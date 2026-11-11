@@ -1,0 +1,2469 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0b0714">
+<meta name="description" content="Together — فضای آنلاین مشترک: اتاق دوطرفه، واتچ پارتی، تماس تصویری، تخته نقاشی و چت. بدون ثبت‌نام.">
+<title>Together — اتاق آنلاین مشترک</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script>
+/* لودر PeerJS با فالبک CDN — اول unpkg، در خطا jsdelivr */
+window.__peerReady = new Promise((res, rej) => {
+  const s = document.createElement('script');
+  s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+  s.onload = () => res(true);
+  s.onerror = () => {
+    const s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+    s2.onload = () => res(true);
+    s2.onerror = () => rej(new Error('peerjs-cdn-fail'));
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+});
+</script>
+<style>
+/* ================= توکن‌های تم ================= */
+:root{
+  --bg:#0b0714; --bg2:#120b22; --panel:rgba(255,255,255,.055); --panel2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.1); --line2:rgba(255,255,255,.18);
+  --txt:#eee9ff; --txt2:#b9b0d8; --txt3:#8d84ad;
+  --vio:#7c3aed; --vio2:#a78bfa; --indigo:#4f46e5; --blue:#3b82f6;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --grad:linear-gradient(135deg,#7c3aed,#4f46e5 55%,#2563eb);
+  --r:16px; --r2:12px;
+  --sh:0 10px 30px rgba(0,0,0,.45);
+  --f:'Vazirmatn',ui-sans-serif,system-ui,'Segoe UI',Tahoma,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--f);background:radial-gradient(1200px 800px at 85% -10%,#231148 0%,transparent 55%),radial-gradient(1000px 700px at -10% 110%,#131a3a 0%,transparent 55%),var(--bg);color:var(--txt);font-size:15px;line-height:1.7;overflow-x:hidden}
+html[dir=ltr] body{letter-spacing:.1px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:var(--vio2);text-decoration:none}
+::placeholder{color:var(--txt3)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+.hide{display:none!important}
+
+/* ================= دکمه‌ها و فرم‌ها ================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-weight:600;transition:.18s;user-select:none;min-height:42px}
+.btn:hover{background:rgba(255,255,255,.14);border-color:var(--line2)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--grad);border-color:transparent;box-shadow:0 6px 20px rgba(124,58,237,.35)}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent}
+.btn.danger{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#fca5a5}
+.btn.ok{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.4);color:#6ee7b7}
+.btn.sm{padding:6px 12px;min-height:34px;font-size:13px;border-radius:10px}
+.btn.icon{width:42px;padding:0;border-radius:12px;font-size:17px}
+.btn.icon.sm{width:36px;min-height:36px;font-size:15px}
+.btn.on{background:var(--grad);border-color:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.inp{width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-height:44px;outline:none;transition:.18s}
+.inp:focus{border-color:var(--vio);box-shadow:0 0 0 3px rgba(124,58,237,.18)}
+label.lb{display:block;font-size:12.5px;color:var(--txt2);margin:12px 0 6px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--txt2)}
+.chip b{color:var(--txt)}
+
+/* ================= لندینگ ================= */
+#landing{min-height:100%;display:flex;flex-direction:column}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;max-width:1080px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-size:19px;box-shadow:0 6px 18px rgba(124,58,237,.4)}
+.hero{max-width:1080px;width:100%;margin:0 auto;padding:34px 22px 10px;text-align:center}
+.hero h1{font-size:clamp(26px,5vw,44px);font-weight:800;line-height:1.35;background:linear-gradient(90deg,#c4b5fd,#93c5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{color:var(--txt2);max-width:640px;margin:14px auto 26px;font-size:clamp(14px,2.4vw,17px)}
+.heroBtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.heroBtns .btn{padding:13px 28px;font-size:16px;border-radius:14px}
+.feats{max-width:1080px;width:100%;margin:34px auto 0;padding:0 22px 44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.feat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;transition:.2s}
+.feat:hover{transform:translateY(-3px);border-color:var(--line2);background:var(--panel2)}
+.feat .fi{width:42px;height:42px;border-radius:12px;background:rgba(124,58,237,.16);display:grid;place-items:center;font-size:20px;margin-bottom:10px}
+.feat h3{font-size:15.5px;margin-bottom:5px}
+.feat p{font-size:13px;color:var(--txt2)}
+.foot{margin-top:auto;text-align:center;color:var(--txt3);font-size:12.5px;padding:18px}
+.pulseDot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:pw 2s infinite}
+@keyframes pw{70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ================= مودال‌ها ================= */
+.modal{position:fixed;inset:0;background:rgba(5,2,14,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;place-items:center;z-index:80;padding:16px}
+.modal.open{display:grid}
+.mCard{width:min(430px,100%);max-height:92vh;overflow:auto;background:#170f2b;border:1px solid var(--line2);border-radius:20px;padding:22px;box-shadow:var(--sh);animation:up .22s ease}
+.mCard h2{font-size:18px;margin-bottom:4px}
+.mCard .msub{font-size:12.5px;color:var(--txt2);margin-bottom:8px}
+@keyframes up{from{transform:translateY(14px);opacity:0}}
+.mHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);color:#fca5a5;border-radius:10px;padding:8px 12px;font-size:13px;margin-top:10px}
+.emojiGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.emojiGrid button{aspect-ratio:1;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:19px;display:grid;place-items:center;transition:.15s}
+.emojiGrid button.sel{background:var(--grad);border-color:transparent;transform:scale(1.08)}
+.colorGrid{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}
+.colorGrid button{aspect-ratio:1;border-radius:50%;border:2px solid transparent;transition:.15s}
+.colorGrid button.sel{border-color:#fff;transform:scale(1.15)}
+.seg{display:flex;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:8px;border-radius:9px;font-size:13px;color:var(--txt2);font-weight:600}
+.seg button.sel{background:var(--grad);color:#fff}
+
+/* ================= اتاق ================= */
+#room{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+#room.open{display:flex}
+.topbar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(13,8,26,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);z-index:30;flex-wrap:nowrap}
+.topbar .tgrp{display:flex;align-items:center;gap:7px}
+.tspacer{flex:1}
+.presence{display:flex;align-items:center}
+.pava{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;border:2px solid var(--bg);margin-inline-start:-8px;position:relative}
+.pava:first-child{margin-inline-start:0}
+.pava .dot{position:absolute;bottom:-1px;inset-inline-end:-1px;width:9px;height:9px;border-radius:50%;background:var(--ok);border:2px solid var(--bg)}
+.netb{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;border:1px solid}
+.netb.t0{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.4);color:#6ee7b7}
+.netb.t1{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fcd34d}
+.netb.t2{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.4);color:#fdba74}
+.netb.t3{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4);color:#fca5a5}
+.netb .nd{width:7px;height:7px;border-radius:50%;background:currentColor}
+.callstrip{display:none;gap:8px;padding:8px 12px;overflow-x:auto;background:rgba(13,8,26,.6);border-bottom:1px solid var(--line);scrollbar-width:none}
+.callstrip.open{display:flex}
+.callstrip::-webkit-scrollbar{display:none}
+.vidBox{position:relative;width:150px;height:96px;border-radius:12px;overflow:hidden;background:#000;flex:none;border:1px solid var(--line)}
+.vidBox video{width:100%;height:100%;object-fit:cover;display:block}
+.vidBox .vname{position:absolute;bottom:4px;inset-inline-start:5px;font-size:10.5px;background:rgba(0,0,0,.55);padding:1px 7px;border-radius:6px;max-width:calc(100% - 10px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.vidBox .voff{position:absolute;inset:0;display:grid;place-items:center;font-size:26px;background:var(--bg2)}
+.vidBox.full{position:fixed;inset:0;z-index:70;width:auto;height:auto;border-radius:0}
+.vidBox.full video{object-fit:contain}
+.main{flex:1;display:flex;min-height:0}
+.stageCol{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.tabs{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);background:rgba(13,8,26,.45)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:11px;font-size:13.5px;font-weight:700;color:var(--txt2);background:var(--panel);border:1px solid var(--line);white-space:nowrap;transition:.15s}
+.tabs button.sel{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.stage{flex:1;position:relative;min-height:0;background:var(--bg2)}
+.tabPane{position:absolute;inset:0;display:none;flex-direction:column;min-height:0}
+.tabPane.sel{display:flex}
+.toolbar{display:flex;align-items:center;gap:7px;padding:8px 10px;border-bottom:1px solid var(--line);background:rgba(13,8,26,.55);flex-wrap:wrap}
+.toolbar .inp{min-height:38px;flex:1;min-width:120px}
+.stageNote{font-size:11.5px;color:var(--txt3);padding:5px 12px;background:rgba(0,0,0,.22);border-bottom:1px solid var(--line)}
+
+/* کو-ویو */
+#covFrameWrap{flex:1;position:relative;overflow:hidden;background:#000}
+#covFrameWrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+#covOverlay{position:absolute;inset:0;pointer-events:none;z-index:5}
+#covEmpty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--txt2);font-size:14px}
+#covEmpty .big{font-size:44px;margin-bottom:12px}
+.zoomChip{min-width:56px;text-align:center;font-size:12.5px;color:var(--txt2)}
+
+/* واتچ پارتی */
+#ytWrap{flex:1;position:relative;background:#000;display:grid;place-items:center;min-height:0}
+#ytWrap iframe,#ytWrap .ytph{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ytph{display:grid;place-items:center;color:var(--txt3);text-align:center;padding:20px;font-size:14px}
+.ytph .big{font-size:46px;margin-bottom:12px}
+#ytSeekWrap{display:flex;align-items:center;gap:9px;padding:7px 12px;background:rgba(13,8,26,.7);border-top:1px solid var(--line);font-size:12px;color:var(--txt2)}
+#ytSeek{flex:1;accent-color:var(--vio);height:5px}
+
+/* فیلم مشترک */
+#mvWrap{flex:1;position:relative;background:#000;display:grid;place-items:center;min-height:0}
+#mvVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;background:#000;cursor:pointer}
+#mvVideo.on{display:block}
+#mvPh{position:absolute;inset:0;display:grid;place-items:center;color:var(--txt3);text-align:center;padding:20px;font-size:14px}
+#mvPh .big{font-size:46px;margin-bottom:12px}
+
+/* تخته */
+#boardWrap{flex:1;position:relative;overflow:hidden;background:#0e0a1c}
+#board,#boardCursors{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#boardCursors{pointer-events:none}
+.btool{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;transition:.12s;flex:none}
+.swatch.sel{border-color:#fff;transform:scale(1.18);box-shadow:0 0 0 2px rgba(124,58,237,.5)}
+#sizeLbl{font-size:12px;color:var(--txt2);min-width:26px;text-align:center}
+
+/* بازی */
+#gamePane{align-items:center;justify-content:center;padding:16px}
+.ttWrap{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(340px,92vw)}
+.ttBoard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.ttBoard button{aspect-ratio:1;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:38px;display:grid;place-items:center;transition:.15s;font-weight:800}
+.ttBoard button:hover{background:var(--panel2)}
+.ttBoard button.x{color:var(--vio2)}.ttBoard button.o{color:#93c5fd}
+.ttBoard button.win{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.5)}
+#ttTurn{font-weight:700;font-size:14.5px}
+#ttScore{color:var(--txt2);font-size:13px}
+
+/* پنل کناری */
+.side{width:320px;flex:none;display:flex;flex-direction:column;border-inline-start:1px solid var(--line);background:rgba(13,8,26,.7);backdrop-filter:blur(10px);min-height:0}
+.sideTabs{display:flex;border-bottom:1px solid var(--line)}
+.sideTabs button{flex:1;padding:11px;font-weight:700;font-size:13.5px;color:var(--txt2);border-bottom:2px solid transparent}
+.sideTabs button.sel{color:var(--txt);border-bottom-color:var(--vio)}
+.sidePane{flex:1;display:none;flex-direction:column;min-height:0}
+.sidePane.sel{display:flex}
+
+/* چت */
+#chatLog{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.cmsg{max-width:88%;padding:7px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:13.5px;position:relative;word-break:break-word;animation:up .15s ease}
+.cmsg.me{align-self:flex-start;background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.35)}
+html[dir=ltr] .cmsg.me{align-self:flex-end}
+.cmsg .cmHead{display:flex;gap:7px;align-items:center;font-size:11px;color:var(--txt2);margin-bottom:2px}
+.cmsg .cmName{font-weight:700}
+.cmsg .cmDel{position:absolute;top:4px;inset-inline-end:4px;font-size:11px;color:var(--txt3);display:none}
+.cmsg.me:hover .cmDel{display:block}
+.cmsg.file .fbar{height:4px;border-radius:4px;background:rgba(0,0,0,.4);margin-top:6px;overflow:hidden}
+.cmsg.file .fbar i{display:block;height:100%;background:var(--grad);width:0%}
+.cmsg.file a{font-size:12.5px;display:inline-flex;align-items:center;gap:5px;margin-top:4px}
+.csy{align-self:center;text-align:center;font-size:11.5px;color:var(--txt3);background:rgba(255,255,255,.04);padding:3px 12px;border-radius:999px;max-width:90%}
+#typingLbl{font-size:11px;color:var(--txt3);padding:0 14px 4px;min-height:18px}
+.chatIn{display:flex;gap:7px;padding:10px;border-top:1px solid var(--line);align-items:flex-end}
+.chatIn textarea{flex:1;resize:none;max-height:110px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:12px;padding:9px 13px;outline:none;min-height:42px}
+.chatIn textarea:focus{border-color:var(--vio)}
+#emojiPop{position:absolute;bottom:64px;inset-inline-start:12px;background:#1b1233;border:1px solid var(--line2);border-radius:14px;padding:10px;display:none;grid-template-columns:repeat(6,1fr);gap:4px;z-index:40;box-shadow:var(--sh)}
+#emojiPop.open{display:grid}
+#emojiPop button{font-size:20px;padding:5px;border-radius:8px}
+#emojiPop button:hover{background:var(--panel2)}
+
+/* افراد */
+#peopleList{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px}
+.prow{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.prow .pav{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;flex:none}
+.prow .pinfo{flex:1;min-width:0}
+.prow .pname{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+.prow .pname .tag{font-size:9.5px;background:var(--grad);padding:1px 7px;border-radius:6px;font-weight:700}
+.prow .pname .tag2{font-size:9.5px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:6px;color:var(--txt2)}
+.prow .pact{display:flex;gap:5px}
+#roomAdmin{border-top:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:9px}
+#roomAdmin .raTitle{font-size:12px;font-weight:700;color:var(--txt2)}
+.rrow{display:flex;gap:7px;align-items:center}
+.rrow .inp{min-height:38px}
+
+/* تب‌بار موبایل */
+.tabbar{display:none;border-top:1px solid var(--line);background:rgba(13,8,26,.92);backdrop-filter:blur(12px);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--txt2);padding:5px;border-radius:10px;font-weight:600}
+.tabbar button .ti{font-size:18px}
+.tabbar button.sel{color:var(--vio2);background:var(--panel)}
+
+/* شیت موبایل */
+.side.mobile{position:fixed;inset-inline:0;bottom:0;top:auto;height:62vh;width:auto;border-radius:20px 20px 0 0;border:1px solid var(--line2);border-bottom:0;z-index:60;transform:translateY(105%);transition:.25s;display:flex;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.side.mobile.open{transform:translateY(0)}
+
+/* توست و واکنش */
+#toasts{position:fixed;top:14px;inset-inline-start:50%;transform:translateX(50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+html[dir=ltr] #toasts{transform:translateX(-50%)}
+.toast{background:#1e1536;border:1px solid var(--line2);border-radius:12px;padding:9px 18px;font-size:13.5px;box-shadow:var(--sh);animation:up .2s ease;max-width:88vw;text-align:center}
+.toast.ok{border-color:rgba(52,211,153,.45)}
+.toast.bad{border-color:rgba(248,113,113,.45)}
+#reactLayer{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
+.freact{position:absolute;bottom:-40px;font-size:30px;animation:fl 2.6s ease-in forwards}
+@keyframes fl{to{transform:translateY(-88vh) translateX(var(--dx,0)) rotate(14deg);opacity:0}}
+
+/* شبکه */
+.kv{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv b{font-weight:700}
+.kv .good{color:var(--ok)}.kv .warn{color:var(--warn)}.kv .bad{color:var(--bad)}
+
+/* منو/ری‌اسپانسیو */
+@media (max-width:860px){
+  .side{display:none}
+  .tabbar{display:flex}
+  .tabs{padding:7px 8px}
+  .tabs button{padding:7px 12px;font-size:12.5px}
+  .topbar{padding:8px}
+  .hero{padding-top:20px}
+  .mCard{padding:18px;border-radius:16px}
+  .callstrip.open{max-height:104px}
+  .vidBox{width:120px;height:80px}
+}
+@media (min-width:861px){ .tabbar{display:none!important} }
+</style>
+</head>
+<body>
+
+<!-- ================= لندینگ ================= -->
+<div id="landing">
+  <div class="topnav">
+    <div class="brand"><div class="logo">🤝</div>Together</div>
+    <button class="btn sm ghost" id="langBtnL">EN</button>
+  </div>
+  <div class="hero">
+    <h1 data-i18n="heroTitle">یه اتاق آنلاین، انگار کنار هم نشستید</h1>
+    <p class="sub" data-i18n="heroSub">با لینک اتاق وارد شوید؛ ویدیو را با هم ببینید، تصویری حرف بزنید، نقاشی بکشید و بازی کنید — همه‌چیز واقعی و بلادرنگ، بدون ثبت‌نام.</p>
+    <div class="heroBtns">
+      <button class="btn primary" id="btnCreate">🚀 <span data-i18n="createRoom">ساخت اتاق</span></button>
+      <button class="btn" id="btnJoin">🔗 <span data-i18n="joinRoom">ورود با کد اتاق</span></button>
+    </div>
+  </div>
+  <div class="feats">
+    <div class="feat"><div class="fi">🌐</div><h3 data-i18n="f1t">هم‌مرورگری</h3><p data-i18n="f1p">یک آدرس، همه با هم — ناوبری و زوم مشترک با نشانگر زندهٔ هر نفر.</p></div>
+    <div class="feat"><div class="fi">🍿</div><h3 data-i18n="f2t">واتچ پارتی</h3><p data-i18n="f2p">یوتیوب کاملاً همگام: پخش، توقف، سیک و سرعت برای همه یک لحظه.</p></div>
+    <div class="feat"><div class="fi">🎥</div><h3 data-i18n="f3t">تماس تصویری</h3><p data-i18n="f3p">WebRTC نقطه‌به‌نقطه با کیفیت تطبیقی متناسب با اینترنت واقعی شما.</p></div>
+    <div class="feat"><div class="fi">🎨</div><h3 data-i18n="f4t">تخته نقاشی</h3><p data-i18n="f4p">قلم، رنگ و پاک‌کن مشترک؛ نشانگر همه روی تخته دیده می‌شود.</p></div>
+    <div class="feat"><div class="fi">💬</div><h3 data-i18n="f5t">چت و فایل</h3><p data-i18n="f5p">پیام لحظه‌ای، واکنش ایموجی و ارسال فایل تا ۵ مگابایت، مستقیم P2P.</p></div>
+    <div class="feat"><div class="fi">📶</div><h3 data-i18n="f6t">پایدار روی شبکه‌های سخت</h3><p data-i18n="f6p">اتصال خودکار، فالبک سیگنالینگ دستی و پنل وضعیت شبکه.</p></div>
+    <div class="feat"><div class="fi">🎬</div><h3 data-i18n="f7t">فیلم مشترک از دستگاه</h3><p data-i18n="f7p">یک ویدیو از حافظهٔ گوشی یا کامپیوترتان پخش کنید؛ طرف مقابل همان لحظه می‌بیند و کنترل پخش دستِ او هم است.</p></div>
+  </div>
+  <div class="foot"><span class="pulseDot" style="display:inline-block;margin-inline-end:6px"></span><span data-i18n="foot">دستگاه‌ها مستقیم به هم وصل می‌شوند (P2P) — هیچ ویدیویی روی سرور ذخیره نمی‌شود.</span></div>
+</div>
+
+<!-- ================= مودال ساخت اتاق ================= -->
+<div class="modal" id="mCreate">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="ctTitle">ساخت اتاق</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <p class="msub" data-i18n="ctSub">شما میزبان اتاق می‌شوید؛ بعداً با کد یا لینک دعوت کنید.</p>
+    <label class="lb" data-i18n="yourName">اسم شما</label>
+    <input class="inp" id="crName" maxlength="24" placeholder="مثلاً: سارا">
+    <label class="lb" data-i18n="avatar">آواتار</label>
+    <div class="emojiGrid" id="crEmojiGrid"></div>
+    <label class="lb" data-i18n="color">رنگ</label>
+    <div class="colorGrid" id="crColorGrid"></div>
+    <div class="grid2">
+      <div><label class="lb" data-i18n="passOpt">رمز اتاق (اختیاری)</label><input class="inp" id="crPass" type="password" maxlength="32" placeholder="••••••"></div>
+      <div><label class="lb" data-i18n="maxUsers">حداکثر افراد</label><select class="inp" id="crLimit"><option>2</option><option selected>4</option><option>6</option><option>8</option><option>12</option></select></div>
+    </div>
+    <label class="lb" data-i18n="connMode">حالت اتصال</label>
+    <div class="seg" id="crMode">
+      <button data-v="auto" class="sel" data-i18n="modeAuto">خودکار</button>
+      <button data-v="manual" data-i18n="modeManual">دستی (کپی/پیست)</button>
+    </div>
+    <p class="msub" style="margin-top:6px" data-i18n="modeHint">حالت دستی برای شبکه‌هایی است که سیگنالینگ ابری را مسدود کرده‌اند؛ فقط برای دو نفر.</p>
+    <button class="btn primary" id="crGo" style="width:100%;margin-top:16px" data-i18n="goRoom">ورود به اتاق →</button>
+  </div>
+</div>
+
+<!-- ================= مودال ورود ================= -->
+<div class="modal" id="mJoin">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="jnTitle">ورود به اتاق</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <p class="msub" data-i18n="jnSub">کد ۵ رقمی اتاق یا لینک دعوت را وارد کنید.</p>
+    <label class="lb" data-i18n="roomCode">کد اتاق</label>
+    <input class="inp" id="jnCode" maxlength="6" placeholder="مثلاً: K7T2M" style="text-align:center;font-size:20px;letter-spacing:6px;font-weight:800;direction:ltr">
+    <label class="lb" data-i18n="yourName">اسم شما</label>
+    <input class="inp" id="jnName" maxlength="24" placeholder="مثلاً: علی">
+    <div class="grid2">
+      <div><label class="lb" data-i18n="avatar">آواتار</label><div class="emojiGrid" id="jnEmojiGrid"></div></div>
+      <div><label class="lb" data-i18n="color">رنگ</label><div class="colorGrid" id="jnColorGrid"></div></div>
+    </div>
+    <label class="lb" data-i18n="passIf">رمز اتاق (اگر دارد)</label>
+    <input class="inp" id="jnPass" type="password" maxlength="32" placeholder="••••••">
+    <label class="lb" data-i18n="connMode">حالت اتصال</label>
+    <div class="seg" id="jnMode">
+      <button data-v="auto" class="sel" data-i18n="modeAuto">خودکار</button>
+      <button data-v="manual" data-i18n="modeManual">دستی (کپی/پیست)</button>
+    </div>
+    <p class="msub" style="margin-top:6px" data-i18n="modeHint">حالت دستی برای شبکه‌هایی است که سیگنالینگ ابری را مسدود کرده‌اند؛ فقط برای دو نفر.</p>
+    <div class="err hide" id="jnErr"></div>
+    <button class="btn primary" id="jnGo" style="width:100%;margin-top:14px" data-i18n="joinBtn">ورود →</button>
+  </div>
+</div>
+<!-- ================= اتاق ================= -->
+<div id="room">
+  <div class="topbar">
+    <div class="tgrp">
+      <button class="btn icon sm danger" id="roomExit" title="خروج">⏻</button>
+      <div class="chip" id="roomCodeChip">🏢 <b id="roomCodeTxt">-----</b></div>
+      <button class="btn sm ghost" id="copyLink" title="کپی لینک دعوت">📋 <span data-i18n="invite">دعوت</span></button>
+    </div>
+    <div class="tspacer"></div>
+    <div class="tgrp">
+      <div class="presence" id="presenceStack"></div>
+      <div class="netb t1" id="netBadge"><span class="nd"></span><span id="netBadgeTxt">…</span></div>
+      <button class="btn icon sm" id="micBtn" title="میکروفون">🎙️</button>
+      <button class="btn icon sm" id="camBtn" title="دوربین">📷</button>
+      <button class="btn icon sm" id="scrBtn" title="اشتراک صفحه">🖥️</button>
+      <button class="btn icon sm ghost" id="btnSettings" title="تنظیمات">⚙️</button>
+    </div>
+  </div>
+  <div class="callstrip" id="callStrip"></div>
+  <div class="main" id="mainRow">
+    <div class="stageCol">
+      <div class="tabs" id="stageTabs">
+        <button data-tab="coview" class="sel">🌐 <span data-i18n="tabCoview">هم‌مرورگری</span></button>
+        <button data-tab="watch">🍿 <span data-i18n="tabWatch">واتچ پارتی</span></button>
+        <button data-tab="board">🎨 <span data-i18n="tabBoard">تخته</span></button>
+        <button data-tab="game">🎮 <span data-i18n="tabGame">بازی</span></button>
+        <button data-tab="movie">🎬 <span data-i18n="tabMovie">فیلم مشترک</span></button>
+      </div>
+      <div class="stage">
+        <!-- کو-ویو -->
+        <div class="tabPane sel" id="pane-coview">
+          <div class="toolbar">
+            <button class="btn icon sm" id="covBack" title="عقب">▶</button>
+            <button class="btn icon sm" id="covFwd" title="جلو">◀</button>
+            <button class="btn icon sm" id="covReload" title="رفرش">⟳</button>
+            <input class="inp" id="covUrl" dir="ltr" placeholder="https://..." style="text-align:left">
+            <button class="btn primary sm" id="covGo" data-i18n="go">برو</button>
+            <button class="btn icon sm" id="covZoomOut">−</button>
+            <span class="zoomChip" id="covZoomLbl">100%</span>
+            <button class="btn icon sm" id="covZoomIn">＋</button>
+            <button class="btn icon sm ghost" id="covExt" title="باز کردن در تب جدید">↗</button>
+          </div>
+          <div class="stageNote" data-i18n="covNote">ناوبری، تاریخچه و زوم برای همه همگام است؛ نشانگر هر نفر زنده دیده می‌شود. کلیک/تایپ داخل سایت‌های خارجی محلی است — کنترل کامل دوطرفه به نسخه سرور (سند معماری) نیاز دارد.</div>
+          <div id="covFrameWrap">
+            <div id="covEmpty"><div><div class="big">🌐</div><div data-i18n="covEmpty">یک آدرس وارد کنید تا همه با هم همان صفحه را ببینند.</div></div></div>
+            <iframe id="covFrame" class="hide" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <canvas id="covOverlay"></canvas>
+          </div>
+        </div>
+        <!-- واتچ پارتی -->
+        <div class="tabPane" id="pane-watch">
+          <div class="toolbar">
+            <input class="inp" id="ytUrl" dir="ltr" placeholder="https://youtube.com/watch?v=..." style="text-align:left">
+            <button class="btn primary sm" id="ytGo" data-i18n="loadVideo">پخش</button>
+            <button class="btn sm" id="ytLockToggle">🔓 <span data-i18n="ctrlAll">کنترل: همه</span></button>
+          </div>
+          <div id="ytWrap"><div class="ytph" id="ytPh"><div><div class="big">🍿</div><span data-i18n="ytEmpty">لینک یوتیوب را بدهید تا برای همه هم‌زمان پخش شود.</span></div></div></div>
+          <div id="ytSeekWrap">
+            <span id="ytCur">0:00</span>
+            <input type="range" id="ytSeek" min="0" max="100" value="0" step="1">
+            <span id="ytDur">0:00</span>
+          </div>
+          <div class="toolbar" style="border-bottom:0;border-top:1px solid var(--line)">
+            <button class="btn sm" id="ytBack10">⏪ ۱۰ث</button>
+            <button class="btn primary sm" id="ytPlay">▶ <span data-i18n="play">پخش</span></button>
+            <button class="btn sm" id="ytPause">⏸ <span data-i18n="pause">توقف</span></button>
+            <button class="btn sm" id="ytFwd10">۱۰ث ⏩</button>
+            <select class="inp" id="ytRate" style="min-height:38px;flex:none;width:auto"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+            <span class="chip" id="ytStatus" data-i18n="ytIdle">پخش‌کننده آماده است</span>
+          </div>
+        </div>
+        <!-- تخته -->
+        <div class="tabPane" id="pane-board">
+          <div class="toolbar btool">
+            <button class="swatch sel" data-c="#f472b6" style="background:#f472b6"></button>
+            <button class="swatch" data-c="#a78bfa" style="background:#a78bfa"></button>
+            <button class="swatch" data-c="#60a5fa" style="background:#60a5fa"></button>
+            <button class="swatch" data-c="#34d399" style="background:#34d399"></button>
+            <button class="swatch" data-c="#fbbf24" style="background:#fbbf24"></button>
+            <button class="swatch" data-c="#f87171" style="background:#f87171"></button>
+            <button class="swatch" data-c="#ffffff" style="background:#fff"></button>
+            <button class="btn sm" id="toolPen">✏️ <span data-i18n="pen">قلم</span></button>
+            <button class="btn sm" id="toolEraser">🧽 <span data-i18n="eraser">پاک‌کن</span></button>
+            <input type="range" id="sizeRange" min="2" max="30" value="4" style="width:90px;accent-color:var(--vio)">
+            <span id="sizeLbl">4</span>
+            <div class="tspacer"></div>
+            <button class="btn sm" id="undoBtn">↩︎ <span data-i18n="undo">برگشت</span></button>
+            <button class="btn sm danger" id="clearBtn">🗑 <span data-i18n="clear">پاک‌کردن</span></button>
+            <button class="btn sm ghost" id="saveBtn">💾 PNG</button>
+          </div>
+          <div id="boardWrap">
+            <canvas id="board"></canvas>
+            <canvas id="boardCursors"></canvas>
+          </div>
+        </div>
+        <!-- بازی -->
+        <div class="tabPane" id="pane-game">
+          <div class="ttWrap">
+            <div id="ttTurn">—</div>
+            <div class="ttBoard" id="ttBoard"></div>
+            <div id="ttScore"></div>
+            <button class="btn sm" id="ttReset">🔄 <span data-i18n="newRound">دور جدید</span></button>
+            <p class="msub" data-i18n="ttHint">دو نفره — هر نفر به نوبت یک خانه می‌زند؛ وضعیت برای همه یکسان است.</p>
+          </div>
+        </div>
+        <!-- فیلم مشترک -->
+        <div class="tabPane" id="pane-movie">
+          <div class="toolbar">
+            <button class="btn primary sm" id="mvPick">📁 <span data-i18n="mvPick">انتخاب فیلم</span></button>
+            <button class="btn sm danger hide" id="mvEject">⏏ <span data-i18n="mvEject">پایان پخش</span></button>
+            <span class="chip hide" id="mvInfo"></span>
+            <div class="tspacer"></div>
+            <button class="btn sm hide" id="mvLockToggle">🔓 <span data-i18n="ctrlAll">کنترل: همه</span></button>
+          </div>
+          <div id="mvWrap">
+            <div id="mvPh"><div><div class="big">🎬</div><span data-i18n="mvEmpty">هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.</span></div></div>
+            <video id="mvVideo" playsinline></video>
+          </div>
+          <div class="toolbar" style="border-bottom:0;border-top:1px solid var(--line)">
+            <button class="btn sm" id="mvBack10">⏪ ۱۰ث</button>
+            <button class="btn primary sm" id="mvPlay">▶ <span data-i18n="play">پخش</span></button>
+            <button class="btn sm" id="mvPause">⏸ <span data-i18n="pause">توقف</span></button>
+            <button class="btn sm" id="mvFwd10">۱۰ث ⏩</button>
+            <span id="mvCur" style="font-size:12px;color:var(--txt2)">0:00</span>
+            <input type="range" id="mvSeek" min="0" max="100" value="0" step="1" style="flex:1;min-width:80px;accent-color:var(--vio)">
+            <span id="mvDur" style="font-size:12px;color:var(--txt2)">0:00</span>
+            <select class="inp" id="mvRate" style="min-height:38px;flex:none;width:auto"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+            <button class="btn icon sm" id="mvMute" title="صدا (محلی)">🔊</button>
+            <button class="btn icon sm" id="mvFull" title="تمام‌صفحه">⛶</button>
+          </div>
+          <div class="stageNote" data-i18n="mvNote">فیلم از دستگاهِ فرستنده مستقیم استریم می‌شود (بدون آپلود به هیچ سروری) و هر دو نفر کنترل پخش/توقف/سیک دارند. پایداری پخش به اینترنتِ فرستنده بستگی دارد؛ در Safari (به‌ویژه iOS) captureStream پشتیبانی نمی‌شود و پیام صادقانه می‌گیرید.</div>
+        </div>
+      </div>
+    </div>
+    <!-- پنل کناری -->
+    <div class="side" id="sidePanel">
+      <div class="sideTabs">
+        <button class="sel" data-side="chat">💬 <span data-i18n="chat">چت</span></button>
+        <button data-side="people">👥 <span data-i18n="people">افراد</span></button>
+      </div>
+      <div class="sidePane sel" id="side-chat">
+        <div id="chatLog"></div>
+        <div id="typingLbl"></div>
+        <div class="chatIn">
+          <button class="btn icon sm" id="chatEmoji">😀</button>
+          <button class="btn icon sm" id="chatFile" title="فایل">📎</button>
+          <textarea id="chatInput" rows="1" maxlength="1500" data-i18n-ph="msgPh" placeholder="پیام…"></textarea>
+          <button class="btn icon sm primary" id="chatSend">➤</button>
+        </div>
+        <div id="emojiPop"></div>
+        <input type="file" id="chatFileIn" class="hide" maxlength="">
+        <input type="file" id="mvFileIn" accept="video/*" class="hide">
+      </div>
+      <div class="sidePane" id="side-people">
+        <div id="peopleList"></div>
+        <div id="roomAdmin"></div>
+      </div>
+    </div>
+  </div>
+  <!-- تب‌بار موبایل -->
+  <div class="tabbar" id="tabbar">
+    <button data-t="stage" class="sel"><span class="ti">🎬</span><span data-i18n="tStage">صحنه</span></button>
+    <button data-t="chat"><span class="ti">💬</span><span data-i18n="chat">چت</span></button>
+    <button data-t="people"><span class="ti">👥</span><span data-i18n="people">افراد</span></button>
+    <button data-t="call"><span class="ti">🎥</span><span data-i18n="tCall">تماس</span></button>
+  </div>
+</div>
+
+<!-- ================= مودال‌های ثانویه ================= -->
+<div class="modal" id="mSet">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="settings">تنظیمات</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <label class="lb" data-i18n="language">زبان</label>
+    <select class="inp" id="setLang"><option value="fa">فارسی</option><option value="en">English</option></select>
+    <label class="lb" data-i18n="yourName">اسم شما</label>
+    <input class="inp" id="setName" maxlength="24">
+    <label class="lb" data-i18n="avatar">آواتار</label>
+    <div class="emojiGrid" id="setEmojiGrid"></div>
+    <label class="lb" data-i18n="color">رنگ</label>
+    <div class="colorGrid" id="setColorGrid"></div>
+    <label class="lb" data-i18n="camQ">کیفیت دوربین</label>
+    <select class="inp" id="setCamQ"><option value="auto" data-i18n="autoAdaptive">خودکار (تطبیقی)</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option><option value="360">360p</option></select>
+    <div class="grid2" style="margin-top:6px">
+      <div><label class="lb" data-i18n="noiseSup">حذف نویز</label><div class="seg" id="setNoise"><button data-v="1" class="sel" data-i18n="on">روشن</button><button data-v="0" data-i18n="off">خاموش</button></div></div>
+      <div><label class="lb" data-i18n="echoCan">حذف اکو</label><div class="seg" id="setEcho"><button data-v="1" class="sel" data-i18n="on">روشن</button><button data-v="0" data-i18n="off">خاموش</button></div></div>
+    </div>
+    <label class="lb" data-i18n="turnOpt">سرور TURN اختصاصی (اختیاری)</label>
+    <input class="inp" id="setTurn" dir="ltr" placeholder="turn:host:3478?transport=udp" style="text-align:left">
+    <label class="lb" data-i18n="turnCred">شناسه/رمز TURN (با کاما)</label>
+    <input class="inp" id="setTurnCred" dir="ltr" placeholder="user,password" style="text-align:left">
+    <p class="msub" style="margin-top:6px" data-i18n="turnHint">اگر شبکه UDP را مسدود کرده، یک TURN با TLS روی پورت ۴۴۳ بهترین گزینه است.</p>
+    <div class="grid2" style="margin-top:6px">
+      <button class="btn" id="btnNetStats">📊 <span data-i18n="netStats">وضعیت شبکه</span></button>
+      <button class="btn ok" id="setSave" data-i18n="save">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mNet">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="netStats">وضعیت شبکه</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <div class="kv"><span data-i18n="nTier">کیفیت اتصال</span><b id="netTierV">—</b></div>
+    <div class="kv"><span data-i18n="nPing">پینگ (کانال داده)</span><b id="netPingV">—</b></div>
+    <div class="kv"><span data-i18n="nRtt">RTT رسانه</span><b id="netRttV">—</b></div>
+    <div class="kv"><span data-i18n="nLoss">افت بسته (رسانه)</span><b id="netLossV">—</b></div>
+    <div class="kv"><span data-i18n="nBr">بیت‌ریت ارسالی ویدیو</span><b id="netBrV">—</b></div>
+    <div class="kv"><span data-i18n="nFps">فریم ارسالی</span><b id="netFpsV">—</b></div>
+    <div class="kv"><span data-i18n="nIce">مسیر ICE</span><b id="netIceV">—</b></div>
+    <p class="msub" style="margin-top:10px" data-i18n="netAdapt">کیفیت دوربین در حالت «خودکار» بر اساس همین指标ها روی 1080p/720p/480p تنظیم می‌شود و در شبکهٔ بحرانی فقط صدا اولویت می‌گیرد.</p>
+  </div>
+</div>
+
+<div class="modal" id="mInv">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="inviteTitle">دعوت به اتاق</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <label class="lb" data-i18n="inviteLink">لینک دعوت</label>
+    <input class="inp" id="invLink" dir="ltr" readonly style="text-align:left">
+    <label class="lb" data-i18n="inviteCode">کد اتاق</label>
+    <input class="inp" id="invCode" dir="ltr" readonly style="text-align:center;font-size:22px;letter-spacing:6px;font-weight:800">
+    <div class="grid2" style="margin-top:6px">
+      <button class="btn primary" id="invCopy">📋 <span data-i18n="copy">کپی لینک</span></button>
+      <button class="btn" id="invShare">📤 <span data-i18n="share">اشتراک</span></button>
+    </div>
+    <p class="msub" style="margin-top:10px" data-i18n="invHint">مهمان بدون ثبت‌نام فقط با این لینک یا کد وارد می‌شود.</p>
+    <p class="msub hide" id="invFileHint" style="margin-top:6px;color:var(--warn)"></p>
+  </div>
+</div>
+
+<div class="modal" id="mCtl">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="ctlReqTitle">درخواست کنترل</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <p id="ctlWho" style="margin:8px 0 14px"></p>
+    <div class="grid2">
+      <button class="btn ok" id="ctlYes" data-i18n="grant">اجازه بده</button>
+      <button class="btn danger" id="ctlNo" data-i18n="deny">رد کن</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="mConfirm">
+  <div class="mCard">
+    <div class="mHead"><h2 id="cfTitle">—</h2></div>
+    <p id="cfBody" style="margin:8px 0 16px;color:var(--txt2);font-size:13.5px"></p>
+    <div class="grid2">
+      <button class="btn danger" id="cfYes" data-i18n="confirm">بله، مطمئنم</button>
+      <button class="btn ghost" id="cfNo" data-i18n="cancel">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- حالت اتصال دستی -->
+<div class="modal" id="mManual">
+  <div class="mCard">
+    <div class="mHead"><h2 data-i18n="mnTitle">اتصال دستی (سیگنالینگ کپی/پیست)</h2><button class="btn icon sm ghost mClose">✕</button></div>
+    <p class="msub" data-i18n="mnSub">برای شبکه‌هایی که سرور سیگنالینگ را مسدود کرده‌اند. متن را با هر کانالی (مثلاً چت تلگرام) رد و بدل کنید.</p>
+    <label class="lb" id="mnStep1L" data-i18n="mnStep1">۱) این کد را برای طرف مقابل بفرستید</label>
+    <textarea class="inp" id="mnOut" rows="5" dir="ltr" readonly style="text-align:left;font-size:10.5px"></textarea>
+    <button class="btn sm" id="mnCopyOut" style="margin-top:7px">📋 <span data-i18n="copySdp">کپی کد من</span></button>
+    <label class="lb" data-i18n="mnStep2">۲) کد طرف مقابل را اینجا بچسبانید</label>
+    <textarea class="inp" id="mnIn" rows="5" dir="ltr" style="text-align:left;font-size:10.5px" placeholder="Paste code here..."></textarea>
+    <button class="btn primary" id="mnApply" style="width:100%;margin-top:10px" data-i18n="mnApply">اتصال</button>
+    <p class="msub" id="mnStatus" style="margin-top:8px"></p>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="reactLayer"></div>
+
+<script>
+/* ═══════════════════════════ ابزارهای پایه ═══════════════════════════ */
+'use strict';
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function sha256(t) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(d)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+function toast(msg, kind = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + kind;
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = '.3s'; setTimeout(() => el.remove(), 320); }, 3400);
+}
+const EMOJIS = ['🌸', '🦊', '🐼', '🚀', '👑', '🐙', '🍀', '⚡', '🎧', '🐝', '🌊', '🔥'];
+const COLORS = ['#7c3aed', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16'];
+const REACTS = ['❤️', '😂', '👍', '😮', '🎉', '🔥', '😢', '👏'];
+const ROOM_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const randCode = () => Array.from(crypto.getRandomValues(new Uint8Array(5))).map((n) => ROOM_ALPHABET[n % ROOM_ALPHABET.length]).join('');
+
+/* ═══════════════════════════ چندزبانه ═══════════════════════════ */
+const I18N = {
+  fa: {
+    heroTitle: 'یه اتاق آنلاین، انگار کنار هم نشستید', heroSub: 'با لینک اتاق وارد شوید؛ ویدیو را با هم ببینید، تصویری حرف بزنید، نقاشی بکشید و بازی کنید — همه‌چیز واقعی و بلادرنگ، بدون ثبت‌نام.',
+    createRoom: 'ساخت اتاق', joinRoom: 'ورود با کد اتاق', f1t: 'هم‌مرورگری', f1p: 'یک آدرس، همه با هم — ناوبری و زوم مشترک با نشانگر زندهٔ هر نفر.',
+    f2t: 'واتچ پارتی', f2p: 'یوتیوب کاملاً همگام: پخش، توقف، سیک و سرعت برای همه یک لحظه.',
+    f3t: 'تماس تصویری', f3p: 'WebRTC نقطه‌به‌نقطه با کیفیت تطبیقی متناسب با اینترنت واقعی شما.',
+    f4t: 'تخته نقاشی', f4p: 'قلم، رنگ و پاک‌کن مشترک؛ نشانگر همه روی تخته دیده می‌شود.',
+    f5t: 'چت و فایل', f5p: 'پیام لحظه‌ای، واکنش ایموجی و ارسال فایل تا ۵ مگابایت، مستقیم P2P.',
+    f6t: 'پایدار روی شبکه‌های سخت', f6p: 'اتصال خودکار، فالبک سیگنالینگ دستی و پنل وضعیت شبکه.',
+    foot: 'دستگاه‌ها مستقیم به هم وصل می‌شوند (P2P) — هیچ ویدیویی روی سرور ذخیره نمی‌شود.',
+    ctTitle: 'ساخت اتاق', ctSub: 'شما میزبان اتاق می‌شوید؛ بعداً با کد یا لینک دعوت کنید.', yourName: 'اسم شما', avatar: 'آواتار', color: 'رنگ',
+    passOpt: 'رمز اتاق (اختیاری)', maxUsers: 'حداکثر افراد', goRoom: 'ورود به اتاق →',
+    jnTitle: 'ورود به اتاق', jnSub: 'کد ۵ رقمی اتاق یا لینک دعوت را وارد کنید.', roomCode: 'کد اتاق', passIf: 'رمز اتاق (اگر دارد)',
+    connMode: 'حالت اتصال', modeAuto: 'خودکار', modeManual: 'دستی (کپی/پیست)', modeHint: 'حالت دستی برای شبکه‌هایی است که سیگنالینگ ابری را مسدود کرده‌اند؛ فقط برای دو نفر.', joinBtn: 'ورود →',
+    tabCoview: 'هم‌مرورگری', tabWatch: 'واتچ پارتی', tabBoard: 'تخته', tabGame: 'بازی',
+    go: 'برو', covNote: 'ناوبری، تاریخچه و زوم برای همه همگام است؛ نشانگر هر نفر زنده دیده می‌شود. کلیک/تایپ داخل سایت‌های خارجی محلی است — کنترل کامل دوطرفه به نسخه سرور (سند معماری) نیاز دارد.',
+    covEmpty: 'یک آدرس وارد کنید تا همه با هم همان صفحه را ببینند.',
+    loadVideo: 'پخش', ctrlAll: 'کنترل: همه', ctrlHost: 'کنترل: میزبان', ytEmpty: 'لینک یوتیوب را بدهید تا برای همه هم‌زمان پخش شود.',
+    play: 'پخش', pause: 'توقف', ytIdle: 'پخش‌کننده آماده است',
+    pen: 'قلم', eraser: 'پاک‌کن', undo: 'برگشت', clear: 'پاک‌کردن',
+    newRound: 'دور جدید', ttHint: 'دو نفره — هر نفر به نوبت یک خانه می‌زند؛ وضعیت برای همه یکسان است.',
+    chat: 'چت', people: 'افراد', msgPh: 'پیام…', tStage: 'صحنه', tCall: 'تماس',
+    settings: 'تنظیمات', language: 'زبان', camQ: 'کیفیت دوربین', autoAdaptive: 'خودکار (تطبیقی)', on: 'روشن', off: 'خاموش',
+    noiseSup: 'حذف نویز', echoCan: 'حذف اکو', turnOpt: 'سرور TURN اختصاصی (اختیاری)', turnCred: 'شناسه/رمز TURN (با کاما)',
+    turnHint: 'اگر شبکه UDP را مسدود کرده، یک TURN با TLS روی پورت ۴۴۳ بهترین گزینه است.', netStats: 'وضعیت شبکه', save: 'ذخیره',
+    nTier: 'کیفیت اتصال', nPing: 'پینگ (کانال داده)', nRtt: 'RTT رسانه', nLoss: 'افت بسته (رسانه)', nBr: 'بیت‌ریت ارسالی ویدیو', nFps: 'فریم ارسالی', nIce: 'مسیر ICE',
+    netAdapt: 'کیفیت دوربین در حالت «خودکار» بر اساس همین شاخص‌ها روی 1080p/720p/480p تنظیم می‌شود و در شبکهٔ بحرانی فقط صدا اولویت می‌گیرد.',
+    inviteTitle: 'دعوت به اتاق', inviteLink: 'لینک دعوت', inviteCode: 'کد اتاق', copy: 'کپی لینک', share: 'اشتراک', invHint: 'مهمان بدون ثبت‌نام فقط با این لینک یا کد وارد می‌شود.', invite: 'دعوت',
+    ctlReqTitle: 'درخواست کنترل', grant: 'اجازه بده', deny: 'رد کن', confirm: 'بله، مطمئنم', cancel: 'انصراف',
+    mnTitle: 'اتصال دستی (سیگنالینگ کپی/پیست)', mnSub: 'برای شبکه‌هایی که سرور سیگنالینگ را مسدود کرده‌اند. متن را با هر کانالی (مثلاً چت تلگرام) رد و بدل کنید.',
+    mnStep1: '۱) این کد را برای طرف مقابل بفرستید', copySdp: 'کپی کد من', mnStep2: '۲) کد طرف مقابل را اینجا بچسبانید', mnApply: 'اتصال',
+    host: 'میزبان', you: 'شما', member: 'عضو',
+    net0: 'عالی', net1: 'خوب', net2: 'ضعیف', net3: 'بحرانی',
+    eCopied: 'کپی شد ✓', eHostLeft: 'میزبان اتاق را بست', ePeerLeft: ' اتاق را ترک کرد', ePeerJoined: ' به اتاق پیوست',
+    eBadCode: 'اتاقی با این کد پیدا نشد', eBadPass: 'رمز اتاق اشتباه است', eFull: 'ظرفیت اتاق پر است', ePassReq: 'این اتاق رمز دارد؛ رمز را وارد کنید',
+    eCamFail: 'دوربین/میکروفون در دسترس نیست', eScrFail: 'اشتراک صفحه در این مرورگر/دستگاه پشتیبانی نمی‌شود — می‌توانید دوربین را جایگزین کنید',
+    eFileBig: 'حجم فایل باید کمتر از ۵ مگابایت باشد', eYtBad: 'لینک یوتیوب معتبر نیست', eLockOn: 'کنترل به دست گرفته شد', eLockOff: 'کنترل برای همه آزاد شد',
+    eCtlSent: 'درخواست کنترل ارسال شد', eCtlGrant: 'کنترل به شما داده شد', eCtlDeny: 'درخواست کنترل رد شد', eNoCall: 'برای تماس، اجازه دوربین/میکروفون لازم است',
+    kYou: 'شما از اتاق خارج شدید', kKicked: 'شما از اتاق حذف شدید', eTransferred: 'مالکیت اتاق منتقل شد', ePassChanged: 'رمز اتاق به‌روزرسانی شد', eLimitChanged: 'ظرفیت اتاق تغییر کرد',
+    eStateBack: 'وضعیت اتاق بازیابی شد ✓', eReconnect: 'اتصال قطع شد؛ در حال تلاش مجدد…', eP2pDown: 'کانال داده بسته است',
+    tabMovie: 'فیلم مشترک', mvPick: 'انتخاب فیلم', mvEject: 'پایان پخش',
+    mvEmpty: 'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.',
+    mvReceiving: 'در حال دریافت استریم فیلم…', mvFrom: 'از', mvReady: 'فیلم مشترک وصل شد 🎬', mvClosed: 'پخش فیلم پایان یافت',
+    mvNotSup: 'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream در دسترس نیست) — از Chrome یا Firefox دسکتاپ استفاده کنید.',
+    mvManualOff: 'فیلم مشترک در حالت اتصال دستی پشتیبانی نمی‌شود', mvUnmuteHint: 'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید',
+    mvNote: 'فیلم از دستگاهِ فرستنده مستقیم استریم می‌شود (بدون آپلود به هیچ سروری) و هر دو نفر کنترل پخش/توقف/سیک دارند. پایداری پخش به اینترنتِ فرستنده بستگی دارد؛ در Safari (به‌ویژه iOS) captureStream پشتیبانی نمی‌شود و پیام صادقانه می‌گیرید.',
+    f7t: 'فیلم مشترک از دستگاه', f7p: 'یک ویدیو از حافظهٔ گوشی یا کامپیوترتان پخش کنید؛ طرف مقابل همان لحظه می‌بیند و کنترل پخش دستِ او هم است.',
+    invFileHint: 'این لینک فقط بین دو دستگاهی کار می‌کند که همین فایل را داشته باشند. برای لینک آنلاین عمومی، پوشهٔ deploy/ را روی Railway یا Netlify بگذارید (راهنما در README).',
+  },
+  en: {
+    heroTitle: 'One online room — like sitting side by side', heroSub: 'Join with a room link; watch videos together, video-call, draw and play — all real-time, no signup.',
+    createRoom: 'Create room', joinRoom: 'Join with code', f1t: 'Co-browsing', f1p: 'One address for everyone — synced navigation and zoom with live cursors.',
+    f2t: 'Watch party', f2p: 'Fully synced YouTube: play, pause, seek and speed — the same instant for all.',
+    f3t: 'Video call', f3p: 'Peer-to-peer WebRTC with adaptive quality based on your real network.',
+    f4t: 'Whiteboard', f4p: 'Shared pen, colors and eraser; everyone’s cursor is visible.',
+    f5t: 'Chat & files', f5p: 'Instant messages, emoji reactions and P2P file transfer up to 5 MB.',
+    f6t: 'Tough networks', f6p: 'Auto connect, manual-signaling fallback and a network status panel.',
+    foot: 'Devices connect directly (P2P) — no media is stored on any server.',
+    ctTitle: 'Create room', ctSub: 'You become the host; invite later via code or link.', yourName: 'Your name', avatar: 'Avatar', color: 'Color',
+    passOpt: 'Room password (optional)', maxUsers: 'Max people', goRoom: 'Enter room →',
+    jnTitle: 'Join room', jnSub: 'Enter the 5-character room code or the invite link.', roomCode: 'Room code', passIf: 'Room password (if any)',
+    connMode: 'Connection mode', modeAuto: 'Auto', modeManual: 'Manual (copy/paste)', modeHint: 'Manual mode is for networks that block the cloud signaling server; two people only.', joinBtn: 'Join →',
+    tabCoview: 'Co-browse', tabWatch: 'Watch party', tabBoard: 'Board', tabGame: 'Game',
+    go: 'Go', covNote: 'Navigation, history and zoom are synced for everyone; each person’s cursor is live. Clicking/typing inside external sites is local only — full two-way control needs the server edition (see architecture doc).',
+    covEmpty: 'Enter an address so everyone sees the same page.',
+    loadVideo: 'Play', ctrlAll: 'Control: everyone', ctrlHost: 'Control: host only', ytEmpty: 'Give a YouTube link to play it for everyone at once.',
+    play: 'Play', pause: 'Pause', ytIdle: 'Player ready',
+    pen: 'Pen', eraser: 'Eraser', undo: 'Undo', clear: 'Clear',
+    newRound: 'New round', ttHint: 'Two players — take turns tapping a cell; state is identical for all.',
+    chat: 'Chat', people: 'People', msgPh: 'Message…', tStage: 'Stage', tCall: 'Call',
+    settings: 'Settings', language: 'Language', camQ: 'Camera quality', autoAdaptive: 'Auto (adaptive)', on: 'On', off: 'Off',
+    noiseSup: 'Noise suppression', echoCan: 'Echo cancellation', turnOpt: 'Custom TURN server (optional)', turnCred: 'TURN user/pass (comma)',
+    turnHint: 'If UDP is blocked, a TURN over TLS on port 443 is the best option.', netStats: 'Network stats', save: 'Save',
+    nTier: 'Connection quality', nPing: 'Ping (data channel)', nRtt: 'Media RTT', nLoss: 'Packet loss (media)', nBr: 'Video send bitrate', nFps: 'Send FPS', nIce: 'ICE path',
+    netAdapt: 'In “Auto” mode camera quality adapts across 1080p/720p/480p based on these metrics; in a critical network audio gets priority.',
+    inviteTitle: 'Invite to room', inviteLink: 'Invite link', inviteCode: 'Room code', copy: 'Copy link', share: 'Share', invHint: 'Guests join with just this link or code — no signup.', invite: 'Invite',
+    ctlReqTitle: 'Control request', grant: 'Grant', deny: 'Deny', confirm: 'Yes, sure', cancel: 'Cancel',
+    mnTitle: 'Manual connection (copy/paste signaling)', mnSub: 'For networks that block the signaling server. Exchange the text over any channel (e.g. Telegram).',
+    mnStep1: '1) Send this code to the other side', copySdp: 'Copy my code', mnStep2: '2) Paste the other side’s code here', mnApply: 'Connect',
+    host: 'Host', you: 'You', member: 'Member',
+    net0: 'Great', net1: 'Good', net2: 'Weak', net3: 'Critical',
+    eCopied: 'Copied ✓', eHostLeft: 'Host closed the room', ePeerLeft: ' left the room', ePeerJoined: ' joined the room',
+    eBadCode: 'No room with this code', eBadPass: 'Wrong room password', eFull: 'Room is full', ePassReq: 'This room needs a password',
+    eCamFail: 'Camera/mic not available', eScrFail: 'Screen sharing is not supported in this browser/device — you can use the camera instead',
+    eFileBig: 'File must be under 5 MB', eYtBad: 'Invalid YouTube link', eLockOn: 'Control locked', eLockOff: 'Control open to everyone',
+    eCtlSent: 'Control request sent', eCtlGrant: 'You got control', eCtlDeny: 'Control request denied', eNoCall: 'Camera/mic permission is needed for calls',
+    kYou: 'You left the room', kKicked: 'You were removed from the room', eTransferred: 'Room ownership transferred', ePassChanged: 'Room password updated', eLimitChanged: 'Room capacity updated',
+    eStateBack: 'Room state restored ✓', eReconnect: 'Connection lost; retrying…', eP2pDown: 'Data channel is closed',
+    tabMovie: 'Movie night', mvPick: 'Pick a video', mvEject: 'Stop sharing',
+    mvEmpty: 'No movie playing yet — “Pick a video” streams a file from your device directly to everyone.',
+    mvReceiving: 'Receiving the movie stream…', mvFrom: 'from', mvReady: 'Movie stream connected 🎬', mvClosed: 'Movie sharing ended',
+    mvNotSup: 'Local-video sharing is not supported in this browser (no captureStream) — use desktop Chrome or Firefox.',
+    mvManualOff: 'Movie sharing is not available in manual-connection mode', mvUnmuteHint: 'Tap the speaker button to enable sound',
+    mvNote: 'The movie streams directly from the sender’s device (no upload to any server) and both sides control play/pause/seek. Playback stability depends on the sender’s internet; Safari (especially iOS) lacks captureStream and gets an honest message.',
+    f7t: 'Movie night from device', f7p: 'Play a video from your phone or computer; the other side watches instantly and controls playback too.',
+    invFileHint: 'This link only works between devices that have this same file. For a public online link, put the deploy/ folder on Railway or Netlify (see README).',
+  },
+};
+let LANG = localStorage.getItem('tg_lang') || 'fa';
+const T = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.fa[k] || k;
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === 'fa' ? 'rtl' : 'ltr';
+  $$('[data-i18n]').forEach((el) => { el.textContent = T(el.dataset.i18n); });
+  $$('[data-i18n-ph]').forEach((el) => { el.placeholder = T(el.dataset.i18nPh); });
+  $('#langBtnL').textContent = LANG === 'fa' ? 'EN' : 'فا';
+  localStorage.setItem('tg_lang', LANG);
+}
+$('#langBtnL').onclick = () => { LANG = LANG === 'fa' ? 'en' : 'fa'; applyLang(); renderPresence(); renderPeople(); };
+
+/* ═══════════════════════════ وضعیت سراسری ═══════════════════════════ */
+const S = {
+  me: { name: '', emoji: '🌸', color: COLORS[0] },
+  code: '', isHost: false, hostId: null, myId: null,
+  roster: new Map(),            // id -> {name,emoji,color,role,conn?}
+  chat: [],                     // {id,from,name,text,ts,mine}
+  strokes: [],                  // {id,pts,color,size,mode,by}
+  yt: { v: '', state: -1, t: 0, rate: 1 },
+  cov: { stack: [], idx: -1, zoom: 1 },
+  tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 } },
+  limit: 4, passHash: '', controller: null,   // controller: id|null (null=همه کنترل دارند)
+  mode: 'auto',                 // auto | manual
+  inCall: false, localStream: null, screenStream: null,
+  media: {},                    // id -> {pc/conn, stream}
+  senders: [], ping: null, tier: 1,
+  connected: false,
+};
+let peer = null, dataConn = null;   // حالت auto
+let manualPC = null, manualDC = null, manualRole = '';
+const isGuest = () => !S.isHost;
+
+function controllerOk(id) { return S.controller == null || S.controller === id || (S.isHost && id === 'host-self'); }
+function canControl() { return S.controller == null || S.controller === S.myId || S.isHost; }
+
+/* ═══════════════════════════ مدال‌ها و ورودی‌های عمومی ═══════════════════════════ */
+const openM = (id) => $(id).classList.add('open');
+const closeM = (id) => $(id).classList.remove('open');
+$$('.mClose').forEach((b) => b.onclick = () => b.closest('.modal').classList.remove('open'));
+$$('.modal').forEach((m) => m.addEventListener('click', (e) => { if (e.target === m && m.id !== 'mManual') m.classList.remove('open'); }));
+
+function segWire(sel, cb) {
+  $$(sel + ' button').forEach((b) => b.onclick = () => { $$(sel + ' button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel'); cb(b.dataset.v); });
+}
+function emojiGrid(sel, cb, initial) {
+  const box = $(sel); box.innerHTML = '';
+  EMOJIS.forEach((e) => {
+    const b = document.createElement('button'); b.textContent = e;
+    if (e === initial) b.classList.add('sel');
+    b.onclick = () => { box.querySelectorAll('.sel').forEach((x) => x.classList.remove('sel')); b.classList.add('sel'); cb(e); };
+    box.appendChild(b);
+  });
+}
+function colorGrid(sel, cb, initial) {
+  const box = $(sel); box.innerHTML = '';
+  COLORS.forEach((c) => {
+    const b = document.createElement('button'); b.style.background = c;
+    if (c === initial) b.classList.add('sel');
+    b.onclick = () => { box.querySelectorAll('.sel').forEach((x) => x.classList.remove('sel')); b.classList.add('sel'); cb(c); };
+    box.appendChild(b);
+  });
+}
+function copyTxt(t) {
+  const done = () => toast(T('eCopied'), 'ok');
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(t).then(done).catch(() => fallbackCopy(t, done));
+  else fallbackCopy(t, done);
+}
+function fallbackCopy(t, done) {
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch {} ta.remove();
+}
+let cfAction = null;
+function confirmBox(title, body, action) {
+  $('#cfTitle').textContent = title; $('#cfBody').textContent = body; cfAction = action; openM('#mConfirm');
+}
+$('#cfYes').onclick = () => { closeM('#mConfirm'); if (cfAction) cfAction(); };
+$('#cfNo').onclick = () => closeM('#mConfirm');
+
+/* ═══════════════════════════ صفحات ورود ═══════════════════════════ */
+let pending = { emoji: '🌸', color: COLORS[0] };
+function profileForms() {
+  const saved = JSON.parse(localStorage.getItem('tg_profile') || '{}');
+  pending.emoji = saved.emoji || '🌸'; pending.color = saved.color || COLORS[0];
+  ['cr', 'jn', 'set'].forEach((p) => {
+    const e = p === 'set' ? 'setEmojiGrid' : p + 'EmojiGrid', c = p === 'set' ? 'setColorGrid' : p + 'ColorGrid';
+    emojiGrid('#' + e, (v) => { pending.emoji = v; }, pending.emoji);
+    colorGrid('#' + c, (v) => { pending.color = v; }, pending.color);
+  });
+  const n = saved.name || '';
+  if (n) { $('#crName').value = n; $('#jnName').value = n; $('#setName').value = n; }
+}
+$('#btnCreate').onclick = () => { profileForms(); openM('#mCreate'); };
+$('#btnJoin').onclick = () => { profileForms(); openM('#mJoin'); };
+segWire('#jnMode', (v) => { S.mode = v; });
+segWire('#crMode', (v) => { S.mode = v; });
+segWire('#setNoise', () => {}); segWire('#setEcho', () => {});
+
+$('#crGo').onclick = async () => {
+  const name = $('#crName').value.trim() || 'مهمان';
+  localStorage.setItem('tg_profile', JSON.stringify({ name, emoji: pending.emoji, color: pending.color }));
+  S.me = { name, emoji: pending.emoji, color: pending.color };
+  S.isHost = true; S.limit = Number($('#crLimit').value);
+  S.mode = $('#crMode .sel')?.dataset.v || 'auto';
+  S.passHash = $('#crPass').value ? await sha256($('#crPass').value) : '';
+  S.code = randCode();
+  closeM('#mCreate');
+  enterRoom();
+};
+$('#jnGo').onclick = async () => {
+  const code = $('#jnCode').value.trim().toUpperCase();
+  const err = $('#jnErr');
+  if (code.length !== 5) { err.textContent = T('eBadCode'); err.classList.remove('hide'); return; }
+  const name = $('#jnName').value.trim() || 'مهمان';
+  localStorage.setItem('tg_profile', JSON.stringify({ name, emoji: pending.emoji, color: pending.color }));
+  S.me = { name, emoji: pending.emoji, color: pending.color };
+  S.isHost = false; S.code = code;
+  S.mode = $('#jnMode .sel')?.dataset.v || 'auto';
+  S.passHash = await sha256($('#jnPass').value);   // حتی اگر اتاق رمز ندارد، هش خالی فرستاده می‌شود
+  err.classList.add('hide');
+  closeM('#mJoin');
+  enterRoom();
+};
+/* لینک دعوت: #r=CODE */
+const hash = new URLSearchParams(location.hash.slice(1));
+if (hash.get('r')) { $('#jnCode').value = hash.get('r').toUpperCase(); setTimeout(() => $('#btnJoin').click(), 150); }
+
+/* ═══════════════════════════ لایه شبکه (اتوماک: PeerJS) ═══════════════════════════ */
+const PEER_PREFIX = 'tgx-';
+function iceConfig() {
+  const list = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
+  const turn = localStorage.getItem('tg_turn'), cred = localStorage.getItem('tg_turn_cred');
+  if (turn) {
+    const [u, p] = (cred || ',').split(',');
+    list.push(u && p ? { urls: turn, username: u.trim(), credential: p.trim() } : { urls: turn });
+  }
+  return { iceServers: list, iceCandidatePoolSize: 2 };
+}
+function peerOpts() { return { config: iceConfig(), debug: 1 }; }
+
+let reconnect = { tries: 0, timer: null, wanted: false };
+
+function enterRoom() {
+  $('#landing').classList.add('hide');
+  $('#room').classList.add('open');
+  $('#roomCodeTxt').textContent = S.code;
+  document.title = S.code + ' — Together';
+  initStage();
+  if (S.mode === 'auto') {
+    setNetBadge('t1', '…');
+    S.isHost ? netHost() : netGuest();
+  } else if (S.isHost) {
+    S.myId = 'HOST'; S.hostId = 'HOST';
+    S.roster.set('HOST', { ...S.me, id: 'HOST', role: 'host' });
+    setNetBadge('t1', '…');
+    openM('#mManual'); mnSetup();
+  } else {
+    setNetBadge('t1', '…');
+    openM('#mManual'); mnState = 'guest-idle';
+    $('#mnOut').value = '';
+    $('#mnStatus').textContent = LANG === 'fa' ? 'کد اتصال میزبان را در کادر پایین بچسبانید و «اتصال» را بزنید.' : 'Paste the host code below and press Connect.';
+  }
+}
+
+/* ---------- میزبان ---------- */
+function netHost() {
+  S.myId = 'HOST'; S.hostId = 'HOST';
+  S.roster.set('HOST', { ...S.me, id: 'HOST', role: 'host' });
+  reconnect.wanted = true;
+  peer = new Peer(PEER_PREFIX + S.code, peerOpts());
+  peer.on('open', () => { S.connected = true; setNetBadge('t1', T('net1')); startPings(); renderPresence(); renderPeople(); });
+  peer.on('connection', (conn) => {
+    conn.on('data', (m) => onData(conn.peer, m, conn));
+    conn.on('close', () => { if (S.roster.has(conn.peer)) dropPeer(conn.peer); });
+    conn.on('error', () => {});
+  });
+  peer.on('call', (call) => {
+    if (call.metadata && call.metadata.kind === 'movie') { call.answer(null); wireMovieMedia(call.peer, call); return; }
+    if (S.localStream) call.answer(S.localStream); else call.answer(null);
+    wireMedia(call.peer, call);
+  });
+  peer.on('error', (e) => {
+    if (e.type === 'unavailable-id') { S.code = randCode(); $('#roomCodeTxt').textContent = S.code; peer.destroy(); netHost(); }
+    else console.warn('peer err', e.type);
+  });
+}
+
+/* ---------- مهمان ---------- */
+function netGuest() {
+  reconnect.wanted = true;
+  peer = new Peer(peerOpts());
+  peer.on('open', (id) => {
+    S.myId = id;
+    dataConn = peer.connect(PEER_PREFIX + S.code, { reliable: true });
+    dataConn.on('open', () => dataConn.send({ t: 'hello', name: S.me.name, emoji: S.me.emoji, color: S.me.color, pass: S.passHash }));
+    dataConn.on('data', (m) => onData(S.hostId || 'HOST', m));
+    dataConn.on('close', () => scheduleReconnect());
+    dataConn.on('error', () => {});
+  });
+  peer.on('call', (call) => {
+    if (call.metadata && call.metadata.kind === 'movie') { call.answer(null); wireMovieMedia(call.peer, call); return; }
+    if (S.localStream) call.answer(S.localStream); else call.answer(null);
+    wireMedia(call.peer, call);
+  });
+  peer.on('error', (e) => {
+    if (e.type === 'peer-unavailable' && !S.connected) { joinFail(T('eBadCode')); }
+    else console.warn('peer err', e.type);
+  });
+}
+function joinFail(msg) {
+  reconnect.wanted = false;
+  leaveToLanding(true);
+  openM('#mJoin');
+  const err = $('#jnErr'); err.textContent = msg; err.classList.remove('hide');
+}
+function scheduleReconnect() {
+  if (!reconnect.wanted) return;
+  S.connected = false; setNetBadge('t3', T('eReconnect'));
+  const wait = Math.min(1000 * 2 ** reconnect.tries, 20000);
+  reconnect.tries++;
+  if (reconnect.tries > 7) { toast(T('eReconnect'), 'bad'); return; }
+  clearTimeout(reconnect.timer);
+  reconnect.timer = setTimeout(() => { try { peer.destroy(); } catch {} peer = null; dataConn = null; netGuest(); }, wait);
+}
+
+/* ---------- اتصال دستی (کپی/پیست) ---------- */
+let mnState = 'idle';
+function mnSetup() {
+  mnState = 'host-offering';
+  manualPC = new RTCPeerConnection(iceConfig());
+  manualDC = manualPC.createDataChannel('together', { ordered: true });
+  manualDC.onopen = () => { S.connected = true; $('#mnStatus').textContent = '✓ ' + (LANG === 'fa' ? 'متصل شد' : 'Connected'); closeM('#mManual'); startPings(); renderPresence(); };
+  manualDC.onmessage = (e) => onData('MAN-GUEST', e.data);
+  manualDC.onclose = () => { S.connected = false; setNetBadge('t3', T('eP2pDown')); };
+  manualPC.ontrack = (e) => attachRemoteStream('MAN-GUEST', e.streams[0]);
+  $('#mnOut').value = '';
+  $('#mnStatus').textContent = LANG === 'fa' ? 'در حال ساخت کد اتصال…' : 'building connection code…';
+  manualPC.createOffer().then((o) => manualPC.setLocalDescription(o)).then(() => waitIce(manualPC)).then(() => {
+    $('#mnOut').value = btoa(unescape(encodeURIComponent(JSON.stringify({ sdp: manualPC.localDescription }))));
+    $('#mnStatus').textContent = LANG === 'fa' ? 'کد بالا را بفرستید و «پاسخ» طرف را در کادر پایین بچسبانید.' : 'Send the code above, paste the reply below.';
+    mnState = 'host-wait-answer';
+  });
+}
+function mnGuestApply(txt) {
+  try {
+    const { sdp } = JSON.parse(decodeURIComponent(escape(atob(txt.trim()))));
+    if (mnState === 'idle' || mnState === 'guest-idle') {   // مهمان: دریافت offer
+      manualPC = new RTCPeerConnection(iceConfig());
+      manualPC.ontrack = (e) => attachRemoteStream('HOST', e.streams[0]);
+      manualPC.ondatachannel = (e) => {
+        manualDC = e.channel;
+        manualDC.onopen = () => {
+          S.connected = true; S.myId = 'MAN-GUEST'; S.hostId = 'HOST';
+          $('#mnStatus').textContent = '✓ ' + (LANG === 'fa' ? 'متصل شد' : 'Connected');
+          manualDC.send({ t: 'hello', name: S.me.name, emoji: S.me.emoji, color: S.me.color, pass: S.passHash });
+          closeM('#mManual'); startPings(); renderPresence();
+        };
+        manualDC.onmessage = (e) => onData('HOST', e.data);
+        manualDC.onclose = () => { S.connected = false; setNetBadge('t3', T('eP2pDown')); };
+      };
+      manualPC.setRemoteDescription(sdp).then(() => manualPC.createAnswer()).then((a) => manualPC.setLocalDescription(a)).then(() => waitIce(manualPC)).then(() => {
+        $('#mnOut').value = btoa(unescape(encodeURIComponent(JSON.stringify({ sdp: manualPC.localDescription }))));
+        $('#mnStatus').textContent = LANG === 'fa' ? 'کد پاسخ شما آماده است؛ برای میزبان بفرستید.' : 'Your reply is ready; send it to the host.';
+        mnState = 'guest-done';
+      });
+      mnState = 'guest-answering';
+    } else if (mnState === 'host-wait-answer') {             // میزبان: دریافت answer
+      manualPC.setRemoteDescription(sdp);
+      mnState = 'host-done';
+    }
+  } catch { $('#mnStatus').textContent = '⚠ کد نامعتبر است'; }
+}
+function waitIce(pc) {
+  return new Promise((res) => {
+    if (pc.iceGatheringState === 'complete') return res();
+    const t = setTimeout(res, 3500);
+    pc.addEventListener('icegatheringstatechange', () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); res(); } });
+  });
+}
+$('#mnApply').onclick = () => { const v = $('#mnIn').value.trim(); if (v) mnGuestApply(v); };
+$('#mnCopyOut').onclick = () => copyTxt($('#mnOut').value);
+
+/* ---------- باس پیام ---------- */
+function sendTo(id, msg) {
+  try { (window.__TGMSG = window.__TGMSG || []).push('out:' + id + ':' + (msg && msg.t)); } catch {}
+  if (S.mode === 'manual') { if (manualDC && manualDC.readyState === 'open') manualDC.send(JSON.stringify(msg)); return; }
+  if (S.isHost) { const r = S.roster.get(id); if (r && r.conn && r.conn.open) r.conn.send(msg); }
+  else { if (dataConn && dataConn.open) dataConn.send(msg); }
+}
+function broadcast(msg, exceptId) {
+  try { (window.__TGMSG = window.__TGMSG || []).push('bc:' + msg?.t + (exceptId != null ? ' ex=' + exceptId : '')); } catch {}
+  if (S.mode === 'manual') { sendTo(null, msg); return; }
+  if (S.isHost) { for (const [id, r] of S.roster) { if (id !== 'HOST' && id !== exceptId && r.conn && r.conn.open) r.conn.send(msg); } }
+  else if (exceptId !== 'HOST') sendTo('HOST', msg);
+}
+function onData(fromId, raw, conn) {
+  let msg = raw;
+  try { if (typeof msg === 'string') msg = JSON.parse(msg); } catch { return; }
+  if (!msg || typeof msg.t !== 'string') return;
+  try { (window.__TGMSG = window.__TGMSG || []).push(msg.t); if (window.__TGMSG.length > 60) window.__TGMSG.shift(); } catch {}
+  S.isHost ? hostDispatch(fromId, msg, conn) : guestDispatch(fromId, msg);
+}
+
+const RATE = new Map();  // flood guard: id -> [timestamps]
+function floodOk(id, key, max, win) {
+  const now = Date.now(); const k = id + key;
+  const arr = (RATE.get(k) || []).filter((t) => now - t < win);
+  if (arr.length >= max) return false;
+  arr.push(now); RATE.set(k, arr); return true;
+}
+
+/* ---------- منطق میزبان (مرجع حق) ---------- */
+function hostDispatch(fromId, m, conn) {
+  const reply = (m2) => { if (S.mode === 'manual') { manualDC && manualDC.readyState === 'open' && manualDC.send(JSON.stringify(m2)); } else if (conn && conn.open) conn.send(m2); };
+  switch (m.t) {
+    case 'hello': {
+      const passOk = !S.passHash || m.pass === S.passHash;
+      const guests = [...S.roster.keys()].filter((k) => k !== 'HOST').length;
+      if (!passOk) return reply({ t: 'reject', code: 'pass' });
+      if (guests >= S.limit) return reply({ t: 'reject', code: 'full' });
+      if (S.roster.has(fromId)) dropPeer(fromId, true);
+      const rec = { id: fromId, pid: fromId, name: String(m.name || 'مهمان').slice(0, 24), emoji: EMOJIS.includes(m.emoji) ? m.emoji : '🌸', color: COLORS.includes(m.color) ? m.color : COLORS[0], role: 'guest', conn };
+      S.roster.set(fromId, rec);
+      reply({ t: 'welcome', id: fromId, host: 'HOST', caps: { limit: S.limit, controller: S.controller, passReq: !!S.passHash },
+        roster: rosterArr(), state: syncState() });
+      broadcast({ t: 'roster', list: rosterArr() }, fromId);
+      broadcast({ t: 'sys', msg: rec.name + T('ePeerJoined'), ts: Date.now() }, fromId);
+      addSys(rec.name + T('ePeerJoined'));
+      renderPresence(); renderPeople();
+      hostSendRosterToMedia();   // معرفی برای تماس mesh
+      if (S.mv && S.mv.active && S.mode === 'auto') {   // فیلم مشترک فعال است؛ استریم را به تازه‌واره بده
+        if (S.mv.hostId === 'HOST') placeMovieCall(rec.pid);
+        else sendTo(S.mv.hostId, { t: 'mv.need', pid: rec.pid });
+      }
+      break;
+    }
+    case 'chat': {
+      if (!floodOk(fromId, 'c', 10, 8000) || typeof m.text !== 'string' || !m.text.trim()) return;
+      const msg = { id: uid(), from: fromId, name: S.roster.get(fromId)?.name || '?', text: m.text.slice(0, 1500), ts: Date.now() };
+      pushChat(msg); broadcast({ t: 'chat', ...msg }, fromId);
+      break;
+    }
+    case 'typing': if (floodOk(fromId, 'ty', 6, 3000)) broadcast({ t: 'typing', on: !!m.on, name: S.roster.get(fromId)?.name || '' }, fromId); break;
+    case 'react': if (floodOk(fromId, 'r', 12, 6000) && REACTS.includes(m.emoji)) { broadcast({ t: 'react', emoji: m.emoji, by: fromId }, fromId); floatReact(m.emoji, fromId); } break;
+    case 'stroke': if (floodOk(fromId, 's', 40, 5000) && Array.isArray(m.pts) && m.pts.length && m.pts.length < 900) {
+      const st = { id: (typeof m.id === 'string' && m.id.length <= 40) ? m.id : uid(), pts: m.pts.slice(0, 900).map((p) => [+p[0] || 0, +p[1] || 0]), color: String(m.color || '#fff').slice(0, 9), size: clamp(+m.size || 4, 2, 30), mode: m.mode === 'e' ? 'e' : 'p', by: fromId };
+      pushStroke(st); broadcast({ t: 'stroke', ...st }, fromId); drawStroke(st);
+    } break;
+    case 'undost': { const st = S.strokes.find((s) => s.id === m.id && s.by === fromId); if (st) { S.strokes = S.strokes.filter((x) => x !== st); broadcast({ t: 'undost', id: m.id }, fromId); redrawAll(); } break; }
+    case 'clearw': { S.strokes = []; broadcast({ t: 'clearw' }, fromId); redrawAll(); addSys(LANG === 'fa' ? 'تخته پاک شد' : 'Board cleared'); break; }
+    case 'cursor': if (floodOk(fromId, 'cu', 40, 1000)) broadcast({ t: 'cursor', x: +m.x || 0, y: +m.y || 0, by: fromId }, fromId); if (paneSel() === 'coview') covCursor(fromId, +m.x, +m.y); if (paneSel() === 'board') boardCursor(fromId, +m.x, +m.y); break;
+    case 'nav': if (controllerOk(fromId)) { hostNav(String(m.url || '').slice(0, 2000), fromId); } else sendTo(fromId, { t: 'toast', k: 'eLockOn' }); break;
+    case 'navctrl': if (controllerOk(fromId)) hostNavCtrl(m.act, +m.z || 1, fromId); else sendTo(fromId, { t: 'toast', k: 'eLockOn' }); break;
+    case 'yt': if (controllerOk(fromId)) hostYt(m, fromId); else sendTo(fromId, { t: 'toast', k: 'eLockOn' }); break;
+    case 'tt': hostTt(fromId, m); break;
+    case 'mv.open': {
+      S.mv = { active: true, hostId: fromId, name: String(m.name || '').slice(0, 80), size: +m.size || 0, dur: +m.dur || 0 };
+      broadcast(m, fromId);
+      applyMvOpen({ ...m, host: fromId });
+      break;
+    }
+    case 'mv.state': if (floodOk(fromId, 'mvs', 30, 5000)) { broadcast(m, fromId); applyMvState(m); } break;
+    case 'mv.cmd': {   // فرمان کنترل از غیرفرستنده → به صاحب فیلم
+      if (mvLock && fromId !== S.mv.hostId && S.controller !== fromId) return sendTo(fromId, { t: 'toast', k: 'eLockOn' });
+      if (S.mv.hostId === 'HOST') hostApplyMv(m);
+      else sendTo(S.mv.hostId, m);
+      break;
+    }
+    case 'mv.dead': { broadcast({ t: 'mv.close' }); applyMvClose(); break; }
+    case 'mv.close': broadcast(m, fromId); applyMvClose(); break;
+    case 'mvlock': mvLock = !!m.on; broadcast(m, fromId); updateMvLockUI(); break;
+    case 'ctl.req': if (floodOk(fromId, 'cr', 3, 15000)) { $('#ctlWho').textContent = (S.roster.get(fromId)?.name || '?') + (LANG === 'fa' ? ' درخواست کنترل انحصاری دارد.' : ' requests exclusive control.'); openM('#mCtl'); S._ctlFrom = fromId; } break;
+    case 'ctl.release': if (S.controller === fromId) setController(null); break;
+    case 'file.ch': case 'file.done': if (floodOk(fromId, 'f', 400, 8000)) broadcast(m, fromId); break;
+    case 'file.meta': if (floodOk(fromId, 'f', 400, 8000)) hostFileMeta(m, fromId); break;
+    case 'room.moved': if (m.code) {   // میزبان قدیم: اعلام کد جدید به بقیه و خودش به‌عنوان مهمان می‌رود
+      broadcast({ t: 'room.moved', code: m.code });
+      stopMediaKeepStream();
+      leaveHosting();
+      S.code = m.code; S.myId = null;
+      netGuest();
+    } break;
+    case 'net.ping': sendTo(fromId, { t: 'net.pong', ts: m.ts, to: fromId }); break;
+    case 'net.pong': if (m.to === 'HOST') { const d = Date.now() - m.ts; S.ping = d; updateNetBadge(); } break;
+    case 'sync.req': reply({ t: 'welcome', id: fromId, host: 'HOST', caps: { limit: S.limit, controller: S.controller, passReq: !!S.passHash }, roster: rosterArr(), state: syncState() }); break;
+  }
+}
+function rosterArr() {
+  return [...S.roster.values()].map((r) => ({
+    id: r.id, name: r.name, emoji: r.emoji, color: r.color, role: r.role,
+    pid: r.pid || (r.id === 'HOST' ? (peer && peer.id) || null : r.id),
+  }));
+}
+function syncState() {
+  return {
+    chat: S.chat.slice(-60), strokes: S.strokes.slice(-400),
+    yt: S.yt, cov: { stack: S.cov.stack.slice(-10), idx: S.cov.idx, zoom: S.cov.zoom },
+    tt: S.tt, caps: { limit: S.limit, controller: S.controller },
+    mv: S.mv ? { active: S.mv.active, hostId: S.mv.hostId, name: S.mv.name, size: S.mv.size, dur: S.mv.dur, lock: mvLock } : { active: false },
+  };
+}
+function dropPeer(id, silent) {
+  const r = S.roster.get(id); if (!r) return;
+  try { r.conn && r.conn.close(); } catch {}
+  S.roster.delete(id); closeMedia(id);
+  if (S.mv && S.mv.active && S.mv.hostId === id) {   // صاحب فیلم رفت؛ پخش برای همه پایان می‌یابد
+    broadcast({ t: 'mv.close' });
+    applyMvClose();
+  }
+  broadcast({ t: 'roster', list: rosterArr() });
+  broadcast({ t: 'sys', msg: r.name + T('ePeerLeft'), ts: Date.now() });
+  addSys(r.name + T('ePeerLeft'));
+  renderPresence(); renderPeople();
+}
+
+/* ---------- منطق مهمان ---------- */
+function guestDispatch(_from, m) {
+  switch (m.t) {
+    case 'welcome': {
+      S.connected = true; reconnect.tries = 0;
+      S.myId = m.id; S.hostId = m.host;
+      S.limit = m.caps.limit; S.controller = m.caps.controller;
+      S.roster.clear();
+      m.roster.forEach((r) => S.roster.set(r.id, r));
+      S.roster.set(S.myId, { id: S.myId, ...S.me, role: 'guest' });
+      const st = m.state;
+      S.chat = st.chat.filter((c) => c.from !== S.myId);   // پیام‌های خود قبلی را نگاه نمی‌کنیم؛ بقیه بازیابی می‌شود
+      S.strokes = st.strokes;
+      S.yt = st.yt; S.cov = { stack: st.cov.stack || [], idx: st.cov.idx ?? -1, zoom: st.cov.zoom || 1 };
+      S.tt = st.tt;
+      if (st.mv && st.mv.active) {   // فیلم مشترک هنگام ورود/اتصال مجدد بازیابی می‌شود
+        S.mv = { active: true, hostId: st.mv.hostId, name: st.mv.name, size: st.mv.size, dur: st.mv.dur, pos: 0, playing: false, rate: 1 };
+        mvLock = !!st.mv.lock;
+        applyMvOpen({ ...st.mv, host: st.mv.hostId });
+        updateMvLockUI();
+      }
+      setNetBadge('t0', T('net1'));
+      renderPresence(); renderPeople(); renderChat(); redrawAll(); applyYtState(true); applyCovState(true); renderTt();
+      if (S.controller === S.myId) toast(T('eCtlGrant'), 'ok');
+      toast(T('eStateBack'), 'ok');
+      joinMediaMesh();
+      break;
+    }
+    case 'reject': joinFail(m.code === 'pass' ? T('eBadPass') : T('eFull')); break;
+    case 'roster': { S.roster.clear(); m.list.forEach((r) => S.roster.set(r.id, r)); if (!S.roster.has(S.myId)) S.roster.set(S.myId, { id: S.myId, ...S.me, role: 'guest' }); renderPresence(); renderPeople(); break; }
+    case 'sys': addSys(m.msg); break;
+    case 'chat': pushChat({ ...m, mine: false }); break;
+    case 'typing': showTyping(m.on, m.name); break;
+    case 'react': floatReact(m.emoji, m.by); break;
+    case 'stroke': pushStroke(m); drawStroke(m); break;
+    case 'undost': S.strokes = S.strokes.filter((s) => s.id !== m.id); redrawAll(); break;
+    case 'clearw': S.strokes = []; redrawAll(); break;
+    case 'cursor': if (paneSel() === 'coview') covCursor(m.by, +m.x, +m.y); if (paneSel() === 'board') boardCursor(m.by, +m.x, +m.y); break;
+    case 'nav': S.cov.stack = (S.cov.stack || []).concat(m.url).slice(-30); S.cov.idx = S.cov.stack.length - 1; applyCovState(); toastSyncBy(m.by); break;
+    case 'navctrl': { const c = S.cov; if (m.act === 'back') c.idx = Math.max(0, c.idx - 1); if (m.act === 'fwd') c.idx = Math.min(c.stack.length - 1, c.idx + 1); if (m.act === 'reload') { applyCovState(); break; } if (m.act === 'zoom') c.zoom = clamp(+m.z || 1, .5, 2); $('#covZoomLbl').textContent = Math.round(c.zoom * 100) + '%'; applyCovState(m.act === 'zoom'); break; }
+    case 'yt': applyYtMsg(m); break;
+    case 'tt': S.tt = m.state; renderTt(); break;
+    case 'mv.open': S.mv = { active: true, hostId: m.host || m.by, name: m.name, size: m.size, dur: m.dur, pos: 0, playing: false, rate: 1 }; applyMvOpen(m); break;
+    case 'mv.cmd': hostApplyMv(m); break;   // فرمان طرف مقابل → روی ویدیوی محلیِ صاحب فیلم اعمال می‌شود
+    case 'mv.state': applyMvState(m); break;
+    case 'mv.need': if (mvIsMine()) { if (mvStream && m.pid) placeMovieCall(m.pid); else sendTo('HOST', { t: 'mv.dead' }); } break;
+    case 'mv.close': applyMvClose(); break;
+    case 'mvlock': mvLock = !!m.on; updateMvLockUI(); break;
+    case 'ctl.grant': if (m.to === S.myId) { S.controller = S.myId; toast(T('eCtlGrant'), 'ok'); renderPeople(); } break;
+    case 'ctllock': S.controller = m.who; if (m.who && m.who !== S.myId) toast(T('eLockOn')); if (!m.who) toast(T('eLockOff')); renderPeople(); updateLockUI(); break;
+    case 'room.limit': S.limit = m.n; renderPeople(); toast(T('eLimitChanged')); break;
+    case 'room.pass': S._passReq = !!m.hash; toast(T('ePassChanged')); break;
+    case 'room.transfer': {   // مالکیت با تغییر کد اتاق واقعاً منتقل می‌شود (re-key)
+      if (S.mode === 'manual') break;
+      S.isHost = true; S.hostId = 'HOST'; S.code = randCode();
+      toast(T('eTransferred'), 'ok');
+      stopMediaKeepStream();
+      reconnect.wanted = true;
+      S.myId = 'HOST';
+      netHost();
+      const oldConn = dataConn;            // اعلام کد جدید از طریق کانال قدیمی
+      const announce = () => {
+        if (oldConn && oldConn.open) { oldConn.send(JSON.stringify({ t: 'room.moved', code: S.code })); setTimeout(() => { try { oldConn.close(); } catch {} }, 2500); }
+        else setTimeout(announce, 400);
+      };
+      setTimeout(announce, 1200);
+      break;
+    }
+    case 'room.moved': if (S.mode === 'auto' && !S.isHost && m.code) moveToRoom(m.code); break;
+    case 'room.kick': if (m.to === S.myId) { toast(T('kKicked'), 'bad'); leaveRoom(); } break;
+    case 'room.close': toast(T('eHostLeft'), 'bad'); leaveRoom(); break;
+    case 'toast': toast(T(m.k), ''); break;
+    case 'file.meta': fileMeta(m); break;
+    case 'file.ch': fileChunk(m); break;
+    case 'file.done': fileDone(m); break;
+    case 'net.ping': sendTo('HOST', { t: 'net.pong', ts: m.ts, to: 'HOST' }); break;
+    case 'net.pong': if (m.to === S.myId || S.mode === 'manual') { const d = Date.now() - m.ts; S.ping = d; updateNetBadge(); } break;
+  }
+}
+function toastSyncBy() { /* نویگیشن از طرف دیگر — بدون نیاز به اسم */ }
+
+function setController(who) {
+  S.controller = who;
+  broadcast({ t: 'ctllock', who });
+  renderPeople(); updateLockUI();
+  if (who) toast(T('eLockOn'), 'ok'); else toast(T('eLockOff'));
+}
+function updateLockUI() {
+  const btn = $('#ytLockToggle');
+  btn.innerHTML = (S.controller == null ? '🔓 ' : '🔒 ') + (S.controller == null ? T('ctrlAll') : (S.controller === S.myId ? T('ctrlHost') + ' ⭐' : (S.roster.get(S.controller)?.name || '?')));
+}
+$('#ctlYes').onclick = () => { const to = S._ctlFrom; closeM('#mCtl'); if (!to) return; sendTo(to, { t: 'ctl.grant', to }); setController(to); };
+$('#ctlNo').onclick = () => { const to = S._ctlFrom; closeM('#mCtl'); if (to) sendTo(to, { t: 'toast', k: 'eCtlDeny' }); };
+
+/* ---------- حضور و افراد ---------- */
+function renderPresence() {
+  const box = $('#presenceStack'); box.innerHTML = '';
+  [...S.roster.values()].slice(0, 6).forEach((r) => {
+    const d = document.createElement('div'); d.className = 'pava'; d.style.background = r.color;
+    d.title = r.name + (r.role === 'host' ? ' 👑' : '');
+    d.textContent = r.emoji;
+    const dot = document.createElement('span'); dot.className = 'dot'; d.appendChild(dot);
+    box.appendChild(d);
+  });
+}
+function renderPeople() {
+  const list = $('#peopleList'); list.innerHTML = '';
+  [...S.roster.values()].forEach((r) => {
+    const row = document.createElement('div'); row.className = 'prow';
+    const av = document.createElement('div'); av.className = 'pav'; av.style.background = r.color; av.textContent = r.emoji;
+    const info = document.createElement('div'); info.className = 'pinfo';
+    const nm = document.createElement('div'); nm.className = 'pname';
+    nm.innerHTML = `<span>${esc(r.name)}</span>` + (r.role === 'host' ? `<span class="tag">👑 ${T('host')}</span>` : '') + (r.id === S.myId ? `<span class="tag2">${T('you')}</span>` : '') + (S.controller === r.id ? `<span class="tag2">🎛️ ${LANG === 'fa' ? 'کنترل' : 'control'}</span>` : '');
+    info.appendChild(nm);
+    const act = document.createElement('div'); act.className = 'pact';
+    if (S.isHost && r.id !== 'HOST' && r.id !== S.myId) {
+      const bK = mkBtn('✕', 'danger sm', () => confirmBox(LANG === 'fa' ? 'حذف عضو' : 'Remove member', r.name, () => sendTo(r.id, { t: 'room.kick', to: r.id }) || dropPeer(r.id)));
+      const bT = mkBtn('👑', '', () => confirmBox(LANG === 'fa' ? 'انتقال مالکیت' : 'Transfer ownership', r.name, () => doTransfer(r.id)));
+      act.append(bK, bT);
+    }
+    if (S.controller === r.id && r.id !== 'HOST' ? false : false) {}
+    row.append(av, info, act); list.appendChild(row);
+  });
+  // بخش کنترل انحصاری
+  const ctl = document.createElement('div'); ctl.className = 'prow';
+  const cinfo = document.createElement('div'); cinfo.className = 'pinfo';
+  cinfo.innerHTML = `<div class="pname">🎛️ ${LANG === 'fa' ? 'کنترل محیط مشترک' : 'Shared control'}</div><div style="font-size:11.5px;color:var(--txt3)">${S.controller == null ? (LANG === 'fa' ? 'همه کنترل دارند' : 'Everyone has control') : (S.controller === S.myId ? (LANG === 'fa' ? 'دست شماست' : 'You hold it') : (S.roster.get(S.controller)?.name || '?'))}</div>`;
+  ctl.appendChild(cinfo);
+  const cact = document.createElement('div'); cact.className = 'pact';
+  if (S.controller == null) {
+    if (S.isHost) cact.appendChild(mkBtn(LANG === 'fa' ? 'قفل کنترل: من' : 'Lock: me', 'sm', () => setController('HOST')));
+    else cact.appendChild(mkBtn(LANG === 'fa' ? 'درخواست کنترل' : 'Request control', 'sm primary', () => { sendTo('HOST', { t: 'ctl.req' }); toast(T('eCtlSent')); }));
+  } else if (S.controller === 'HOST' && S.isHost || S.controller === S.myId) {
+    cact.appendChild(mkBtn(LANG === 'fa' ? 'آزادسازی' : 'Release', 'sm ok', () => sendTo('HOST', { t: 'ctl.release' }) || (S.isHost && setController(null))));
+  }
+  ctl.appendChild(cact);
+  list.appendChild(ctl);
+  renderAdmin();
+}
+function mkBtn(txt, cls, fn) { const b = document.createElement('button'); b.className = 'btn ' + cls; b.textContent = txt; b.onclick = fn; return b; }
+function doTransfer(id) {
+  if (S.mode === 'manual') return toast(LANG === 'fa' ? 'در حالت دستی مالکیت منتقل نمی‌شود' : 'No transfer in manual mode');
+  const r = S.roster.get(id); if (!r) return;
+  sendTo(id, { t: 'room.transfer' });
+  toast(T('eTransferred') + (LANG === 'fa' ? ' — اتاق به کد جدید منتقل می‌شود' : ' — room moves to a new code'), 'ok');
+}
+function leaveHosting() {
+  try { dataConn && dataConn.close(); } catch {}
+  try { peer && peer.destroy(); } catch {}
+  peer = null; dataConn = null; S.isHost = false;
+}
+/*⏳P6*/
+function renderAdmin() {
+  const box = $('#roomAdmin'); box.innerHTML = '';
+  if (S.isHost) {
+    const t = document.createElement('div'); t.className = 'raTitle'; t.textContent = '⚙️ ' + (LANG === 'fa' ? 'مدیریت اتاق' : 'Room admin'); box.appendChild(t);
+    const r1 = document.createElement('div'); r1.className = 'rrow';
+    const lim = document.createElement('input'); lim.className = 'inp'; lim.type = 'number'; lim.min = 2; lim.max = 12; lim.value = S.limit;
+    const b1 = mkBtn('✔', 'sm', () => { S.limit = clamp(Number(lim.value) || 4, 2, 12); broadcast({ t: 'room.limit', n: S.limit }); renderPeople(); });
+    const l1 = document.createElement('span'); l1.style.cssText = 'font-size:12px;color:var(--txt2)'; l1.textContent = LANG === 'fa' ? 'ظرفیت:' : 'Limit:';
+    r1.append(l1, lim, b1); box.appendChild(r1);
+    const r2 = document.createElement('div'); r2.className = 'rrow';
+    const pw = document.createElement('input'); pw.className = 'inp'; pw.type = 'password'; pw.maxLength = 32; pw.placeholder = LANG === 'fa' ? 'رمز جدید (خالی=حذف)' : 'new pass (empty=remove)';
+    const b2 = mkBtn('✔', 'sm', async () => { S.passHash = pw.value ? await sha256(pw.value) : ''; broadcast({ t: 'room.pass', hash: S.passHash ? '1' : '' }); toast(T('ePassChanged'), 'ok'); });
+    const l2 = document.createElement('span'); l2.style.cssText = 'font-size:12px;color:var(--txt2)'; l2.textContent = LANG === 'fa' ? 'رمز:' : 'Pass:';
+    r2.append(l2, pw, b2); box.appendChild(r2);
+    const r3 = document.createElement('div'); r3.className = 'rrow';
+    r3.appendChild(mkBtn('⏻ ' + (LANG === 'fa' ? 'بستن اتاق' : 'Close room'), 'danger sm', () => confirmBox(LANG === 'fa' ? 'بستن اتاق' : 'Close room', LANG === 'fa' ? 'برای همه بسته می‌شود.' : 'Closes for everyone.', () => { broadcast({ t: 'room.close' }); leaveRoom(); })));
+    box.appendChild(r3);
+  } else if (S.controller != null && S.controller !== S.myId && S.controller !== 'HOST') {
+    const t = document.createElement('div'); t.className = 'raTitle'; t.textContent = '🎛️ ' + (LANG === 'fa' ? 'کنترل در دست ' + (S.roster.get(S.controller)?.name || '?') : 'Control held by ' + (S.roster.get(S.controller)?.name || '?')); box.appendChild(t);
+  }
+}
+/* خروج */
+function leaveRoom() {
+  reconnect.wanted = false; clearTimeout(reconnect.timer);
+  if (S.mv && S.mv.active && S.mv.hostId === S.myId) broadcast({ t: 'mv.close' });
+  broadcast({ t: 'sys', msg: S.me.name + T('ePeerLeft'), ts: Date.now() });
+  try { endMovie(false); } catch {}
+  try { dataConn && dataConn.close(); } catch {}
+  try { peer && peer.destroy(); } catch {}
+  try { manualPC && manualPC.close(); } catch {}
+  stopMedia(true);
+  leaveToLanding(false);
+}
+function leaveToLanding(keepModal) {
+  $('#room').classList.remove('open');
+  $('#landing').classList.remove('hide');
+  document.title = 'Together — اتاق آنلاین مشترک';
+  S.roster.clear(); S.chat = []; S.strokes = []; S.connected = false;
+  S.yt = { v: '', state: -1, t: 0, rate: 1 }; S.cov = { stack: [], idx: -1, zoom: 1 };
+  S.controller = null; S.inCall = false;
+  if (!keepModal) resetStageUI();
+}
+$('#roomExit').onclick = () => confirmBox(LANG === 'fa' ? 'خروج از اتاق' : 'Leave room', LANG === 'fa' ? 'مطمئنی؟' : 'Sure?', () => { toast(T('kYou')); leaveRoom(); });
+/* ═══════════════════════════ پنل‌ها و تب‌ها ═══════════════════════════ */
+let curPane = 'coview';
+const paneSel = () => curPane;
+function initStage() {
+  $$('#stageTabs button').forEach((b) => b.onclick = () => {
+    $$('#stageTabs button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel');
+    $$('.tabPane').forEach((p) => p.classList.remove('sel'));
+    curPane = b.dataset.tab;
+    $('#pane-' + curPane).classList.add('sel');
+    if (curPane === 'watch') ensureYTApi();
+    if (curPane === 'board') { sizeBoard(); redrawAll(); }
+    if (curPane === 'coview') sizeCovOverlay();
+  });
+  $$('.sideTabs button').forEach((b) => b.onclick = () => {
+    $$('.sideTabs button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel');
+    $$('.sidePane').forEach((p) => p.classList.remove('sel'));
+    $('#side-' + b.dataset.side).classList.add('sel');
+  });
+  // تب‌بار موبایل
+  $$('#tabbar button').forEach((b) => b.onclick = () => {
+    $$('#tabbar button').forEach((x) => x.classList.remove('sel')); b.classList.add('sel');
+    const side = $('#sidePanel');
+    if (innerWidth <= 860) {
+      side.classList.add('mobile');
+      if (b.dataset.t === 'stage') { side.classList.remove('open'); $('#callStrip').classList.remove('open'); }
+      if (b.dataset.t === 'chat') { side.classList.add('open'); $('.sideTabs [data-side=chat]').click(); }
+      if (b.dataset.t === 'people') { side.classList.add('open'); $('.sideTabs [data-side=people]').click(); }
+      if (b.dataset.t === 'call') { $('#callStrip').classList.toggle('open'); side.classList.remove('open'); }
+    } else { side.classList.remove('mobile', 'open'); $('#callStrip').classList.toggle('open', b.dataset.t === 'call'); }
+  });
+  wireChat();
+  wireCoview();
+  wireWatch();
+  wireBoard();
+  wireGame();
+  wireMovie();
+  wireTopbar();
+  window.addEventListener('resize', () => { sizeBoard(); sizeCovOverlay(); });
+  sizeBoard(); sizeCovOverlay();
+}
+function resetStageUI() {
+  $('#chatLog').innerHTML = ''; $('#peopleList').innerHTML = ''; $('#roomAdmin').innerHTML = '';
+  $('#covFrame').classList.add('hide'); $('#covFrame').src = 'about:blank'; $('#covEmpty').classList.remove('hide');
+  $('#covUrl').value = ''; $('#covZoomLbl').textContent = '100%';
+  try { if (ytPlayer && ytPlayer.destroy) ytPlayer.destroy(); } catch {}
+  ytPlayer = null;
+  $('#ytWrap').innerHTML = `<div class="ytph" id="ytPh"><div><div class="big">🍿</div><span data-i18n="ytEmpty">${esc(T('ytEmpty'))}</span></div></div>`;
+  $('#ytUrl').value = ''; $('#ytStatus').textContent = T('ytIdle'); $('#ytSeek').value = 0;
+  S.tt = { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 } }; renderTt();
+  try { endMovie(false); } catch {}
+  $('#callStrip').classList.remove('open'); $('#callStrip').innerHTML = '';
+}
+
+/* ═══════════════════════════ چت ═══════════════════════════ */
+let notifOn = localStorage.getItem('tg_notif') === '1';
+let typingTimer = null;
+function wireChat() {
+  const inBtn = $('#chatEmoji');
+  const nb = document.createElement('button');
+  nb.className = 'btn icon sm'; nb.id = 'notifToggle'; nb.title = T('eCopied');
+  nb.textContent = notifOn ? '🔔' : '🔕';
+  nb.onclick = async () => {
+    notifOn = !notifOn; localStorage.setItem('tg_notif', notifOn ? '1' : '0'); nb.textContent = notifOn ? '🔔' : '🔕';
+    if (notifOn && 'Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch {} }
+  };
+  inBtn.parentNode.insertBefore(nb, inBtn);
+  $('#chatSend').onclick = sendChat;
+  $('#chatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  });
+  $('#chatInput').addEventListener('input', () => {
+    clearTimeout(typingTimer);
+    broadcast({ t: 'typing', on: true });
+    typingTimer = setTimeout(() => broadcast({ t: 'typing', on: false }), 1600);
+  });
+  $('#chatFile').onclick = () => $('#chatFileIn').click();
+  $('#chatFileIn').addEventListener('change', sendFile);
+  const pop = $('#emojiPop'); pop.innerHTML = '';
+  [...REACTS, ...EMOJIS].forEach((e) => {
+    const b = document.createElement('button'); b.textContent = e;
+    b.onclick = () => {
+      pop.classList.remove('open');
+      const inp = $('#chatInput');
+      if (REACTS.includes(e) && !inp.value.trim()) { broadcast({ t: 'react', emoji: e }); floatReact(e, S.myId); }
+      else inp.value += e;
+    };
+    pop.appendChild(b);
+  });
+  inBtn.onclick = () => pop.classList.toggle('open');
+  document.addEventListener('click', (e) => { if (!pop.contains(e.target) && e.target !== inBtn) pop.classList.remove('open'); });
+}
+function sendChat() {
+  const inp = $('#chatInput');
+  const text = inp.value.trim().slice(0, 1500);
+  if (!text || !S.connected) return;
+  inp.value = '';
+  broadcast({ t: 'typing', on: false });
+  if (S.isHost) { const msg = { id: uid(), from: S.myId, name: S.me.name, text, ts: Date.now() }; pushChat(msg); broadcast({ t: 'chat', ...msg }); }
+  else { const id = uid(); pushChat({ id, from: S.myId, name: S.me.name, text, ts: Date.now(), mine: true }); sendTo('HOST', { t: 'chat', text, id }); }
+}
+function pushChat(m) {
+  m.ts = m.ts || Date.now();
+  if (S.isHost && m.from === S.myId) m.mine = true;
+  S.chat.push(m); if (S.chat.length > 200) S.chat.shift();
+  renderMsg(m);
+  if (!m.mine && notifOn && document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(m.name || 'Together', { body: m.text || '📎', tag: 'tg-chat' }); } catch {}
+  }
+}
+function addSys(txt) {
+  const el = document.createElement('div'); el.className = 'csy'; el.textContent = txt;
+  $('#chatLog').appendChild(el); scrollChat();
+}
+function renderChat() { const log = $('#chatLog'); log.innerHTML = ''; S.chat.forEach(renderMsg); scrollChat(); }
+function renderMsg(m) {
+  if (m.kind === 'file') return renderFileMsg(m);
+  const el = document.createElement('div');
+  el.className = 'cmsg' + (m.mine || m.from === S.myId ? ' me' : ''); el.dataset.mid = m.id;
+  const head = document.createElement('div'); head.className = 'cmHead';
+  head.innerHTML = `<span class="cmName" style="color:${m.name === S.me.name ? 'var(--vio2)' : 'inherit'}">${esc(m.name || '')}</span><span>${new Date(m.ts || Date.now()).toLocaleTimeString(LANG === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>`;
+  const body = document.createElement('div'); body.textContent = m.text;
+  el.append(head, body);
+  const del = document.createElement('button'); del.className = 'cmDel'; del.textContent = '🗑';
+  del.onclick = () => deleteMsg(m.id);
+  el.appendChild(del);
+  $('#chatLog').appendChild(el); scrollChat();
+}
+function deleteMsg(id) {
+  const m = S.chat.find((x) => x.id === id); if (!m) return;
+  if (!(m.mine || m.from === S.myId)) return;
+  S.chat = S.chat.filter((x) => x.id !== id);
+  const el = $(`.cmsg[data-mid="${id}"]`); if (el) el.remove();
+  if (S.isHost) { S.chat = S.chat.filter((x) => x.id !== id); broadcast({ t: 'chatdel', id }); }
+  else sendTo('HOST', { t: 'chatdel', id });
+}
+function showTyping(on, name) {
+  const lbl = $('#typingLbl');
+  if (!on) { lbl.textContent = ''; return; }
+  lbl.textContent = (name || '') + (LANG === 'fa' ? ' در حال نوشتن…' : ' is typing…');
+}
+function scrollChat() { const log = $('#chatLog'); log.scrollTop = log.scrollHeight; }
+function floatReact(emoji, by) {
+  const el = document.createElement('div');
+  el.className = 'freact'; el.textContent = emoji;
+  el.style.insetInlineStart = (15 + Math.random() * 70) + '%';
+  el.style.setProperty('--dx', (Math.random() * 90 - 45) + 'px');
+  $('#reactLayer').appendChild(el);
+  setTimeout(() => el.remove(), 2700);
+}
+
+/* ═══════════════════════════ انتقال فایل (P2P، ≤5MB) ═══════════════════════════ */
+const MAX_FILE = 5 * 1024 * 1024, CHUNK = 48000;
+const fileRx = new Map();
+function wireTopbar() { $('#copyLink').onclick = openInvite; }
+function openInvite() {
+  const link = location.origin.startsWith('http') ? `${location.origin}${location.pathname}#r=${S.code}` : `${location.href.split('#')[0]}#r=${S.code}`;
+  $('#invLink').value = link; $('#invCode').value = S.code; openM('#mInv');
+  const fh = $('#invFileHint');
+  if (location.protocol === 'file:') { fh.textContent = T('invFileHint'); fh.classList.remove('hide'); }
+  else fh.classList.add('hide');
+}
+$('#invCopy').onclick = () => copyTxt($('#invLink').value);
+$('#invShare').onclick = async () => {
+  const link = $('#invLink').value;
+  if (navigator.share) { try { await navigator.share({ title: 'Together', url: link }); } catch {} }
+  else copyTxt(link);
+};
+function sendFile() {
+  const f = $('#chatFileIn').files[0]; $('#chatFileIn').value = '';
+  if (!f) return;
+  if (f.size > MAX_FILE) return toast(T('eFileBig'), 'bad');
+  if (!S.connected) return toast(T('eP2pDown'), 'bad');
+  const fid = uid();
+  const meta = { t: 'file.meta', fid, name: f.name.slice(0, 80), size: f.size, mime: f.type || 'application/octet-stream' };
+  if (S.isHost) { broadcast({ ...meta, sname: S.me.name }); fileMeta({ ...meta, sname: S.me.name, mine: true }); }
+  else { fileMeta({ ...meta, sname: S.me.name, mine: true }); sendTo('HOST', meta); }
+  f.arrayBuffer().then((buf) => {
+    const total = Math.ceil(buf.byteLength / CHUNK);
+    let seq = 0;
+    const tick = setInterval(() => {
+      for (let k = 0; k < 4 && seq < total; k++, seq++) {
+        const b64 = btoa(String.fromCharCode(...new Uint8Array(buf.slice(seq * CHUNK, (seq + 1) * CHUNK))));
+        const m = { t: 'file.ch', fid, seq, b64 };
+        S.isHost ? broadcast(m) : sendTo('HOST', m);
+      }
+      if (seq % 16 === 0 || seq >= total) updateFileBar(fid, seq / total);
+      if (seq >= total) {
+        clearInterval(tick);
+        const done = { t: 'file.done', fid };
+        S.isHost ? broadcast(done) : sendTo('HOST', done);
+        updateFileBar(fid, 1);
+      }
+    }, 30);
+  });
+}
+function hostFileMeta(m, fromId) {
+  const msg = { ...m, sname: S.roster.get(fromId)?.name || '?', mine: false };
+  broadcast(msg, fromId); fileMeta(msg);
+}
+function fileMeta(m) {
+  m.kind = 'file'; m.ts = Date.now();
+  m.rx = m.mine ? null : { chunks: [], got: 0 };
+  S.chat.push(m); if (S.chat.length > 200) S.chat.shift();
+  renderFileMsg(m);
+}
+function fileChunk(m) {
+  const fm = S.chat.find((x) => x.fid === m.fid); if (!fm || !fm.rx) return;
+  const bin = Uint8Array.from(atob(m.b64), (c) => c.charCodeAt(0));
+  fm.rx.chunks[m.seq] = bin; fm.rx.got += bin.length;
+  updateFileBar(m.fid, Math.min(1, fm.rx.got / fm.size));
+}
+function fileDone(m) {
+  const fm = S.chat.find((x) => x.fid === m.fid); if (!fm || !fm.rx) return;
+  const blob = new Blob(fm.rx.chunks.filter(Boolean), { type: fm.mime });
+  const url = URL.createObjectURL(blob);
+  fm.url = url;
+  const el = $(`.cmsg[data-mid="${m.fid}"] a`) || $(`.cmsg[data-fid="${m.fid}"] a`);
+  if (el) { el.href = url; el.download = fm.name; el.classList.remove('hide'); }
+  const bar = $(`.cmsg[data-fid="${m.fid}"] .fbar`); if (bar) bar.remove();
+  toast((LANG === 'fa' ? 'فایل دریافت شد: ' : 'File received: ') + fm.name, 'ok');
+}
+function renderFileMsg(m) {
+  const el = document.createElement('div');
+  el.className = 'cmsg file' + (m.mine ? ' me' : ''); el.dataset.fid = m.fid; el.dataset.mid = m.fid;
+  const head = document.createElement('div'); head.className = 'cmHead';
+  head.innerHTML = `<span class="cmName">${esc(m.sname || m.name || '')}</span><span>${new Date(m.ts).toLocaleTimeString(LANG === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>`;
+  const body = document.createElement('div');
+  body.innerHTML = `📎 <b dir="ltr">${esc(m.name)}</b> <span style="font-size:11px;color:var(--txt2)">${(m.size / 1024).toFixed(0)}KB</span>`;
+  const bar = document.createElement('div'); bar.className = 'fbar'; bar.innerHTML = '<i></i>';
+  const a = document.createElement('a'); a.textContent = '⬇️ ' + (LANG === 'fa' ? 'دانلود' : 'Download'); a.href = '#'; a.className = 'hide';
+  el.append(head, body, bar, a);
+  $('#chatLog').appendChild(el); scrollChat();
+}
+function updateFileBar(fid, p) {
+  const bar = $(`.cmsg[data-fid="${fid}"] .fbar i`); if (bar) bar.style.width = Math.round(clamp(p, 0, 1) * 100) + '%';
+}
+/* ═══════════════════════════ هم‌مرورگری مشترک ═══════════════════════════ */
+const covCursorMap = new Map(), boardCursorMap = new Map();
+function normUrl(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  try { return new URL(u).href; } catch { return ''; }
+}
+function wireCoview() {
+  const go = () => {
+    const u = normUrl($('#covUrl').value);
+    if (!u) return;
+    if (S.isHost) hostNav(u, 'HOST');
+    else if (S.mode === 'manual') { /* manual: مهمان هم مستقیم */ S.cov.stack.push(u); S.cov.idx = S.cov.stack.length - 1; applyCovState(); broadcast({ t: 'nav', url: u }); }
+    else sendTo('HOST', { t: 'nav', url: u });
+    $('#covUrl').value = u;
+  };
+  $('#covGo').onclick = go;
+  $('#covUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  const ctrl = (act, z) => {
+    if (S.isHost) hostNavCtrl(act, z, 'HOST');
+    else if (S.mode === 'manual') { manualNavCtrl(act, z); broadcast({ t: 'navctrl', act, z }); }
+    else sendTo('HOST', { t: 'navctrl', act, z });
+  };
+  $('#covBack').onclick = () => ctrl('back');
+  $('#covFwd').onclick = () => ctrl('fwd');
+  $('#covReload').onclick = () => ctrl('reload');
+  $('#covZoomIn').onclick = () => ctrl('zoom', clamp(S.cov.zoom + .1, .5, 2));
+  $('#covZoomOut').onclick = () => ctrl('zoom', clamp(S.cov.zoom - .1, .5, 2));
+  $('#covExt').onclick = () => { const u = S.cov.stack[S.cov.idx]; if (u) window.open(u, '_blank'); };
+  // نشانگر خودی (در نواحی غیر از آی‌فریم کراس-اورجین قابل ردیابی است)
+  const wrap = $('#covFrameWrap');
+  wrap.addEventListener('pointermove', (e) => {
+    const r = wrap.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (floodOk(S.myId, 'my-cu', 20, 1000)) { broadcast({ t: 'cursor', x: +x.toFixed(3), y: +y.toFixed(3) }); }
+  }, { passive: true });
+}
+function manualNavCtrl(act, z) { const c = S.cov; if (act === 'back') c.idx = Math.max(0, c.idx - 1); if (act === 'fwd') c.idx = Math.min(c.stack.length - 1, c.idx + 1); if (act === 'zoom') c.zoom = clamp(z, .5, 2); }
+function hostNav(url, _from) {
+  if (!/^https?:\/\//i.test(url)) return;
+  S.cov.stack = S.cov.stack.slice(0, S.cov.idx + 1);
+  S.cov.stack.push(url); if (S.cov.stack.length > 30) S.cov.stack.shift();
+  S.cov.idx = S.cov.stack.length - 1;
+  broadcast({ t: 'nav', url, by: 'HOST' });
+  applyCovState();
+}
+function hostNavCtrl(act, z, _from) {
+  const c = S.cov;
+  if (act === 'back') c.idx = Math.max(0, c.idx - 1);
+  if (act === 'fwd') c.idx = Math.min(c.stack.length - 1, c.idx + 1);
+  if (act === 'zoom') c.zoom = clamp(z, .5, 2);
+  broadcast({ t: 'navctrl', act, z: c.zoom, by: 'HOST' });
+  if (act !== 'reload') applyCovState(); else { applyCovState(); }
+  $('#covZoomLbl').textContent = Math.round(c.zoom * 100) + '%';
+}
+function applyCovState(keepFrame) {
+  const c = S.cov, fr = $('#covFrame'), empty = $('#covEmpty');
+  $('#covZoomLbl').textContent = Math.round(c.zoom * 100) + '%';
+  fr.style.transform = `scale(${c.zoom})`;
+  fr.style.width = (100 / c.zoom) + '%'; fr.style.height = (100 / c.zoom) + '%';
+  const url = c.stack[c.idx];
+  if (!url) return;
+  empty.classList.add('hide'); fr.classList.remove('hide');
+  if (!keepFrame || !fr.src || !fr.src.endsWith(url)) fr.src = url;
+  $('#covUrl').value = url;
+}
+function sizeCovOverlay() {
+  const w = $('#covFrameWrap'), ov = $('#covOverlay');
+  if (!w || !ov) return;
+  ov.width = w.clientWidth; ov.height = w.clientHeight;
+}
+function covCursor(by, x, y) { covCursorMap.set(by, { x, y, ts: Date.now() }); drawCovCursors(); }
+function drawCovCursors() {
+  const ov = $('#covOverlay'); if (!ov || curPane !== 'coview') return;
+  const ctx = ov.getContext('2d'); ctx.clearRect(0, 0, ov.width, ov.height);
+  const now = Date.now();
+  for (const [by, c] of covCursorMap) {
+    if (now - c.ts > 4000 || by === S.myId) { if (by === S.myId) {} else { covCursorMap.delete(by); continue; } }
+    const r = S.roster.get(by) || { color: '#a78bfa', name: '?' };
+    const px = c.x * ov.width, py = c.y * ov.height;
+    ctx.beginPath(); ctx.arc(px, py, 7, 0, 7); ctx.fillStyle = r.color; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = '11px Vazirmatn, sans-serif'; ctx.fillStyle = r.color;
+    ctx.fillText(r.name || '?', px + 10, py + 4);
+  }
+}
+setInterval(drawCovCursors, 900);
+
+/* ═══════════════════════════ واتچ پارتی (YouTube IFrame API) ═══════════════════════════ */
+let ytPlayer = null, ytApiLoading = false, ytSeekDrag = false, S_ytLock = false;
+function ensureYTApi() {
+  if (window.YT && window.YT.Player) return Promise.resolve();
+  if (ytApiLoading) return;
+  ytApiLoading = true;
+  const s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+}
+const ytParse = (u) => {
+  u = String(u || '').trim();
+  const m = u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,15})/i) || u.match(/^([\w-]{11})$/);
+  return m ? m[1] : '';
+};
+const canYtCtl = () => !S_ytLock || S.isHost || S.controller === S.myId;
+function wireWatch() {
+  $('#ytGo').onclick = () => {
+    const v = ytParse($('#ytUrl').value);
+    if (!v) return toast(T('eYtBad'), 'bad');
+    $('#ytUrl').value = 'https://youtu.be/' + v;
+    if (S.isHost) hostYt({ act: 'load', v }, 'HOST');
+    else if (S.mode === 'manual') { applyYtMsg({ act: 'load', v, pos: 0 }); broadcast({ t: 'yt', act: 'load', v, pos: 0 }); }
+    else sendTo('HOST', { t: 'yt', act: 'load', v });
+  };
+  const cmd = (act, extra = {}) => {
+    if (!canYtCtl()) return toast(T('eLockOn'));
+    if (S.isHost) hostYt({ act, ...extra }, 'HOST');
+    else if (S.mode === 'manual') { const m = { act, ...extra, pos: extra.pos ?? (ytPlayer?.getCurrentTime?.() || 0) }; applyYtMsg(m); broadcast({ t: 'yt', ...m }); }
+    else sendTo('HOST', { t: 'yt', act, ...extra });
+  };
+  $('#ytPlay').onclick = () => cmd('play');
+  $('#ytPause').onclick = () => cmd('pause');
+  $('#ytBack10').onclick = () => cmd('seek', { pos: Math.max(0, (ytPlayer?.getCurrentTime?.() || 0) - 10) });
+  $('#ytFwd10').onclick = () => cmd('seek', { pos: (ytPlayer?.getCurrentTime?.() || 0) + 10 });
+  $('#ytRate').onchange = () => cmd('rate', { rate: Number($('#ytRate').value) });
+  $('#ytSeek').addEventListener('input', () => { ytSeekDrag = true; });
+  $('#ytSeek').addEventListener('change', () => {
+    ytSeekDrag = false;
+    const d = ytPlayer?.getDuration?.() || 0; if (!d) return;
+    cmd('seek', { pos: ($('#ytSeek').value / 100) * d });
+  });
+  $('#ytLockToggle').onclick = () => {
+    if (S.isHost) hostYtLock();
+    else if (S.mode === 'manual') { hostYtLock(); broadcast({ t: 'ytlock' }); }
+    else sendTo('HOST', { t: 'ytlock' });
+  };
+  setInterval(ytTick, 1000);
+}
+function hostYtLock() {
+  S_ytLock = !S_ytLock;
+  broadcast({ t: 'ytlock', on: S_ytLock });
+  updateYtLockUI();
+  toast(S_ytLock ? T('eLockOn') : T('eLockOff'));
+}
+function updateYtLockUI() {
+  $('#ytLockToggle').innerHTML = (S_ytLock ? '🔒 ' : '🔓 ') + (S_ytLock ? T('ctrlHost') : T('ctrlAll'));
+}
+function hostYt(m, from) {
+  if (m.act === 'ytlock') return;
+  if (S_ytLock && from !== 'HOST' && from !== S.controller) return sendTo(from, { t: 'toast', k: 'eLockOn' });
+  const cur = ytPlayer?.getCurrentTime?.() || 0;
+  let out;
+  if (m.act === 'load') { S.yt = { v: m.v, state: 1, t: 0, rate: 1 }; out = { t: 'yt', act: 'load', v: m.v, pos: 0, by: from }; }
+  if (m.act === 'play') { S.yt.state = 1; out = { t: 'yt', act: 'play', v: S.yt.v, pos: cur, rate: S.yt.rate, by: from }; }
+  if (m.act === 'pause') { S.yt.state = 0; out = { t: 'yt', act: 'pause', v: S.yt.v, pos: cur, by: from }; }
+  if (m.act === 'seek') { out = { t: 'yt', act: 'seek', v: S.yt.v, pos: +m.pos || 0, by: from }; }
+  if (m.act === 'rate') { S.yt.rate = +m.rate || 1; out = { t: 'yt', act: 'rate', v: S.yt.v, rate: S.yt.rate, by: from }; }
+  broadcast(out, from);
+  applyYtMsg(out);
+}
+setInterval(() => {   // سینک دوره‌ای از میزبان
+  if (S.isHost && ytPlayer && S.yt.v && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
+    broadcast({ t: 'yt', act: 'sync', v: S.yt.v, pos: ytPlayer.getCurrentTime(), state: 1, rate: S.yt.rate });
+  }
+}, 8000);
+function applyYtMsg(m) {
+  if (m.act === 'ytlock') return;
+  if (m.act === 'load') { S.yt = { v: m.v, state: 1, t: m.pos || 0, rate: m.rate || 1 }; createYtPlayer(m.v); updateYtStatus(); return; }
+  if (m.act === 'rate') { S.yt.rate = m.rate || 1; try { ytPlayer?.setPlaybackRate(m.rate); } catch {} updateYtStatus(); return; }
+  if (m.act === 'play') { S.yt.state = 1; syncTo(m.pos); try { ytPlayer?.seekTo(m.pos, true); ytPlayer?.playVideo(); } catch {} updateYtStatus(); return; }
+  if (m.act === 'pause') { S.yt.state = 0; try { ytPlayer?.seekTo(m.pos, true); ytPlayer?.pauseVideo(); } catch {} updateYtStatus(); return; }
+  if (m.act === 'seek') { syncTo(m.pos); try { ytPlayer?.seekTo(m.pos, true); } catch {} return; }
+  if (m.act === 'sync') {
+    if (!ytPlayer || !S.yt.v) return;
+    const st = ytPlayer.getPlayerState();
+    if ((m.state === 1 && st !== 1) || (m.state === 0 && st !== 2)) { try { m.state === 1 ? ytPlayer.playVideo() : ytPlayer.pauseVideo(); } catch {} }
+    syncTo(m.pos);
+    return;
+  }
+}
+function syncTo(t) { if (!ytSeekDrag && ytPlayer && Math.abs((ytPlayer.getCurrentTime?.() || 0) - t) > 2.5) { try { ytPlayer.seekTo(t, true); } catch {} } }
+function createYtPlayer(v) {
+  const ph = $('#ytPh');
+  const doCreate = () => {
+    const box = $('#ytWrap');
+    const div = document.createElement('div'); div.id = 'ytDiv';
+    $('#ytWrap').innerHTML = ''; box.appendChild(div);
+    ytPlayer = new YT.Player('ytDiv', {
+      videoId: v,
+      playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+      events: {
+        onReady: () => { if (S.yt.t) try { ytPlayer.seekTo(S.yt.t, true); } catch {} if (S.yt.state === 1) { try { ytPlayer.playVideo(); } catch {} } updateYtStatus(); },
+        onStateChange: (e) => { if (e.data === 0) updateYtStatus(true); },
+      },
+    });
+  };
+  if (window.YT && window.YT.Player) doCreate();
+  else {
+    ensureYTApi();
+    const iv = setInterval(() => { if (window.YT && window.YT.Player) { clearInterval(iv); doCreate(); } }, 300);
+    setTimeout(() => clearInterval(iv), 25000);   // شبکه‌های کند: تا ۲۵ ثانیه منتظر API می‌مانیم
+  }
+  if (ph) ph.classList.add('hide');
+}
+function applyYtState(silent) {
+  if (S.yt.v) createYtPlayer(S.yt.v);
+  updateYtLockUI();
+}
+function fmtT(s) { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function updateYtStatus(ended) {
+  const st = ytPlayer?.getPlayerState?.();
+  $('#ytStatus').textContent = !S.yt.v ? T('ytIdle') : ended ? (LANG === 'fa' ? 'پایان ویدیو' : 'Ended') : st === 1 ? '▶ ' + fmtT(ytPlayer.getCurrentTime()) : st === 2 ? '⏸ ' + fmtT(ytPlayer.getCurrentTime()) : '…';
+}
+function ytTick() {
+  if (!ytPlayer || !S.yt.v || !ytPlayer.getPlayerState) return;
+  if (!ytSeekDrag) {
+    const d = ytPlayer.getDuration?.() || 0, c = ytPlayer.getCurrentTime?.() || 0;
+    if (d) $('#ytSeek').value = Math.round((c / d) * 100);
+    $('#ytCur').textContent = fmtT(c); $('#ytDur').textContent = fmtT(d);
+  }
+  updateYtStatus();
+}
+
+/* ═══════════════════════════ تخته نقاشی مشترک ═══════════════════════════ */
+let bColor = '#f472b6', bSize = 4, bErase = false, drawing = null;
+function sizeBoard() {
+  const w = $('#boardWrap'), b = $('#board'), c = $('#boardCursors');
+  if (!w || !b) return;
+  b.width = w.clientWidth; b.height = w.clientHeight;
+  c.width = b.width; c.height = b.height;
+  redrawAll();
+}
+function wireBoard() {
+  $$('.swatch').forEach((s) => s.onclick = () => { $$('.swatch').forEach((x) => x.classList.remove('sel')); s.classList.add('sel'); bColor = s.dataset.c; bErase = false; $('#toolPen').classList.add('on'); $('#toolEraser').classList.remove('on'); });
+  $('#toolPen').onclick = () => { bErase = false; $('#toolPen').classList.add('on'); $('#toolEraser').classList.remove('on'); };
+  $('#toolEraser').onclick = () => { bErase = true; $('#toolEraser').classList.add('on'); $('#toolPen').classList.remove('on'); };
+  $('#sizeRange').oninput = () => { bSize = +$('#sizeRange').value; $('#sizeLbl').textContent = bSize; };
+  $('#undoBtn').onclick = () => {
+    const mine = S.strokes.filter((s) => s.by === S.myId || s.mine);
+    const last = mine[mine.length - 1]; if (!last) return;
+    if (S.isHost) { S.strokes = S.strokes.filter((x) => x !== last); broadcast({ t: 'undost', id: last.id }); redrawAll(); }
+    else { S.strokes = S.strokes.filter((x) => x !== last); redrawAll(); sendTo('HOST', { t: 'undost', id: last.id }); }
+  };
+  $('#clearBtn').onclick = () => confirmBox(T('clear'), LANG === 'fa' ? 'تخته برای همه پاک می‌شود.' : 'Clears for everyone.', () => {
+    if (S.isHost) { S.strokes = []; broadcast({ t: 'clearw' }); redrawAll(); }
+    else sendTo('HOST', { t: 'clearw' });
+  });
+  $('#saveBtn').onclick = () => {
+    const a = document.createElement('a');
+    a.download = 'together-board.png';
+    a.href = $('#board').toDataURL('image/png');
+    a.click();
+  };
+  const b = $('#board');
+  b.addEventListener('pointerdown', (e) => {
+    b.setPointerCapture(e.pointerId);
+    const r = b.getBoundingClientRect();
+    drawing = { pts: [[(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]] };
+  });
+  b.addEventListener('pointermove', (e) => {
+    if (!drawing) return cursorMove(e);
+    const r = b.getBoundingClientRect();
+    drawing.pts.push([(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]);
+    if (drawing.pts.length > 900) { finishStroke(); drawing = { pts: [] }; }
+    liveDraw();
+  });
+  const end = () => { if (drawing) finishStroke(); };
+  b.addEventListener('pointerup', end); b.addEventListener('pointercancel', end); b.addEventListener('pointerleave', () => { if (drawing) end(); });
+}
+function cursorMove(e) {
+  const r = $('#board').getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  if (floodOk(S.myId, 'my-cu', 20, 1000)) broadcast({ t: 'cursor', x: +x.toFixed(3), y: +y.toFixed(3) });
+}
+function finishStroke() {
+  let pts = drawing.pts;
+  drawing = null;
+  if (pts.length < 2) pts = pts.concat(pts);
+  if (pts.length > 900) pts = pts.filter((_, i) => i % 2 === 0);
+  const st = { id: uid(), pts: pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), color: bColor, size: bErase ? Math.max(bSize, 16) : bSize, mode: bErase ? 'e' : 'p' };
+  if (S.isHost) { pushStroke({ ...st, by: S.myId }); broadcast({ t: 'stroke', ...st, by: S.myId }); drawStroke({ ...st, by: S.myId }); }
+  else { pushStroke({ ...st, by: S.myId }); drawStroke({ ...st, by: S.myId }); sendTo('HOST', { t: 'stroke', ...st }); }
+}
+function pushStroke(st) { S.strokes.push(st); if (S.strokes.length > 2000) S.strokes.shift(); }
+function drawStroke(st) {
+  const b = $('#board'); const ctx = b.getContext('2d');
+  strokePath(ctx, st);
+}
+function strokePath(ctx, st) {
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  ctx.strokeStyle = st.mode === 'e' ? '#0e0a1c' : st.color;
+  ctx.lineWidth = st.size * (w / 900) * 1.6 + st.size * .4;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  st.pts.forEach((p, i) => { const x = p[0] * w, y = p[1] * h; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+  ctx.stroke();
+}
+let liveCtx = null;
+function liveDraw() {
+  if (!drawing) return;
+  const b = $('#board'); const ctx = b.getContext('2d');
+  const n = drawing.pts.length;
+  if (n < 2) return;
+  strokePath(ctx, { pts: [drawing.pts[n - 2], drawing.pts[n - 1]], color: bColor, size: bSize, mode: bErase ? 'e' : 'p' });
+}
+function redrawAll() {
+  const b = $('#board'); if (!b) return;
+  const ctx = b.getContext('2d');
+  ctx.fillStyle = '#0e0a1c'; ctx.fillRect(0, 0, b.width, b.height);
+  S.strokes.forEach((st) => strokePath(ctx, st));
+  drawBoardCursors();
+}
+function boardCursor(by, x, y) { boardCursorMap.set(by, { x, y, ts: Date.now() }); drawBoardCursors(); }
+function drawBoardCursors() {
+  const c = $('#boardCursors'); if (!c) return;
+  const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
+  const now = Date.now();
+  for (const [by, cur] of boardCursorMap) {
+    if (now - cur.ts > 4000) { boardCursorMap.delete(by); continue; }
+    const r = S.roster.get(by) || { color: '#a78bfa', name: '?' };
+    const px = cur.x * c.width, py = cur.y * c.height;
+    ctx.beginPath(); ctx.arc(px, py, 7, 0, 7); ctx.fillStyle = r.color; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = '11px Vazirmatn, sans-serif'; ctx.fillStyle = r.color;
+    ctx.fillText(r.name || '?', px + 10, py + 4);
+  }
+}
+setInterval(drawBoardCursors, 900);
+
+/* ═══════════════════════════ بازی تیک‌تک‌تو ═══════════════════════════ */
+const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+function wireGame() {
+  const bd = $('#ttBoard'); bd.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const b = document.createElement('button'); b.dataset.i = i;
+    b.onclick = () => {
+      if (S.tt.winner || S.tt.cells[i]) return;
+      const mySym = S.tt.px === S.myId ? 'x' : S.tt.po === S.myId ? 'o' : null;
+      if (mySym && S.tt.turn !== mySym) return;
+      if (S.isHost) hostTt(S.myId, { i });
+      else sendTo('HOST', { t: 'tt', i });
+    };
+    bd.appendChild(b);
+  }
+  $('#ttReset').onclick = () => {
+    if (S.isHost) { S.tt = { ...S.tt, cells: Array(9).fill(''), turn: 'x', winner: null, line: null, px: null, po: null }; broadcast({ t: 'tt', state: S.tt }); renderTt(); }
+    else sendTo('HOST', { t: 'tt', i: -1 });
+  };
+  renderTt();
+}
+function hostTt(fromId, m) {
+  if (m.i === -1) { S.tt = { ...S.tt, cells: Array(9).fill(''), turn: 'x', winner: null, line: null, px: null, po: null }; broadcast({ t: 'tt', state: S.tt }); renderTt(); return; }
+  const t = S.tt;
+  if (t.winner || t.cells[m.i]) return;
+  if (!t.px) t.px = fromId;
+  else if (!t.po && fromId !== t.px) t.po = fromId;
+  const sym = fromId === t.px ? 'x' : fromId === t.po ? 'o' : null;
+  if (!sym) { sendTo(fromId, { t: 'toast', k: LANG === 'fa' ? 'دو بازیکن قبلاً مشخص شده‌اند' : 'Two players already assigned' }); return; }
+  if (t.turn !== sym) return;
+  t.cells[m.i] = sym;
+  t.turn = sym === 'x' ? 'o' : 'x';
+  for (const L of LINES) if (t.cells[L[0]] && t.cells[L[0]] === t.cells[L[1]] && t.cells[L[1]] === t.cells[L[2]]) {
+    t.winner = t.cells[L[0]]; t.line = L; t.scores[t.winner]++;
+  }
+  if (!t.winner && t.cells.every(Boolean)) t.winner = 'draw';
+  broadcast({ t: 'tt', state: t });
+  renderTt();
+}
+function renderTt() {
+  const t = S.tt;
+  $$('#ttBoard button').forEach((b, i) => {
+    const v = t.cells[i] || '';
+    b.textContent = v === 'x' ? '✕' : v === 'o' ? '◯' : '';
+    b.className = v === 'x' ? 'x' : v === 'o' ? 'o' : '';
+    if (t.line && t.line.includes(i)) b.classList.add('win');
+  });
+  const nm = (sym) => sym === 'x' ? (S.roster.get(t.px)?.name || '✕') : (S.roster.get(t.po)?.name || '◯');
+  $('#ttTurn').textContent = t.winner === 'draw' ? (LANG === 'fa' ? 'مساوی! 🤝' : 'Draw! 🤝')
+    : t.winner ? (LANG === 'fa' ? 'برنده: ' : 'Winner: ') + nm(t.winner) + ' 🎉'
+    : (LANG === 'fa' ? 'نوبت: ' : 'Turn: ') + (t.px ? nm(t.turn) : (LANG === 'fa' ? 'اولین حرکت = ✕' : 'First move = ✕'));
+  $('#ttScore').textContent = `✕ ${t.scores?.x || 0} — ${t.scores?.o || 0} ◯` + (t.px && t.po ? `   (${nm('x')} / ${nm('o')})` : '');
+}
+/* ═══════════════════════════ فیلم مشترک (استریم فایل محلی + کنترل دوطرفه) ═══════════════════════════ */
+let mvLock = false, mvStream = null, mvObjUrl = null, mvSeekDrag = false;
+S.mv = { active: false, hostId: null, name: '', size: 0, dur: 0, pos: 0, playing: false, rate: 1 };
+const mvMedia = new Map();   // pid -> {mc, pc}
+const mvVideo = $('#mvVideo');
+const mvIsMine = () => S.mv.active && S.mv.hostId === S.myId;
+const canMvCtl = () => !mvLock || mvIsMine() || S.controller === S.myId;
+function wireMovie() {
+  $('#mvPick').onclick = () => $('#mvFileIn').click();
+  $('#mvFileIn').addEventListener('change', startMovie);
+  $('#mvEject').onclick = () => endMovie(true);
+  $('#mvLockToggle').onclick = () => {
+    if (S.isHost) hostMvLock();
+    else sendTo('HOST', { t: 'mvlock', on: !mvLock });
+  };
+  const cmd = (act, extra = {}) => {
+    if (!S.mv.active) return;
+    if (!canMvCtl()) return toast(T('eLockOn'));
+    if (mvIsMine()) hostApplyMv({ act, ...extra });
+    else sendTo('HOST', { t: 'mv.cmd', act, ...extra });
+  };
+  $('#mvPlay').onclick = () => cmd('play');
+  $('#mvPause').onclick = () => cmd('pause');
+  $('#mvBack10').onclick = () => cmd('seek', { pos: Math.max(0, (mvCurTime() || 0) - 10) });
+  $('#mvFwd10').onclick = () => cmd('seek', { pos: (mvCurTime() || 0) + 10 });
+  $('#mvRate').onchange = () => cmd('rate', { rate: Number($('#mvRate').value) });
+  $('#mvSeek').addEventListener('input', () => { mvSeekDrag = true; });
+  $('#mvSeek').addEventListener('change', () => {
+    mvSeekDrag = false;
+    const d = S.mv.dur || 0; if (!d) return;
+    cmd('seek', { pos: ($('#mvSeek').value / 100) * d });
+  });
+  $('#mvMute').onclick = () => {
+    mvVideo.muted = !mvVideo.muted;
+    $('#mvMute').textContent = mvVideo.muted ? '🔇' : '🔊';
+  };
+  $('#mvFull').onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else mvVideo.requestFullscreen?.();
+  };
+  mvVideo.addEventListener('click', () => { if (S.mv.active && canMvCtl()) cmd(mvPausedNow() ? 'play' : 'pause'); });
+  setInterval(mvTick, 1000);
+  setInterval(() => {   // سینک دوره‌ای از صاحب فیلم
+    if (mvIsMine() && !mvVideo.paused) broadcast({ t: 'mv.state', act: 'sync', pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1, by: S.myId });
+  }, 5000);
+}
+const mvCurTime = () => (mvIsMine() ? (mvVideo.currentTime || 0) : (S.mv.pos || 0));
+const mvPausedNow = () => (mvIsMine() ? mvVideo.paused : S.mv.playing === false);
+function hostMvLock() {
+  mvLock = !mvLock;
+  broadcast({ t: 'mvlock', on: mvLock });
+  updateMvLockUI();
+  toast(mvLock ? T('eLockOn') : T('eLockOff'));
+}
+function updateMvLockUI() {
+  const b = $('#mvLockToggle');
+  if (!b) return;
+  b.innerHTML = (mvLock ? '🔒 ' : '🔓 ') + (mvLock ? T('ctrlHost') : T('ctrlAll'));
+}
+function startMovie(e) {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const cap = HTMLVideoElement.prototype.captureStream || HTMLVideoElement.prototype.mozCaptureStream;
+  if (!cap) return toast(T('mvNotSup'), 'bad');
+  if (S.mode === 'manual') return toast(T('mvManualOff'), 'bad');
+  if (!S.connected) return toast(T('eP2pDown'), 'bad');
+  mvObjUrl = URL.createObjectURL(f);
+  mvVideo.srcObject = null;
+  mvVideo.src = mvObjUrl;
+  mvVideo.onloadedmetadata = () => {
+    S.mv = { active: true, hostId: S.myId, name: f.name.slice(0, 80), size: f.size, dur: mvVideo.duration || 0 };
+    try { mvStream = cap.call(mvVideo); } catch { S.mv = { active: false, hostId: null, name: '', size: 0, dur: 0 }; return toast(T('mvNotSup'), 'bad'); }
+    mvVideo.classList.add('on');
+    $('#mvPh').classList.add('hide');
+    mvVideo.play().catch(() => {});
+    const msg = { t: 'mv.open', name: S.mv.name, size: S.mv.size, dur: S.mv.dur, host: S.mv.hostId };
+    if (S.isHost) broadcast(msg);
+    else sendTo('HOST', msg);
+    startMovieCalls();
+    applyMvOpen(msg);
+  };
+}
+function startMovieCalls() {
+  if (S.mode === 'manual' || !mvStream) return;
+  const mine = myPid();
+  for (const r of S.roster.values()) {
+    if (!r.pid || r.pid === mine || mvMedia.has(r.pid)) continue;
+    placeMovieCall(r.pid);
+  }
+}
+function placeMovieCall(pid) {
+  if (!peer || !mvStream || pid === myPid()) return;
+  try { const call = peer.call(pid, mvStream, { metadata: { kind: 'movie' } }); wireMovieMedia(pid, call); } catch (e) { console.warn('mv call fail', e.message); }
+}
+function wireMovieMedia(pid, call) {
+  if (mvMedia.has(pid)) { try { mvMedia.get(pid).mc.close(); } catch {} }
+  mvMedia.set(pid, { mc: call, pc: call.peerConnection });
+  call.on('stream', (rs) => attachMovieStream(rs));
+  call.on('close', () => { mvMedia.delete(pid); if (!mvIsMine() && mvMedia.size === 0 && S.mv.active) mvWaitingUI(); });
+  call.on('error', () => {});
+}
+function attachMovieStream(rs) {
+  mvVideo.srcObject = rs;
+  mvVideo.classList.add('on');
+  $('#mvPh').classList.add('hide');
+  mvVideo.play().catch(() => {   // سیاست autoplay موبایل: بی‌صدا شروع و راهنمایی
+    mvVideo.muted = true; $('#mvMute').textContent = '🔇';
+    mvVideo.play().catch(() => {});
+    toast(T('mvUnmuteHint'));
+  });
+  toast(T('mvReady'), 'ok');
+}
+function mvWaitingUI() {
+  $('#mvPh').classList.remove('hide');
+  $('#mvPh').querySelector('span').textContent = T('mvReceiving');
+}
+function applyMvOpen(m) {
+  if (!mvIsMine()) {
+    $('#mvPh').querySelector('span').textContent = T('mvReceiving');
+    $('#mvPh').classList.remove('hide');
+  }
+  updateMvUI();
+  updateMvLockUI();
+  addSys((LANG === 'fa' ? '🎬 پخش فیلم مشترک: ' : '🎬 Movie sharing: ') + (m.name || ''));
+}
+function hostApplyMv(m) {
+  if (!mvIsMine()) return;
+  if (m.act === 'play') mvVideo.play().catch(() => {});
+  if (m.act === 'pause') mvVideo.pause();
+  if (m.act === 'seek') { try { mvVideo.currentTime = +m.pos || 0; } catch {} }
+  if (m.act === 'rate') { try { mvVideo.playbackRate = +m.rate || 1; } catch {} }
+  broadcast({ t: 'mv.state', act: m.act, pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1, by: S.myId });
+  mvTick();
+}
+function applyMvState(m) {
+  if (mvIsMine()) return;   // خودم مرجع هستم
+  S.mv.pos = +m.pos || 0;
+  S.mv.playing = m.act !== 'pause';
+  S.mv.rate = +m.rate || 1;
+  if (!mvSeekDrag) { const d = S.mv.dur || 1; $('#mvSeek').value = clamp(Math.round((S.mv.pos / d) * 100), 0, 100); }
+  $('#mvCur').textContent = fmtT(S.mv.pos);
+  $('#mvRate').value = String(S.mv.rate);
+  updateMvStatusTxt();
+}
+function mvTick() {
+  if (!S.mv.active) return;
+  if (mvIsMine()) {
+    const d = mvVideo.duration || S.mv.dur || 1;
+    if (!mvSeekDrag) $('#mvSeek').value = clamp(Math.round(((mvVideo.currentTime || 0) / d) * 100), 0, 100);
+    $('#mvCur').textContent = fmtT(mvVideo.currentTime || 0);
+    $('#mvDur').textContent = fmtT(mvVideo.duration || S.mv.dur || 0);
+  }
+  updateMvStatusTxt();
+}
+function updateMvStatusTxt() {
+  if (!S.mv.active) return;
+  const st = mvIsMine() ? (mvVideo.paused ? '⏸' : '▶') : (S.mv.playing ? '▶' : '⏸');
+  $('#mvInfo').innerHTML = `🎬 <b dir="ltr">${esc(S.mv.name)}</b> · ${((S.mv.size || 0) / 1048576).toFixed(1)}MB · ${T('mvFrom')} ${esc(S.roster.get(S.mv.hostId)?.name || '?')} · ${st} ${fmtT(mvCurTime())}`;
+}
+function updateMvUI() {
+  const on = S.mv.active;
+  $('#mvEject').classList.toggle('hide', !(on && mvIsMine()));
+  $('#mvLockToggle').classList.toggle('hide', !on);
+  $('#mvInfo').classList.toggle('hide', !on);
+  if (on) { updateMvStatusTxt(); $('#mvDur').textContent = fmtT(S.mv.dur || 0); }
+  else {
+    mvVideo.pause?.(); mvVideo.classList.remove('on');
+    $('#mvPh').classList.remove('hide');
+    $('#mvPh').querySelector('span').textContent = T('mvEmpty');
+    $('#mvSeek').value = 0; $('#mvCur').textContent = '0:00'; $('#mvDur').textContent = '0:00';
+  }
+}
+function endMovie(local) {
+  for (const [, m] of mvMedia) { try { m.mc && m.mc.close(); } catch {} }
+  mvMedia.clear();
+  if (mvObjUrl) { URL.revokeObjectURL(mvObjUrl); mvObjUrl = null; }
+  mvStream = null;
+  try { mvVideo.pause(); mvVideo.removeAttribute('src'); mvVideo.srcObject = null; mvVideo.load(); } catch {}
+  mvVideo.classList.remove('on');
+  S.mv = { active: false, hostId: null, name: '', size: 0, dur: 0 };
+  updateMvUI();
+  if (local) { broadcast({ t: 'mv.close' }); toast(T('mvClosed')); }
+}
+function applyMvClose() {
+  const had = S.mv.active;
+  endMovie(false);
+  if (had) toast(T('mvClosed'));
+}
+
+/* ═══════════════════════════ موتور رسانه (تماس mesh) ═══════════════════════════ */
+let selfVid = null, camAudioParams = { noiseSuppression: true, echoCancellation: true };
+const myPid = () => peer && peer.id;
+function camConstraints() {
+  const q = localStorage.getItem('tg_camq') || 'auto';
+  const h = { auto: 720, '1080': 1080, '720': 720, '480': 480, '360': 360 }[q] || 720;
+  return {
+    video: { width: { ideal: Math.round(h * 16 / 9) }, height: { ideal: h }, frameRate: { ideal: 30, max: 30 } },
+    audio: { noiseSuppression: localStorage.getItem('tg_noise') !== '0', echoCancellation: localStorage.getItem('tg_echo') !== '0' },
+  };
+}
+async function startCall() {
+  if (S.inCall && S.localStream) return true;
+  try {
+    S.localStream = await navigator.mediaDevices.getUserMedia(camConstraints());
+  } catch { toast(T('eCamFail'), 'bad'); return false; }
+  S.inCall = true;
+  $('#micBtn').classList.add('on'); $('#camBtn').classList.add('on');
+  $('#callStrip').classList.add('open');
+  addSelfView();
+  joinMediaMesh();
+  return true;
+}
+function addSelfView() {
+  if (selfVid) return;
+  const box = document.createElement('div'); box.className = 'vidBox'; box.dataset.pid = 'SELF';
+  const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.autoplay = true;
+  v.srcObject = S.localStream;
+  v.style.transform = 'scaleX(-1)';
+  const nm = document.createElement('div'); nm.className = 'vname'; nm.textContent = S.me.name + ' (' + T('you') + ')';
+  box.append(v, nm);
+  $('#callStrip').prepend(box);
+  selfVid = box; v.play().catch(() => {});
+}
+function removeSelfVid() { if (selfVid) { selfVid.remove(); selfVid = null; } }
+function joinMediaMesh() {
+  if (S.mode === 'manual' || !S.inCall || !S.localStream) return;
+  const mine = myPid();
+  for (const r of S.roster.values()) {
+    const pid = r.pid;
+    if (!pid || pid === mine || S.media[pid]) continue;
+    placeCall(pid);
+  }
+}
+function placeCall(pid) {
+  if (!peer || !S.localStream) return;
+  try { const call = peer.call(pid, S.localStream); wireMedia(pid, call); } catch (e) { console.warn('call fail', e.message); }
+}
+function hostSendRosterToMedia() { /* رُستر با pid برای همه فرستاده شده؛ تازه‌واردها joinMediaMesh را صدا می‌زنند */ }
+function wireMedia(id, call) {
+  if (S.media[id]) { try { S.media[id].mc && S.media[id].mc.close(); } catch {} }
+  S.media[id] = { mc: call, pc: call.peerConnection };
+  call.on('stream', (rs) => attachRemoteStream(id, rs));
+  call.on('close', () => { removeVid(id); delete S.media[id]; });
+  call.on('error', () => {});
+}
+function attachRemoteStream(id, stream) {
+  if (id === 'SELF') return;
+  removeVid(id);
+  const r = [...S.roster.values()].find((x) => x.id === id || x.pid === id) || { name: '?', color: '#666', emoji: '👤' };
+  const box = document.createElement('div'); box.className = 'vidBox'; box.dataset.pid = id;
+  const v = document.createElement('video'); v.playsInline = true; v.autoplay = true;
+  v.srcObject = stream;
+  const nm = document.createElement('div'); nm.className = 'vname'; nm.textContent = r.name;
+  const off = document.createElement('div'); off.className = 'voff'; off.textContent = r.emoji;
+  const upd = () => {
+    const vt = stream.getVideoTracks()[0];
+    off.style.display = (!vt || !vt.enabled || vt.muted) ? 'grid' : 'none';
+  };
+  stream.getVideoTracks().forEach((t) => { t.onmute = upd; t.onunmute = upd; t.onended = upd; });
+  upd();
+  box.append(off, v, nm);
+  $('#callStrip').appendChild(box);
+  $('#callStrip').classList.add('open');
+  box.onclick = () => box.classList.toggle('full');
+  v.play().catch(() => {});
+}
+function removeVid(id) { $(`.vidBox[data-pid="${id}"]`)?.remove(); }
+function closeMedia(id) {
+  const m = S.media[id];
+  if (m) { try { m.mc && m.mc.close && m.mc.close(); } catch {} try { m.pc && m.pc.close(); } catch {} delete S.media[id]; }
+  removeVid(id);
+}
+function stopMediaKeepStream() {
+  for (const id of Object.keys(S.media)) closeMedia(id);
+  removeSelfVid();
+}
+function stopMedia(full) {
+  stopMediaKeepStream();
+  if (full) {
+    try { S.localStream?.getTracks().forEach((t) => t.stop()); } catch {}
+    try { S.screenStream?.getTracks().forEach((t) => t.stop()); } catch {}
+    S.localStream = null; S.screenStream = null; S.inCall = false;
+  }
+}
+
+/* --- میکروفون/دوربین/اشتراک صفحه --- */
+function wireTopbarMedia() {
+  $('#micBtn').onclick = async () => {
+    if (!S.inCall) { if (!await startCall()) return; return; }
+    const t = S.localStream?.getAudioTracks()[0];
+    if (!t) return;
+    t.enabled = !t.enabled;
+    $('#micBtn').textContent = t.enabled ? '🎙️' : '🔇';
+    $('#micBtn').classList.toggle('on', t.enabled);
+  };
+  $('#camBtn').onclick = async () => {
+    if (!S.inCall) { if (!await startCall()) return; return; }
+    const t = S.localStream?.getVideoTracks()[0];
+    if (!t) return;
+    t.enabled = !t.enabled;
+    $('#camBtn').textContent = t.enabled ? '📷' : '📵';
+    $('#camBtn').classList.toggle('on', t.enabled);
+  };
+  $('#scrBtn').onclick = toggleScreen;
+}
+function repTrack(kind, track) {
+  for (const m of Object.values(S.media)) {
+    try {
+      const s = m.pc.getSenders().find((x) => x.track?.kind === kind || (!x.track && x.kind === kind));
+      if (s) s.replaceTrack(track);
+    } catch (e) { console.warn('replaceTrack', e.message); }
+  }
+}
+async function toggleScreen() {
+  if (S.screenStream) {
+    try { S.screenStream.getTracks().forEach((t) => t.stop()); } catch {}
+    S.screenStream = null;
+    $('#scrBtn').classList.remove('on');
+    const camV = S.localStream?.getVideoTracks()[0];
+    const camA = S.localStream?.getAudioTracks()[0];
+    repTrack('video', camV || null);
+    if (camA) repTrack('audio', camA);
+    toast(LANG === 'fa' ? 'اشتراک صفحه متوقف شد' : 'Screen sharing stopped');
+    return;
+  }
+  if (!navigator.mediaDevices?.getDisplayMedia) return toast(T('eScrFail'), 'bad');
+  if (!S.inCall) { if (!await startCall()) return toast(T('eScrFail'), 'bad'); }
+  try {
+    S.screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 15, max: 24 } }, audio: true });
+  } catch { return toast(T('eScrFail'), 'bad'); }
+  const sv = S.screenStream.getVideoTracks()[0];
+  const sa = S.screenStream.getAudioTracks()[0];
+  repTrack('video', sv);
+  if (sa) repTrack('audio', sa);
+  $('#scrBtn').classList.add('on');
+  toast(LANG === 'fa' ? 'اشتراک صفحه فعال شد — همه می‌بینند' : 'Screen sharing on', 'ok');
+  sv.onended = () => { if (S.screenStream) toggleScreen(); };
+}
+
+/* ═══════════════════════════ شبکه: پینگ، آمار، Adaptive Bitrate ═══════════════════════════ */
+function setNetBadge(cls, txt) {
+  const b = $('#netBadge');
+  b.className = 'netb ' + cls;
+  $('#netBadgeTxt').textContent = txt;
+}
+function updateNetBadge() {
+  const p = S.ping;
+  if (p == null) { setNetBadge('t1', '…'); return; }
+  const t = S.tier;
+  setNetBadge('t' + t, p + 'ms · ' + T('net' + t));
+}
+function startPings() {
+  if (startPings._iv) clearInterval(startPings._iv);
+  startPings._iv = setInterval(() => {
+    if (!S.connected) return;
+    if (S.mode === 'manual') { if (manualDC && manualDC.readyState === 'open') manualDC.send(JSON.stringify({ t: 'net.ping', ts: Date.now() })); return; }
+    if (S.isHost) { for (const id of S.roster.keys()) if (id !== 'HOST') sendTo(id, { t: 'net.ping', ts: Date.now() }); }
+    else sendTo('HOST', { t: 'net.ping', ts: Date.now() });
+  }, 4000);
+}
+S.mediaStats = { rtt: null, loss: null, kbps: null, fps: null, ice: null, lastBytes: 0, lastTs: 0, lastFrames: 0 };
+function computeTier() {
+  const rtt = (S.mediaStats.rtt ?? S.ping ?? 400);
+  const loss = S.mediaStats.loss ?? 0;
+  if (rtt < 150 && loss < .03) return 0;
+  if (rtt < 350 && loss < .07) return 1;
+  if (rtt < 700) return 2;
+  return 3;
+}
+const TIER_CFG = { 0: { h: 720, fps: 30, br: 2200000 }, 1: { h: 720, fps: 24, br: 1200000 }, 2: { h: 480, fps: 15, br: 450000 }, 3: { h: 360, fps: 8, br: 0 } };
+let appliedTier = -1;
+async function applyAdaptive(tier) {
+  if (!S.localStream || !S.inCall) return;
+  const q = localStorage.getItem('tg_camq') || 'auto';
+  if (q !== 'auto' || tier === appliedTier) return;
+  appliedTier = tier;
+  const cfg = TIER_CFG[tier];
+  const vt = S.localStream.getVideoTracks()[0];
+  try {
+    if (tier >= 3) { if (vt) vt.enabled = false; toast(T('net3') + (LANG === 'fa' ? ' — ویدیو خاموش شد، صدا در اولویت' : ' — video off, audio priority'), 'bad'); }
+    else {
+      if (vt && !vt.enabled) vt.enabled = true;
+      if (vt) await vt.applyConstraints({ width: { ideal: Math.round(cfg.h * 16 / 9) }, height: { ideal: cfg.h }, frameRate: { ideal: cfg.fps } });
+    }
+  } catch {}
+  for (const m of Object.values(S.media)) {
+    try {
+      const s = m.pc.getSenders().find((x) => x.track?.kind === 'video');
+      if (s) { const p = s.getParameters(); p.encodings = p.encodings && p.encodings.length ? p.encodings : [{}]; p.encodings[0].maxBitrate = cfg.br || undefined; p.encodings[0].scaleResolutionDownBy = tier >= 2 ? 2 : 1; await s.setParameters(p); }
+    } catch {}
+  }
+}
+function statsLoop() {
+  setInterval(async () => {
+    const rows = Object.values(S.media);
+    if (!rows.length) return;
+    let rtt = null, loss = null, kbps = null, fps = null, iceTxt = null;
+    const now = performance.now();
+    for (const m of rows) {
+      if (!m.pc) continue;
+      try {
+        const rep = await m.pc.getStats();
+        rep.forEach((r) => {
+          if (r.type === 'candidate-pair' && r.state === 'succeeded' && r.currentRoundTripTime != null && rtt == null) rtt = Math.round(r.currentRoundTripTime * 1000);
+          if (r.type === 'outbound-rtp' && r.kind === 'video') {
+            if (S.mediaStats.lastTs && r.bytesSent) {
+              const dt = (now - S.mediaStats.lastTs) / 1000;
+              if (dt > 0 && dt < 10) kbps = Math.round(((r.bytesSent - S.mediaStats.lastBytes) * 8) / dt / 1000);
+              if (r.framesSent != null && S.mediaStats.lastFrames != null) fps = Math.max(0, Math.round((r.framesSent - S.mediaStats.lastFrames) / dt));
+            }
+            S.mediaStats.lastBytes = r.bytesSent || 0; S.mediaStats.lastTs = now; S.mediaStats.lastFrames = r.framesSent || 0;
+          }
+          if (r.type === 'remote-inbound-rtp' && r.kind === 'video' && r.packetsReceived != null) {
+            const tot = r.packetsReceived + (r.packetsLost || 0);
+            if (tot > 0) loss = (r.packetsLost || 0) / tot;
+          }
+          if (r.type === 'local-candidate' && r.candidateType && !iceTxt) iceTxt = (r.candidateType) + '/' + (r.protocol || r.transport || '?');
+        });
+      } catch {}
+    }
+    if (rtt != null) S.mediaStats.rtt = rtt;
+    if (loss != null) S.mediaStats.loss = loss;
+    if (kbps != null) S.mediaStats.kbps = kbps;
+    if (fps != null) S.mediaStats.fps = fps;
+    if (iceTxt) S.mediaStats.ice = iceTxt;
+    const tier = computeTier();
+    if (tier !== S.tier || S._tierInit !== true) { S.tier = tier; S._tierInit = true; appliedTier = -1; updateNetBadge(); }
+    applyAdaptive(tier);
+    if ($('#mNet').classList.contains('open')) fillNet();
+  }, 3000);
+}
+function fillNet() {
+  const st = S.mediaStats, p = S.ping;
+  const tier = S.tier;
+  const el = $('#netTierV'); el.textContent = T('net' + tier);
+  el.className = tier <= 1 ? 'good' : tier === 2 ? 'warn' : 'bad';
+  $('#netPingV').textContent = p == null ? '—' : p + ' ms';
+  $('#netRttV').textContent = st.rtt == null ? '—' : st.rtt + ' ms';
+  const l = st.loss == null ? null : Math.round(st.loss * 100);
+  $('#netLossV').textContent = l == null ? '—' : l + '%';
+  $('#netBrV').textContent = st.kbps == null ? '—' : st.kbps + ' kbps';
+  $('#netFpsV').textContent = st.fps == null ? '—' : st.fps;
+  $('#netIceV').textContent = st.ice || '—';
+}
+$('#btnNetStats').onclick = () => { fillNet(); openM('#mNet'); };
+
+/* ═══════════════════════════ تنظیمات ═══════════════════════════ */
+function wireSettings() {
+  $('#btnSettings').onclick = () => {
+    $('#setLang').value = LANG;
+    $('#setName').value = S.me.name;
+    $('#setCamQ').value = localStorage.getItem('tg_camq') || 'auto';
+    $$('#setNoise button').forEach((b) => b.classList.toggle('sel', (localStorage.getItem('tg_noise') !== '0' ? '1' : '0') === b.dataset.v));
+    $$('#setEcho button').forEach((b) => b.classList.toggle('sel', (localStorage.getItem('tg_echo') !== '0' ? '1' : '0') === b.dataset.v));
+    $('#setTurn').value = localStorage.getItem('tg_turn') || '';
+    $('#setTurnCred').value = localStorage.getItem('tg_turn_cred') || '';
+    emojiGrid('#setEmojiGrid', (v) => { pending.emoji = v; }, S.me.emoji);
+    colorGrid('#setColorGrid', (v) => { pending.color = v; }, S.me.color);
+    openM('#mSet');
+  };
+  $('#setLang').onchange = () => { LANG = $('#setLang').value; applyLang(); renderPresence(); renderPeople(); };
+  segWire('#setNoise', () => {}); segWire('#setEcho', () => {});
+  $('#setSave').onclick = () => {
+    const name = $('#setName').value.trim() || 'مهمان';
+    S.me = { name, emoji: pending.emoji, color: pending.color };
+    localStorage.setItem('tg_profile', JSON.stringify({ name, emoji: pending.emoji, color: pending.color }));
+    localStorage.setItem('tg_camq', $('#setCamQ').value);
+    localStorage.setItem('tg_noise', $('#setNoise .sel').dataset.v);
+    localStorage.setItem('tg_echo', $('#setEcho .sel').dataset.v);
+    localStorage.setItem('tg_turn', $('#setTurn').value.trim());
+    localStorage.setItem('tg_turn_cred', $('#setTurnCred').value.trim());
+    appliedTier = -1;
+    if (S.isHost) { const h = S.roster.get('HOST'); if (h) { Object.assign(h, { name: S.me.name, emoji: S.me.emoji, color: S.me.color }); broadcast({ t: 'roster', list: rosterArr() }); } }
+    else { const h = S.roster.get(S.myId); if (h) Object.assign(h, { name: S.me.name, emoji: S.me.emoji, color: S.me.color }); }
+    renderPresence(); renderPeople();
+    closeM('#mSet');
+    toast(T('eCopied'), 'ok');
+  };
+}
+
+/* ═══════════════════════════ بوت ═══════════════════════════ */
+applyLang();
+profileForms();
+segWire('#setNoise', () => {}); segWire('#setEcho', () => {});
+wireTopbarMedia();
+wireSettings();
+statsLoop();
+window.__TG = S;   // قلاب دیباگ/تست
+/*⏳P6*/
+</script>
+</body>
+</html>
