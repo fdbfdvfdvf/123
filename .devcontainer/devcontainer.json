@@ -1,0 +1,17 @@
+{
+  "name": "together",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "together app", "visibility": "public" }
+  },
+  "postCreateCommand": "npm install --omit=dev && bash deploy/codespace-up.sh",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["GITHUB-DEPLOY.md"]
+    }
+  }
+}

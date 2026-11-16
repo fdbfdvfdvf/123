@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0714">
+<title>Together — اتاق آنلاین مشترک</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0714; --bg2:#120b22; --panel:rgba(255,255,255,.055); --panel2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.1); --line2:rgba(255,255,255,.18);
+  --txt:#eee9ff; --txt2:#b9b0d8; --txt3:#8d84ad;
+  --vio:#7c3aed; --vio2:#a78bfa; --indigo:#4f46e5; --blue:#3b82f6;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --grad:linear-gradient(135deg,#7c3aed,#4f46e5 55%,#2563eb);
+  --r:16px; --r2:12px;
+  --sh:0 10px 30px rgba(0,0,0,.45);
+  --f:'Vazirmatn',ui-sans-serif,system-ui,'Segoe UI',Tahoma,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--f);background:radial-gradient(1200px 800px at 85% -10%,#231148 0%,transparent 55%),radial-gradient(1000px 700px at -10% 110%,#131a3a 0%,transparent 55%),var(--bg);color:var(--txt);font-size:15px;line-height:1.7;overflow-x:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:var(--vio2);text-decoration:none}
+::placeholder{color:var(--txt3)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+.hide{display:none!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);font-weight:600;transition:.18s;user-select:none;min-height:42px}
+.btn:hover{background:rgba(255,255,255,.14);border-color:var(--line2)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--grad);border-color:transparent;box-shadow:0 6px 20px rgba(124,58,237,.35)}
+.btn.danger{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#fca5a5}
+.btn.sm{padding:6px 12px;min-height:34px;font-size:13px;border-radius:10px}
+.btn.icon{width:42px;padding:0;border-radius:12px;font-size:17px}
+.btn.on{background:var(--grad);border-color:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.inp{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--txt);outline:0;transition:.18s}
+.inp:focus{border-color:var(--vio);box-shadow:0 0 0 3px rgba(124,58,237,.25)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--txt2)}
+.toastWrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:99;display:grid;gap:8px;width:min(92vw,420px)}
+.toast{background:rgba(30,20,55,.95);border:1px solid var(--line2);border-radius:12px;padding:10px 14px;box-shadow:var(--sh);animation:tin .25s}
+.toast.ok{border-color:rgba(52,211,153,.4)} .toast.bad{border-color:rgba(248,113,113,.4)}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1}}
+
+/* لندینگ */
+#landing{min-height:100%;display:grid;place-items:center;padding:24px}
+.lwrap{width:min(96vw,880px);text-align:center}
+.logo{font-size:44px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.lsub{color:var(--txt2);margin:6px 0 26px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;text-align:right}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.card h2{font-size:18px;margin-bottom:12px}
+.card .inp{margin-bottom:10px}
+.feats{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;text-align:right}
+.feat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:14px}
+.feat b{display:block;margin-bottom:4px}
+.feat span{font-size:13px;color:var(--txt2)}
+.langRow{margin-top:22px;display:flex;gap:10px;justify-content:center}
+
+/* اتاق */
+#room{height:100%;display:none;flex-direction:column}
+#room.open{display:flex}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(13,8,26,.6)}
+header .logo{font-size:20px}
+.hspacer{flex:1}
+#main{flex:1;display:grid;grid-template-columns:230px 1fr 300px;min-height:0}
+@media (max-width:900px){ #main{grid-template-columns:1fr} #sidePeople{display:none} #chatPane{position:fixed;inset:56px 0 0 0;z-index:50;background:var(--bg);transform:translateX(-105%);transition:.25s} #chatPane.open{transform:none} }
+#sidePeople{border-inline-end:1px solid var(--line);background:rgba(13,8,26,.5);overflow-y:auto;padding:12px}
+#sidePeople h3{font-size:13px;color:var(--txt3);margin-bottom:10px}
+.person{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:10px;background:var(--panel);margin-bottom:8px;border:1px solid var(--line)}
+.person .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--grad);font-weight:700;font-size:13px}
+.person .nm{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person .role{font-size:10px;color:var(--txt3)}
+.kick{color:var(--bad);font-size:12px;padding:2px 6px;border-radius:8px;background:rgba(248,113,113,.12)}
+#stageCol{display:flex;flex-direction:column;min-width:0;min-height:0}
+#stageTabs{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto}
+#stageTabs button{padding:7px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--txt2);font-size:13px;white-space:nowrap}
+#stageTabs button.on{background:var(--grad);color:#fff;border-color:transparent}
+.stage{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px;gap:10px}
+.tabPane{flex:1;display:none;flex-direction:column;min-height:0;gap:10px}
+.tabPane.on{display:flex}
+.toolbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);flex-wrap:wrap}
+.tspacer{flex:1}
+.stageNote{font-size:12px;color:var(--txt3);padding:2px 6px}
+#chatPane{display:flex;flex-direction:column;border-inline-start:1px solid var(--line);background:rgba(13,8,26,.5);min-width:0}
+#chatHead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:700}
+#chatMsgs{flex:1;overflow-y:auto;padding:12px;display:grid;gap:8px;align-content:start}
+.cmsg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:7px 11px;max-width:100%}
+.cmsg .who{font-size:11px;color:var(--vio2);font-weight:700}
+.cmsg .who.mine{color:var(--ok)}
+.cmsg.sys{background:transparent;border:0;color:var(--txt3);font-size:12px;text-align:center}
+.cmsg .body{font-size:13.5px;word-break:break-word;white-space:pre-wrap}
+#chatFoot{padding:10px;border-top:1px solid var(--line);display:grid;gap:8px}
+#typing{font-size:11px;color:var(--txt3);min-height:16px}
+#chatToggle{display:none}
+@media (max-width:900px){ #chatToggle{display:inline-flex} }
+
+/* یوتیوب */
+#ytWrap{flex:1;position:relative;background:#000;border-radius:var(--r2);overflow:hidden;min-height:220px}
+#ytPlayer{position:absolute;inset:0;width:100%;height:100%}
+#ytPh{position:absolute;inset:0;display:grid;place-items:center;color:var(--txt3);text-align:center;padding:18px;font-size:14px}
+
+/* فیلم مشترک */
+#mvWrap{flex:1;position:relative;background:#000;border-radius:var(--r2);overflow:hidden;min-height:220px;display:grid;place-items:center}
+#mvVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;background:#000;cursor:pointer}
+#mvVideo.on{display:block}
+#mvPh{position:absolute;inset:0;display:grid;place-items:center;color:var(--txt3);text-align:center;padding:20px;font-size:14px}
+#mvPh .big{font-size:46px;margin-bottom:12px}
+
+/* تخته */
+#boardWrap{flex:1;position:relative;border-radius:var(--r2);overflow:hidden;border:1px solid var(--line);background:#14101f;min-height:220px}
+#board{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.cdot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--vio);border:2px solid #fff;transform:translate(-50%,-50%);pointer-events:none;transition:left .1s,top .1s;opacity:.85}
+.cdot b{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;background:var(--vio);color:#fff;padding:0 5px;border-radius:6px;white-space:nowrap}
+
+/* هم‌مرورگری */
+#covWrap{flex:1;position:relative;background:#fff;border-radius:var(--r2);overflow:hidden;min-height:220px}
+#covFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+#covZoomer{position:absolute;inset:0;transform-origin:top center}
+
+/* بازی */
+#ttWrap{flex:1;display:grid;place-items:center}
+#ttBoard{display:grid;grid-template-columns:repeat(3,90px);gap:8px}
+#ttBoard button{width:90px;height:90px;border-radius:14px;background:var(--panel2);border:1px solid var(--line2);font-size:38px;font-weight:800;display:grid;place-items:center}
+#ttBoard button.x{color:var(--vio2)} #ttBoard button.o{color:var(--blue)}
+#ttBoard button.win{background:rgba(52,211,153,.2);border-color:rgba(52,211,153,.5)}
+#ttStatus{text-align:center;font-size:15px;font-weight:700;margin-top:12px}
+.msub{color:var(--txt3);font-size:12px}
+.swatch{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);padding:0}
+.swatch.on{border-color:#fff}
+</style>
+</head>
+<body>
+<div class="toastWrap" id="toasts"></div>
+
+<!-- لندینگ -->
+<div id="landing">
+  <div class="lwrap">
+    <div class="logo">Together</div>
+    <p class="lsub" data-i18n="lsub">اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.</p>
+    <div class="cards">
+      <div class="card">
+        <h2 data-i18n="mkRoom">ساخت اتاق</h2>
+        <input class="inp" id="crName" data-i18n-ph="yourName" placeholder="اسم شما">
+        <input class="inp" id="crRoomName" data-i18n-ph="roomName" placeholder="اسم اتاق (اختیاری)">
+        <input class="inp" id="crPass" type="password" data-i18n-ph="optPass" placeholder="رمز اتاق (اختیاری)">
+        <button class="btn primary" id="btnCreate" style="width:100%" data-i18n="mkGo">ساخت و ورود</button>
+      </div>
+      <div class="card">
+        <h2 data-i18n="joinRoom">ورود با کد</h2>
+        <input class="inp" id="jnName" data-i18n-ph="yourName" placeholder="اسم شما">
+        <input class="inp" id="jnCode" data-i18n-ph="roomCode" placeholder="کد اتاق، مثلاً 7XK2M">
+        <input class="inp" id="jnPass" type="password" data-i18n-ph="roomPass" placeholder="رمز (اگر دارد)">
+        <button class="btn primary" id="btnJoin" style="width:100%" data-i18n="joinGo">ورود</button>
+      </div>
+    </div>
+    <div class="feats">
+      <div class="feat"><b data-i18n="f1t">اتاق دائمی</b><span data-i18n="f1p">وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.</span></div>
+      <div class="feat"><b data-i18n="f2t">چت زنده</b><span data-i18n="f2p">تاریخچهٔ ماندگار و اعلان ورود و خروج.</span></div>
+      <div class="feat"><b data-i18n="f3t">یوتیوب همگام</b><span data-i18n="f3p">پخش/توقف/سیک با کنترل همه یا فقط میزبان.</span></div>
+      <div class="feat"><b data-i18n="f4t">فیلم مشترک</b><span data-i18n="f4p">ویدیو از دستگاه شما برای همه استریم می‌شود؛ هر دو کنترل دارید.</span></div>
+      <div class="feat"><b data-i18n="f5t">تخته و هم‌مرورگری</b><span data-i18n="f5p">نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.</span></div>
+      <div class="feat"><b data-i18n="f6t">بازی و مرجع حق سرور</b><span data-i18n="f6p">تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.</span></div>
+    </div>
+    <div class="langRow">
+      <button class="btn sm" id="langFa">فارسی</button>
+      <button class="btn sm" id="langEn">English</button>
+    </div>
+  </div>
+</div>
+
+<!-- اتاق -->
+<div id="room">
+  <header>
+    <div class="logo">Together</div>
+    <span class="chip" id="codeChip" title="کد اتاق">-----</span>
+    <button class="btn sm" id="btnInvite">🔗 <span data-i18n="invite">دعوت</span></button>
+    <span class="chip hide" id="netChip">…</span>
+    <div class="hspacer"></div>
+    <button class="btn icon sm" id="chatToggle">💬</button>
+    <button class="btn icon sm" id="langBtn">EN</button>
+    <button class="btn sm danger" id="btnLeave" data-i18n="leave">خروج</button>
+  </header>
+  <div id="main">
+    <aside id="sidePeople">
+      <h3 data-i18n="online">آنلاین در اتاق</h3>
+      <div id="people"></div>
+      <h3 style="margin-top:14px" data-i18n="ctlTitle">کنترل</h3>
+      <div id="ctlBox"></div>
+    </aside>
+    <div id="stageCol">
+      <div id="stageTabs">
+        <button data-tab="yt" class="on">▶ <span data-i18n="tabYt">یوتیوب</span></button>
+        <button data-tab="movie">🎬 <span data-i18n="tabMovie">فیلم مشترک</span></button>
+        <button data-tab="board">🎨 <span data-i18n="tabBoard">تخته</span></button>
+        <button data-tab="coview">🌐 <span data-i18n="tabCoview">هم‌مرورگری</span></button>
+        <button data-tab="game">🎮 <span data-i18n="tabGame">بازی</span></button>
+      </div>
+      <div class="stage">
+        <!-- یوتیوب -->
+        <div class="tabPane on" id="pane-yt">
+          <div class="toolbar">
+            <input class="inp" id="ytUrl" data-i18n-ph="ytUrlPh" placeholder="لینک یا آیدی ویدیوی یوتیوب" style="flex:1;min-width:150px">
+            <button class="btn primary sm" id="ytSet" data-i18n="setVideo">تنظیم ویدیو</button>
+            <span class="chip" id="ytInfo">—</span>
+          </div>
+          <div id="ytWrap">
+            <div id="ytPh"><div><div style="font-size:46px;margin-bottom:10px">▶️</div><span data-i18n="ytEmpty">با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.</span></div></div>
+            <div id="ytPlayer"></div>
+          </div>
+          <div class="toolbar">
+            <button class="btn sm" id="ytBack">⏪ ۱۰ث</button>
+            <button class="btn primary sm" id="ytPlay">▶ <span data-i18n="play">پخش</span></button>
+            <button class="btn sm" id="ytPause">⏸ <span data-i18n="pause">توقف</span></button>
+            <button class="btn sm" id="ytFwd">۱۰ث ⏩</button>
+            <span id="ytCur" class="msub">0:00</span>
+            <input type="range" id="ytSeek" min="0" max="100" value="0" style="flex:1;min-width:80px">
+            <span id="ytDur" class="msub">0:00</span>
+            <select class="inp" id="ytRate" style="min-height:34px;flex:none;width:auto"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+          </div>
+          <div class="stageNote" data-i18n="ytNote">هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).</div>
+        </div>
+        <!-- فیلم مشترک -->
+        <div class="tabPane" id="pane-movie">
+          <div class="toolbar">
+            <button class="btn primary sm" id="mvPick">📁 <span data-i18n="mvPick">انتخاب فیلم</span></button>
+            <button class="btn sm danger hide" id="mvEject">⏏ <span data-i18n="mvEject">پایان پخش</span></button>
+            <span class="chip hide" id="mvInfo"></span>
+            <div class="tspacer"></div>
+            <button class="btn sm hide" id="mvLockToggle">🔓 <span data-i18n="ctrlAll">کنترل: همه</span></button>
+          </div>
+          <div id="mvWrap">
+            <div id="mvPh"><div><div class="big">🎬</div><span data-i18n="mvEmpty">هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.</span></div></div>
+            <video id="mvVideo" playsinline></video>
+          </div>
+          <div class="toolbar">
+            <button class="btn sm" id="mvBack10">⏪ ۱۰ث</button>
+            <button class="btn primary sm" id="mvPlay">▶ <span data-i18n="play">پخش</span></button>
+            <button class="btn sm" id="mvPause">⏸ <span data-i18n="pause">توقف</span></button>
+            <button class="btn sm" id="mvFwd10">۱۰ث ⏩</button>
+            <span id="mvCur" class="msub">0:00</span>
+            <input type="range" id="mvSeek" min="0" max="100" value="0" step="1" style="flex:1;min-width:80px">
+            <span id="mvDur" class="msub">0:00</span>
+            <select class="inp" id="mvRate" style="min-height:34px;flex:none;width:auto"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+            <button class="btn icon sm" id="mvMute" title="صدا (محلی)">🔊</button>
+            <button class="btn icon sm" id="mvFull" title="تمام‌صفحه">⛶</button>
+          </div>
+          <div class="stageNote" data-i18n="mvNote">استریم مستقیم دستگاه‌به‌دستگاه (WebRTC) با سیگنالینگ سرور؛ پایداری به اینترنت فرستنده بستگی دارد. در Safari/iOS captureStream نیست و پیام صادقانه می‌گیرید.</div>
+        </div>
+        <!-- تخته -->
+        <div class="tabPane" id="pane-board">
+          <div class="toolbar">
+            <button class="swatch on" data-c="#a78bfa" style="background:#a78bfa"></button>
+            <button class="swatch" data-c="#f87171" style="background:#f87171"></button>
+            <button class="swatch" data-c="#34d399" style="background:#34d399"></button>
+            <button class="swatch" data-c="#fbbf24" style="background:#fbbf24"></button>
+            <button class="swatch" data-c="#eee9ff" style="background:#eee9ff"></button>
+            <input type="range" id="bWidth" min="2" max="20" value="4" title="ضخامت" style="width:80px">
+            <button class="btn sm" id="bEraser">🧽 <span data-i18n="eraser">پاک‌کن</span></button>
+            <div class="tspacer"></div>
+            <button class="btn sm" id="bUndo">↩ <span data-i18n="undo">برگشت</span></button>
+            <button class="btn sm" id="bClear">🗑 <span data-i18n="clear">پاک‌کردن همه</span></button>
+            <button class="btn sm" id="bPng">🖼 PNG</button>
+          </div>
+          <div id="boardWrap"><canvas id="board"></canvas></div>
+          <div class="stageNote" data-i18n="boardNote">هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.</div>
+        </div>
+        <!-- هم‌مرورگری -->
+        <div class="tabPane" id="pane-coview">
+          <div class="toolbar">
+            <input class="inp" id="covUrl" data-i18n-ph="urlPh" placeholder="آدرس سایت — مثلاً https://example.com" style="flex:1;min-width:150px" dir="ltr">
+            <button class="btn primary sm" id="covGo" data-i18n="go">برو</button>
+            <button class="btn icon sm" id="covBack" title="عقب">↩</button>
+            <button class="btn icon sm" id="covFwd" title="جلو">↪</button>
+            <button class="btn icon sm" id="covReload" title="بارگیری مجدد">⟳</button>
+            <span id="covZoomLbl" class="msub">100%</span>
+            <input type="range" id="covZoom" min="50" max="200" value="100" style="width:90px">
+          </div>
+          <div id="covWrap"><div id="covZoomer"><iframe id="covFrame" class="hide" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe></div>
+            <div id="covPh" style="position:absolute;inset:0;display:grid;place-items:center;color:#333;text-align:center;padding:18px"><div><div style="font-size:44px">🌐</div><span data-i18n="covEmpty">سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.</span></div></div>
+          </div>
+          <div class="stageNote" data-i18n="covNote">برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.</div>
+        </div>
+        <!-- بازی -->
+        <div class="tabPane" id="pane-game">
+          <div id="ttWrap">
+            <div>
+              <div id="ttBoard"></div>
+              <div id="ttStatus">—</div>
+              <div style="text-align:center;margin-top:10px"><span class="chip" id="ttScores">✕ 0 — 0 ⭕</span> <button class="btn sm" id="ttReset" data-i18n="reset">شروع مجدد</button></div>
+              <p class="msub" style="text-align:center;margin-top:10px" data-i18n="ttNote">دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside id="chatPane">
+      <div id="chatHead">💬 <span data-i18n="chat">چت</span><div class="hspacer"></div><button class="btn icon sm" id="chatClose">✕</button></div>
+      <div id="chatMsgs"></div>
+      <div id="typing"></div>
+      <div id="chatFoot">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn icon sm react" data-e="👍">👍</button><button class="btn icon sm react" data-e="😂">😂</button>
+          <button class="btn icon sm react" data-e="🔥">🔥</button><button class="btn icon sm react" data-e="🎉">🎉</button>
+          <button class="btn icon sm react" data-e="❤️">❤️</button><button class="btn icon sm react" data-e="😮">😮</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="chatIn" data-i18n-ph="msgPh" placeholder="پیام…">
+          <button class="btn primary" id="chatSend">➤</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<input type="file" id="mvFileIn" accept="video/*" class="hide">
+<script src="/socket.io/socket.io.js"></script>
+<script>
+/* ═══ i18n ═══ */
+const I18N = {
+  fa: { lsub:'اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.', mkRoom:'ساخت اتاق', joinRoom:'ورود با کد', mkGo:'ساخت و ورود', joinGo:'ورود', yourName:'اسم شما', roomName:'اسم اتاق (اختیاری)', optPass:'رمز اتاق (اختیاری)', roomCode:'کد اتاق، مثلاً 7XK2M', roomPass:'رمز (اگر دارد)', f1t:'اتاق دائمی', f1p:'وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.', f2t:'چت زنده', f2p:'تاریخچهٔ ماندگار و اعلان ورود و خروج.', f3t:'یوتیوب همگام', f3p:'پخش/توقف/سیک برای همه؛ هر کسی می‌تواند ویدیو بگذارد و همه کنترل دارند.', f4t:'فیلم مشترک', f4p:'ویدیو از دستگاه شما برای همه استریم می‌شود؛ هر دو کنترل دارید.', f5t:'تخته و هم‌مرورگری', f5p:'نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.', f6t:'بازی و مرجع حق سرور', f6p:'تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.', invite:'دعوت', leave:'خروج', online:'آنلاین در اتاق', ctlTitle:'کنترل', tabYt:'یوتیوب', tabMovie:'فیلم مشترک', tabBoard:'تخته', tabCoview:'هم‌مرورگری', tabGame:'بازی', setVideo:'تنظیم ویدیو', ytUrlPh:'لینک یا آیدی ویدیوی یوتیوب', ytEmpty:'با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.', play:'پخش', pause:'توقف', ytNote:'هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).', mvPick:'انتخاب فیلم', mvEject:'پایان پخش', ctrlAll:'کنترل: همه', ctrlHost:'کنترل: میزبان', mvEmpty:'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.', mvReceiving:'در حال دریافت استریم فیلم…', mvFrom:'از', mvReady:'فیلم مشترک وصل شد 🎬', mvClosed:'پخش فیلم پایان یافت', mvNotSup:'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream نیست) — از Chrome/Firefox دسکتاپ استفاده کنید.', mvUnmuteHint:'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید', mvNote:'استریم مستقیم دستگاه‌به‌دستگاه (WebRTC) با سیگنالینگ سرور؛ پایداری به اینترنت فرستنده بستگی دارد. در Safari/iOS captureStream نیست و پیام صادقانه می‌گیرید.', eraser:'پاک‌کن', undo:'برگشت', clear:'پاک‌کردن همه', boardNote:'هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.', urlPh:'آدرس سایت — مثلاً https://example.com', go:'برو', covEmpty:'سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.', covNote:'برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.', reset:'شروع مجدد', ttNote:'دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.', chat:'چت', msgPh:'پیام…', copied:'کپی شد ✓', invTitle:'لینک دعوت کپی شد', joined:'وارد اتاق شدی ✓', locked:'کنترل در اختیار نفر دیگری است', rate:'خیلی سریع! کمی آهسته‌تر', kicked:'میزبان شما را از اتاق حذف کرد', rejoin:'اتصال قطع شد؛ در حال اتصال مجدد…', badUrl:'آدرس معتبر نیست', host:'میزبان', you:'شما', winX:'✕ برد! 🎉', winO:'⭕ برد! 🎉', draw:'مساوی!', turnX:'نوبت ✕', turnO:'نوبت ⭕', spec:'تماشاچی', linkCopied:'لینک دعوت کپی شد — بفرستش برای طرف مقابل', badmove:'حرکت غیرقانونی — منتظر نوبت خودتان بمانید', forbidden:'دسترسی ندارید' },
+  en: { lsub:'A persistent online room with chat, whiteboard, YouTube, shared movies and games — no sign-up.', mkRoom:'Create a room', joinRoom:'Join by code', mkGo:'Create & join', joinGo:'Join', yourName:'Your name', roomName:'Room name (optional)', optPass:'Room password (optional)', roomCode:'Room code, e.g. 7XK2M', roomPass:'Password (if any)', f1t:'Persistent rooms', f1p:'State lives on the server — reconnect and everything is still there.', f2t:'Live chat', f2p:'Durable history with join/leave notices.', f3t:'Synced YouTube', f3p:'Play/pause/seek — everyone controls; anyone can set the video.', f4t:'Movie night', f4p:'Stream a local video to everyone; both sides control it.', f5t:'Board & co-view', f5p:'Shared drawing and synced site navigation.', f6t:'Server-authoritative games', f6p:'Tic-tac-toe turns validated on the server — no cheating.', invite:'Invite', leave:'Leave', online:'Online in room', ctlTitle:'Control', tabYt:'YouTube', tabMovie:'Movie night', tabBoard:'Board', tabCoview:'Co-view', tabGame:'Game', setVideo:'Set video', ytUrlPh:'YouTube URL or video ID', ytEmpty:'Use “Set video” to play a YouTube for everyone; playback stays in sync.', play:'Play', pause:'Pause', ytNote:'Each device renders its own player; commands sync via the server (periodic sync every 8s).', mvPick:'Pick a video', mvEject:'Stop sharing', ctrlAll:'Control: everyone', ctrlHost:'Control: host', mvEmpty:'No movie playing yet — “Pick a video” streams a file from your device to everyone.', mvReceiving:'Receiving the movie stream…', mvFrom:'from', mvReady:'Movie stream connected 🎬', mvClosed:'Movie sharing ended', mvNotSup:'Local-video sharing is not supported here (no captureStream) — use desktop Chrome/Firefox.', mvUnmuteHint:'Tap the speaker button to enable sound', mvNote:'Direct device-to-device stream (WebRTC) with server signaling; stability depends on the sender’s internet. Safari/iOS lacks captureStream and gets an honest message.', eraser:'Eraser', undo:'Undo', clear:'Clear all', boardNote:'Drawings appear live for everyone and persist on the server; you can see the other side’s cursor too.', urlPh:'Site URL — e.g. https://example.com', go:'Go', covEmpty:'Open a site so we both see it together; navigation is shared.', covNote:'Some sites (like Google) refuse to be embedded and show a fallback message. Click/typing inside external sites is not possible in this edition; full control needs the server-browser edition on the roadmap.', reset:'Reset', ttNote:'First two members of the room become ✕ and ⭕; turns are validated on the server.', chat:'Chat', msgPh:'Message…', copied:'Copied ✓', invTitle:'Invite link copied', joined:'You joined the room ✓', locked:'Control is held by someone else', rate:'Too fast! Slow down a bit', kicked:'The host removed you from the room', rejoin:'Connection lost; reconnecting…', badUrl:'Invalid URL', host:'host', you:'you', winX:'✕ wins! 🎉', winO:'⭕ wins! 🎉', draw:'Draw!', turnX:'✕ to move', turnO:'⭕ to move', spec:'spectator', linkCopied:'Invite link copied — send it to your friend', badmove:'Illegal move — wait for your turn', forbidden:'Not allowed' },
+};
+let LANG = localStorage.getItem('tg_lang') || (navigator.language?.startsWith('fa') ? 'fa' : 'fa');
+const T = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.fa[k] || k;
+function applyI18n() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === 'fa' ? 'rtl' : 'ltr';
+  for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = T(el.dataset.i18n);
+  for (const el of document.querySelectorAll('[data-i18n-ph]')) el.placeholder = T(el.dataset.i18nPh);
+  $('#langBtn').textContent = LANG === 'fa' ? 'EN' : 'فا';
+}
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+function toast(msg, kind = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + kind; t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3800);
+}
+const fmtT = (s) => { s = Math.max(0, Math.round(Number(s) || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ═══ state ═══ */
+const S = { code: null, name: '', pass: '', you: null, roster: [], hostUid: null, controller: null,
+  cov: { stack: [], idx: -1, zoom: 1 }, yt: { v: null, hostUid: null, act: 'pause', pos: 0, rate: 1 },
+  tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 }, sides: { x: null, o: null } },
+  mv: { active: false, hostUid: null, name: '', size: 0, dur: 0, lock: false, pos: 0, playing: false },
+  isHost: () => S.you && S.you.uid === S.hostUid,
+  canCtl: () => !S.controller || (S.you && (S.you.uid === S.controller || S.you.uid === S.hostUid)),
+};
+const socket = io({ reconnection: true, reconnectionDelay: 800 });
+window.__sock = socket;   // هوک تست/دیباگ
+
+/* ═══ لندینگ ═══ */
+$('#langFa').onclick = () => { LANG = 'fa'; localStorage.setItem('tg_lang', 'fa'); applyI18n(); };
+$('#langEn').onclick = () => { LANG = 'en'; localStorage.setItem('tg_lang', 'en'); applyI18n(); };
+$('#langBtn').onclick = () => { LANG = LANG === 'fa' ? 'en' : 'fa'; localStorage.setItem('tg_lang', LANG); applyI18n(); };
+$('#btnCreate').onclick = async () => {
+  S.name = $('#crName').value.trim() || 'مهمان';
+  const pass = $('#crPass').value;
+  try {
+    const r = await fetch('/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: $('#crRoomName').value || 'room', pass }) });
+    const j = await r.json();
+    if (!j.ok) return toast(j.err || 'خطا', 'bad');
+    startJoin(j.code, pass);
+  } catch { toast('خطای شبکه', 'bad'); }
+};
+$('#btnJoin').onclick = () => {
+  S.name = $('#jnName').value.trim() || 'مهمان';
+  const code = $('#jnCode').value.trim().toUpperCase();
+  if (!code) return toast(T('roomCode'), 'bad');
+  startJoin(code, $('#jnPass').value);
+};
+const hash = location.hash.match(/r=([A-Z0-9]{4,8})/i);
+if (hash) { $('#jnCode').value = hash[1].toUpperCase(); }
+function startJoin(code, pass) { S.code = code; S.pass = pass || ''; doJoin(); }
+function doJoin() { socket.emit('join', { code: S.code, name: S.name, pass: S.pass }, (res) => { if (!res?.ok) { toast(res?.err || 'خطا', 'bad'); S.code = null; } }); }
+
+/* ═══ welcome / roster ═══ */
+socket.on('welcome', (p) => {
+  S.you = p.you; S.hostUid = p.state.hostUid; S.controller = p.state.controller;
+  S.cov = p.state.cov || S.cov; S.yt = { ...S.yt, ...p.state.yt }; S.tt = { ...S.tt, ...p.state.tt };
+  S.mv = { ...S.mv, ...p.state.mv };
+  $('#room').classList.add('open'); $('#landing').style.display = 'none';
+  $('#codeChip').textContent = S.code;
+  renderChatHistory(p.state.chat || []);
+  S.strokes = (p.state.strokes || []).map((s) => { try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
+  resizeBoard(); redrawAll();
+  applyCov(); applyYtSet(); renderTt(); updateMvUI(); renderPeople();
+  toast(T('joined'), 'ok');
+  if (!S.ytApiLoaded && S.yt.v) loadYtApi();
+});
+socket.on('roster', (p) => { S.roster = p.list; S.hostUid = p.hostUid; S.controller = p.controller; renderPeople(); movieOnRosterChange(); });
+socket.on('sys', (p) => addChat({ sys: true, body: p.msg, ts: p.ts }));
+socket.on('err', (p) => toast(p.code === 'rate' ? T('rate') : p.code === 'locked' ? T('locked') : T(p.code === 'badurl' ? 'badUrl' : p.code) || p.code, 'bad'));
+socket.on('kicked', () => { toast(T('kicked'), 'bad'); setTimeout(() => location.reload(), 1500); });
+socket.on('disconnect', () => { if (S.code) toast(T('rejoin'), 'bad'); });
+socket.on('connect', () => { if (S.code && S.name) doJoin(); });
+
+/* ═══ people ═══ */
+function renderPeople() {
+  const box = $('#people'); box.innerHTML = '';
+  for (const r of S.roster) {
+    const me = S.you && r.uid === S.you.uid;
+    const d = document.createElement('div'); d.className = 'person';
+    d.innerHTML = `<div class="av">${esc((r.name || '?')[0])}</div><div class="nm">${esc(r.name)}${me ? ` <span class="role">(${T('you')})</span>` : ''}<div class="role">${r.role === 'host' ? '👑 ' + T('host') : r.side === 'spec' ? T('spec') : ''}</div></div>${S.isHost() && !me ? `<button class="kick" data-uid="${r.uid}">✕</button>` : ''}`;
+    box.appendChild(d);
+  }
+  box.querySelectorAll('.kick').forEach((b) => b.onclick = () => socket.emit('kick', { uid: b.dataset.uid }));
+  const cb = $('#ctlBox'); cb.innerHTML = '';
+  const sel = document.createElement('select'); sel.className = 'inp'; sel.style.minHeight = '34px';
+  const opts = [[null, T('ctrlAll')], [S.hostUid, '👑 ' + T('host')], ...S.roster.filter((r) => r.uid !== S.hostUid).map((r) => [r.uid, r.name])];
+  for (const [v, label] of opts) { const o = document.createElement('option'); o.value = v ?? ''; o.textContent = label; if ((S.controller || '') === (v ?? '')) o.selected = true; sel.appendChild(o); }
+  sel.disabled = !S.canCtl();
+  sel.onchange = () => socket.emit('ctl.lock', { target: sel.value || null });
+  cb.appendChild(sel);
+}
+
+/* ═══ chat ═══ */
+function addChat(m) {
+  const d = document.createElement('div');
+  if (m.sys) { d.className = 'cmsg sys'; d.textContent = m.body; }
+  else {
+    d.className = 'cmsg';
+    d.innerHTML = `<div class="who ${S.you && m.uid === S.you.uid ? 'mine' : ''}">${esc(m.name)} · ${new Date(m.ts).toLocaleTimeString(LANG === 'fa' ? 'fa-IR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</div><div class="body">${esc(m.body)}</div>`;
+  }
+  $('#chatMsgs').appendChild(d);
+  $('#chatMsgs').scrollTop = 1e9;
+}
+function renderChatHistory(list) { $('#chatMsgs').innerHTML = ''; for (const m of list) addChat(m); }
+function sendChat(body) { const b = body.trim(); if (b) socket.emit('chat', { body: b }); }
+$('#chatSend').onclick = () => { sendChat($('#chatIn').value); $('#chatIn').value = ''; };
+$('#chatIn').addEventListener('keydown', (e) => { if (e.key === 'Enter') { sendChat($('#chatIn').value); $('#chatIn').value = ''; } });
+let typingT = null;
+$('#chatIn').addEventListener('input', () => { socket.emit('typing', { on: true }); clearTimeout(typingT); typingT = setTimeout(() => socket.emit('typing', { on: false }), 1500); });
+let typingTimer = null;
+socket.on('typing', (p) => {
+  $('#typing').textContent = p.on ? `${p.name}…` : '';
+  clearTimeout(typingTimer); typingTimer = setTimeout(() => { $('#typing').textContent = ''; }, 2200);
+});
+socket.on('chat', addChat);
+$$('.react').forEach((b) => b.onclick = () => sendChat(b.dataset.e));
+$('#chatToggle').onclick = () => $('#chatPane').classList.add('open');
+$('#chatClose').onclick = () => $('#chatPane').classList.remove('open');
+
+/* ═══ تب‌ها ═══ */
+$$('#stageTabs button').forEach((b) => b.onclick = () => {
+  $$('#stageTabs button').forEach((x) => x.classList.remove('on')); b.classList.add('on');
+  $$('.tabPane').forEach((x) => x.classList.remove('on')); $('#pane-' + b.dataset.tab).classList.add('on');
+  if (b.dataset.tab === 'board') resizeBoard();
+});
+$('#btnLeave').onclick = () => { socket.disconnect(); location.href = '/'; };
+
+/* ═══ دعوت ═══ */
+$('#btnInvite').onclick = async () => {
+  const link = `${location.origin}/#r=${S.code}`;
+  try { await navigator.clipboard.writeText(link); toast(T('linkCopied'), 'ok'); }
+  catch { prompt('', link); }
+};
+$('#codeChip').onclick = async () => { try { await navigator.clipboard.writeText(S.code); toast(T('copied'), 'ok'); } catch {} };
+
+/* ═══ یوتیوب ═══ */
+let ytPlayer = null, ytDrag = false;
+function ytId(input) {
+  const s = String(input || '').trim();
+  if (/^[\w-]{11}$/.test(s)) return s;
+  const m = s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+$('#ytSet').onclick = () => {
+  const id = ytId($('#ytUrl').value);
+  if (!id) return toast(T('badUrl'), 'bad');
+  socket.emit('yt.set', { v: id });
+};
+socket.on('yt.set', (p) => { S.yt = { v: p.v, hostUid: p.hostUid, act: 'pause', pos: 0, rate: 1 }; applyYtSet(); });
+function applyYtSet() {
+  const has = !!S.yt.v;
+  $('#ytPh').classList.toggle('hide', has);
+  $('#ytInfo').textContent = has ? 'ID: ' + S.yt.v : '—';
+  if (has) {
+    loadYtApi();
+    ytWhenReady(() => {
+      if (ytPlayer) { ytPlayer.destroy?.(); ytPlayer = null; }
+      ytPlayer = new YT.Player('ytPlayer', {
+        videoId: S.yt.v, playerVars: { playsinline: 1, rel: 0, origin: location.origin },
+        events: {
+          onReady: () => { $('#ytDur').textContent = fmtT(ytPlayer.getDuration()); ytLoop(); },
+          onStateChange: (e) => {
+            if (S.yt.hostUid === S.you?.uid && (e.data === 1 || e.data === 2)) socket.emit('yt.state', { act: e.data === 1 ? 'play' : 'pause', pos: ytPlayer.getCurrentTime(), rate: ytPlayer.getPlaybackRate() });
+          },
+        },
+      });
+    });
+  } else if (ytPlayer) { ytPlayer.destroy?.(); ytPlayer = null; }
+}
+let ytApiLoading = false, ytApiReady = false, ytQueue = [];
+function loadYtApi() {
+  if (ytApiReady) return ytQueue.splice(0).forEach((f) => f());
+  S.ytApiLoaded = true;
+  if (ytApiLoading) return;
+  ytApiLoading = true;
+  window.onYouTubeIframeAPIReady = () => { ytApiReady = true; ytQueue.splice(0).forEach((f) => f()); };
+  const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+}
+function ytWhenReady(f) { if (ytApiReady) f(); else { ytQueue.push(f); loadYtApi(); } }
+socket.on('yt.state', (p) => {
+  S.yt.act = p.act; S.yt.pos = p.pos; S.yt.rate = p.rate;
+  if (S.yt.hostUid === S.you?.uid) return;
+  ytWhenReady(() => {
+    if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+    const st = ytPlayer.getPlayerState();
+    if (p.act === 'play' && st !== 1) ytPlayer.playVideo();
+    if (p.act === 'pause' && st === 1) ytPlayer.pauseVideo();
+    if (p.act === 'seek') ytPlayer.seekTo(p.pos, true);
+    if (p.act === 'rate') ytPlayer.setPlaybackRate(p.rate);
+    if (p.act === 'sync' && Math.abs(ytPlayer.getCurrentTime() - p.pos) > 2) ytPlayer.seekTo(p.pos, true);
+    $('#ytRate').value = String(p.rate);
+  });
+});
+function ytLoop() {
+  setInterval(() => {
+    if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+    const cur = ytPlayer.getCurrentTime() || 0, dur = ytPlayer.getDuration() || 0;
+    if (!ytDrag) $('#ytSeek').value = dur ? Math.round((cur / dur) * 100) : 0;
+    $('#ytCur').textContent = fmtT(cur);
+    if (S.yt.hostUid === S.you?.uid && !ytPlayer.getPlayerState?.() !== 2) {} // no-op
+    if (S.yt.hostUid === S.you?.uid && ytPlayer.getPlayerState() === 1 && Math.floor(cur) % 8 === 0) socket.emit('yt.state', { act: 'sync', pos: cur, rate: ytPlayer.getPlaybackRate() });
+  }, 1000);
+}
+const ytCtl = (act, extra = {}) => {
+  if (!S.yt.v) return;
+  if (S.yt.hostUid === S.you?.uid) {
+    if (act === 'play') ytPlayer?.playVideo(); if (act === 'pause') ytPlayer?.pauseVideo();
+    if (act === 'seek') ytPlayer?.seekTo(extra.pos, true); if (act === 'rate') ytPlayer?.setPlaybackRate(extra.rate);
+  }
+  socket.emit('yt.state', { act, pos: extra.pos ?? 0, rate: extra.rate });
+};
+$('#ytPlay').onclick = () => ytCtl('play');
+$('#ytPause').onclick = () => ytCtl('pause');
+$('#ytBack').onclick = () => ytCtl('seek', { pos: Math.max(0, (ytPlayer?.getCurrentTime?.() || 0) - 10) });
+$('#ytFwd').onclick = () => ytCtl('seek', { pos: (ytPlayer?.getCurrentTime?.() || 0) + 10 });
+$('#ytRate').onchange = () => ytCtl('rate', { rate: Number($('#ytRate').value) });
+$('#ytSeek').addEventListener('input', () => { ytDrag = true; });
+$('#ytSeek').addEventListener('change', () => { ytDrag = false; const d = ytPlayer?.getDuration?.() || 0; if (d) ytCtl('seek', { pos: ($('#ytSeek').value / 100) * d }); });
+
+/* ═══ فیلم مشترک ═══ */
+const mvVideo = $('#mvVideo');
+let mvStream = null, mvObjUrl = null, mvDrag = false;
+const mediaPeers = new Map();   // uid -> RTCPeerConnection
+const isMvHost = () => S.mv.active && S.mv.hostUid === S.you?.uid;
+const canMvCtl = () => !S.mv.lock || isMvHost() || (S.you && (S.you.uid === S.controller || S.you.uid === S.hostUid));
+$('#mvPick').onclick = () => $('#mvFileIn').click();
+$('#mvFileIn').addEventListener('change', (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const cap = HTMLVideoElement.prototype.captureStream || HTMLVideoElement.prototype.mozCaptureStream;
+  if (!cap) return toast(T('mvNotSup'), 'bad');
+  mvObjUrl = URL.createObjectURL(f);
+  mvVideo.srcObject = null; mvVideo.src = mvObjUrl;
+  mvVideo.onloadedmetadata = () => {
+    S.mv = { ...S.mv, active: true, hostUid: S.you.uid, name: f.name.slice(0, 80), size: f.size, dur: mvVideo.duration || 0 };
+    try { mvStream = cap.call(mvVideo); } catch { return toast(T('mvNotSup'), 'bad'); }
+    mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
+    mvVideo.play().catch(() => {});
+    socket.emit('mv.open', { name: S.mv.name, size: S.mv.size, dur: S.mv.dur });
+    startMovieCalls();
+    updateMvUI();
+  };
+});
+function startMovieCalls() {
+  if (!mvStream) return;
+  for (const r of S.roster) if (r.uid !== S.you.uid && !mediaPeers.has(r.uid)) placeMovieCall(r.uid);
+}
+function movieOnRosterChange() {
+  if (isMvHost() && mvStream) for (const r of S.roster) if (r.uid !== S.you.uid && !mediaPeers.has(r.uid)) placeMovieCall(r.uid);
+}
+function placeMovieCall(toUid) {
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+  mediaPeers.set(toUid, pc);
+  for (const track of mvStream.getTracks()) pc.addTrack(track, mvStream);
+  pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: toUid, data: { t: 'ice', c: e.candidate.toJSON() } }); };
+  pc.onconnectionstatechange = () => { if (['failed', 'closed'].includes(pc.connectionState)) mediaPeers.delete(toUid); };
+  pc.createOffer().then((o) => pc.setLocalDescription(o)).then(() => socket.emit('rt.sig', { to: toUid, data: { t: 'offer', sdp: pc.localDescription.toJSON() } })).catch(() => {});
+}
+function pcFor(uid, from) {
+  let pc = mediaPeers.get(uid);
+  if (pc) return pc;
+  pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+  mediaPeers.set(uid, pc);
+  pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: from, data: { t: 'ice', c: e.candidate.toJSON() } }); };
+  pc.ontrack = (e) => attachMovieStream(e.streams[0]);
+  return pc;
+}
+socket.on('rt.sig', async (p) => {
+  const d = p.data || {};
+  try {
+    if (d.t === 'offer') {
+      const pc = pcFor(p.from, p.from);
+      await pc.setRemoteDescription(d.sdp);
+      const a = await pc.createAnswer(); await pc.setLocalDescription(a);
+      socket.emit('rt.sig', { to: p.from, data: { t: 'answer', sdp: pc.localDescription.toJSON() } });
+    } else if (d.t === 'answer') {
+      const pc = mediaPeers.get(p.from);
+      if (pc && pc.signalingState === 'have-local-offer') await pc.setRemoteDescription(d.sdp);
+    } else if (d.t === 'ice') {
+      const pc = mediaPeers.get(p.from);
+      if (pc) await pc.addIceCandidate(d.c).catch(() => {});
+    }
+  } catch (e) { console.warn('sig', e.message); }
+});
+function attachMovieStream(rs) {
+  mvVideo.srcObject = rs;
+  mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
+  mvVideo.play().catch(() => { mvVideo.muted = true; $('#mvMute').textContent = '🔇'; mvVideo.play().catch(() => {}); toast(T('mvUnmuteHint')); });
+  toast(T('mvReady'), 'ok');
+}
+socket.on('mv.open', (p) => {
+  S.mv = { ...S.mv, active: true, hostUid: p.hostUid, name: p.name, size: p.size, dur: p.dur, pos: 0, playing: false };
+  if (!isMvHost()) $('#mvPh').querySelector('span').textContent = T('mvReceiving');
+  updateMvUI();
+});
+socket.on('mv.state', (p) => {
+  if (isMvHost()) return;
+  S.mv.pos = p.pos || 0; S.mv.playing = p.act !== 'pause'; S.mv.rate = p.rate || 1;
+  if (!mvDrag) { const d = S.mv.dur || 1; $('#mvSeek').value = Math.min(100, Math.max(0, Math.round((S.mv.pos / d) * 100))); }
+  $('#mvCur').textContent = fmtT(S.mv.pos);
+  $('#mvRate').value = String(S.mv.rate);
+});
+socket.on('mv.lock', (p) => { S.mv.lock = !!p.on; updateMvUI(); });
+socket.on('mv.close', () => { endMovie(false); });
+function endMovie(local) {
+  for (const [, pc] of mediaPeers) { try { pc.close(); } catch {} }
+  mediaPeers.clear();
+  if (mvObjUrl) { URL.revokeObjectURL(mvObjUrl); mvObjUrl = null; }
+  mvStream = null;
+  try { mvVideo.pause(); mvVideo.removeAttribute('src'); mvVideo.srcObject = null; mvVideo.load(); } catch {}
+  mvVideo.classList.remove('on');
+  S.mv = { active: false, hostUid: null, name: '', size: 0, dur: 0, lock: false, pos: 0, playing: false };
+  $('#mvPh').classList.remove('hide'); $('#mvPh').querySelector('span').textContent = T('mvEmpty');
+  updateMvUI();
+  if (local) { socket.emit('mv.close'); toast(T('mvClosed')); }
+}
+$('#mvEject').onclick = () => endMovie(true);
+$('#mvLockToggle').onclick = () => socket.emit('mv.lock', { on: !S.mv.lock });
+const mvCmd = (act, extra = {}) => {
+  if (!S.mv.active || !canMvCtl()) return toast(T('locked'));
+  if (isMvHost()) hostApplyMv({ act, ...extra });
+  else socket.emit('mv.cmd', { act, ...extra });
+};
+function hostApplyMv(m) {
+  if (m.act === 'play') mvVideo.play().catch(() => {});
+  if (m.act === 'pause') mvVideo.pause();
+  if (m.act === 'seek') { try { mvVideo.currentTime = +m.pos || 0; } catch {} }
+  if (m.act === 'rate') { try { mvVideo.playbackRate = +m.rate || 1; } catch {} }
+  socket.emit('mv.state', { act: m.act, pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
+}
+$('#mvPlay').onclick = () => mvCmd('play');
+$('#mvPause').onclick = () => mvCmd('pause');
+$('#mvBack10').onclick = () => mvCmd('seek', { pos: Math.max(0, (isMvHost() ? mvVideo.currentTime : S.mv.pos) - 10) });
+$('#mvFwd10').onclick = () => mvCmd('seek', { pos: (isMvHost() ? mvVideo.currentTime : S.mv.pos) + 10 });
+$('#mvRate').onchange = () => mvCmd('rate', { rate: Number($('#mvRate').value) });
+$('#mvSeek').addEventListener('input', () => { mvDrag = true; });
+$('#mvSeek').addEventListener('change', () => { mvDrag = false; const d = S.mv.dur || 0; if (d) mvCmd('seek', { pos: ($('#mvSeek').value / 100) * d }); });
+$('#mvMute').onclick = () => { mvVideo.muted = !mvVideo.muted; $('#mvMute').textContent = mvVideo.muted ? '🔇' : '🔊'; };
+$('#mvFull').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else mvVideo.requestFullscreen?.(); };
+mvVideo.addEventListener('click', () => { if (S.mv.active && canMvCtl()) mvCmd(isMvHost() ? (mvVideo.paused ? 'play' : 'pause') : (S.mv.playing ? 'pause' : 'play')); });
+setInterval(() => {
+  if (!S.mv.active) return;
+  if (isMvHost()) {
+    const d = mvVideo.duration || S.mv.dur || 1;
+    if (!mvDrag) $('#mvSeek').value = Math.min(100, Math.max(0, Math.round(((mvVideo.currentTime || 0) / d) * 100)));
+    $('#mvCur').textContent = fmtT(mvVideo.currentTime || 0);
+    if (!mvVideo.paused && Math.floor(mvVideo.currentTime || 0) % 5 === 0) socket.emit('mv.state', { act: 'sync', pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
+  }
+}, 1000);
+function updateMvUI() {
+  const on = S.mv.active;
+  $('#mvEject').classList.toggle('hide', !(on && (isMvHost() || S.you?.uid === S.hostUid)));
+  $('#mvLockToggle').classList.toggle('hide', !(on && (isMvHost() || S.you?.uid === S.hostUid)));
+  $('#mvInfo').classList.toggle('hide', !on);
+  $('#mvLockToggle').innerHTML = (S.mv.lock ? '🔒 ' : '🔓 ') + (S.mv.lock ? T('ctrlHost') : T('ctrlAll'));
+  if (on) $('#mvInfo').innerHTML = `🎬 <b dir="ltr">${esc(S.mv.name)}</b> · ${((S.mv.size || 0) / 1048576).toFixed(1)}MB · ${T('mvFrom')} ${esc(S.roster.find((r) => r.uid === S.mv.hostUid)?.name || '?')}`;
+}
+
+/* ═══ تخته ═══ */
+const board = $('#board'); const bx = board.getContext('2d');
+let bColor = '#a78bfa', bErasing = false, bDrawing = null, cursors = new Map();
+function resizeBoard() {
+  const r = board.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  board.width = r.width * dpr; board.height = r.height * dpr;
+  bx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  redrawAll();
+}
+window.addEventListener('resize', resizeBoard);
+function drawStroke(s) {
+  if (!s?.p?.length) return;
+  bx.globalCompositeOperation = s.t === 'eraser' ? 'destination-out' : 'source-over';
+  bx.strokeStyle = s.c || '#000'; bx.lineWidth = s.w || 4; bx.lineCap = 'round'; bx.lineJoin = 'round';
+  bx.beginPath();
+  const r = board.getBoundingClientRect();
+  bx.moveTo(s.p[0] * r.width, s.p[1] * r.height);
+  for (let i = 2; i < s.p.length; i += 2) bx.lineTo(s.p[i] * r.width, s.p[i + 1] * r.height);
+  bx.stroke();
+  bx.globalCompositeOperation = 'source-over';
+}
+function redrawAll() { bx.clearRect(0, 0, board.width, board.height); for (const s of S.strokes) drawStroke(s); }
+board.addEventListener('pointerdown', (e) => {
+  const r = board.getBoundingClientRect();
+  bDrawing = { id: 's' + Math.random().toString(36).slice(2, 9), t: bErasing ? 'eraser' : 'pen', c: bColor, w: bErasing ? Math.max(12, +$('#bWidth').value * 3) : +$('#bWidth').value, p: [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height] };
+  board.setPointerCapture(e.pointerId);
+});
+board.addEventListener('pointermove', (e) => {
+  if (!bDrawing) return;
+  const r = board.getBoundingClientRect();
+  bDrawing.p.push((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  drawStroke(bDrawing);
+});
+board.addEventListener('pointerup', () => {
+  if (!bDrawing) return;
+  S.strokes.push(JSON.stringify(bDrawing));
+  socket.emit('stroke', { d: bDrawing });
+  bDrawing = null;
+});
+socket.on('stroke', (p) => { S.strokes.push(p.d); drawStroke(p.d); });
+socket.on('undost', (p) => { S.strokes = S.strokes.filter((s) => s.id !== p.id); redrawAll(); });
+socket.on('clearw', () => { S.strokes = []; redrawAll(); });
+$('#bUndo').onclick = () => { const mine = S.strokes.filter((s) => s.id?.startsWith('s')); const last = mine[mine.length - 1]; if (last) socket.emit('undost', { id: last.id }); };
+$('#bClear').onclick = () => socket.emit('clearw');
+$('#bEraser').onclick = () => { bErasing = !bErasing; $('#bEraser').classList.toggle('on', bErasing); };
+$$('.swatch').forEach((s) => s.onclick = () => { $$('.swatch').forEach((x) => x.classList.remove('on')); s.classList.add('on'); bColor = s.dataset.c; bErasing = false; $('#bEraser').classList.remove('on'); });
+$('#bPng').onclick = () => {
+  const a = document.createElement('a');
+  a.href = board.toDataURL('image/png'); a.download = 'together-board.png'; a.click();
+};
+
+/* ═══ نشانگر طرف مقابل ═══ */
+let lastCur = 0;
+for (const wrap of [$('#boardWrap'), $('#covWrap')]) {
+  wrap.addEventListener('pointermove', (e) => {
+    const now = Date.now(); if (now - lastCur < 60) return; lastCur = now;
+    const r = wrap.getBoundingClientRect();
+    socket.emit('cursor', { pane: wrap === $('#boardWrap') ? 'board' : 'cov', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
+  });
+}
+socket.on('cursor', (p) => {
+  if (S.you && p.by === S.you.uid) return;
+  let d = cursors.get(p.by);
+  if (!d) { d = document.createElement('div'); d.className = 'cdot'; d.innerHTML = `<b>${esc(S.roster.find((r) => r.uid === p.by)?.name || '?')}</b>`; d.style.position = 'absolute'; document.body.appendChild(d); cursors.set(p.by, d); }
+  const wrap = p.pane === 'board' ? $('#boardWrap') : $('#covWrap');
+  const r = wrap.getBoundingClientRect();
+  d.style.left = r.left + p.x * r.width + 'px'; d.style.top = r.top + p.y * r.height + 'px';
+  d.style.zIndex = 60;
+  clearTimeout(d._t); d._t = setTimeout(() => { d.remove(); cursors.delete(p.by); }, 1800);
+});
+
+/* ═══ هم‌مرورگری ═══ */
+function applyCov() {
+  const c = S.cov;
+  $('#covPh').style.display = c.idx >= 0 && c.stack[c.idx] ? 'none' : 'grid';
+  if (c.idx >= 0 && c.stack[c.idx]) { $('#covFrame').classList.remove('hide'); if ($('#covFrame').src !== c.stack[c.idx]) $('#covFrame').src = c.stack[c.idx]; }
+  $('#covZoomer').style.transform = `scale(${c.zoom})`;
+  $('#covZoom').value = Math.round(c.zoom * 100);
+  $('#covZoomLbl').textContent = Math.round(c.zoom * 100) + '%';
+  $('#covUrl').value = c.stack[c.idx] || '';
+}
+socket.on('cov.nav', (p) => { S.cov.stack = [...S.cov.stack, p.url].slice(-30); S.cov.idx = S.cov.stack.length - 1; applyCov(); });
+socket.on('cov.ctl', (p) => { S.cov.idx = p.idx; S.cov.zoom = p.zoom; applyCov(); });
+socket.on('cov.reload', () => { if ($('#covFrame').src) $('#covFrame').src = $('#covFrame').src; });
+$('#covGo').onclick = () => {
+  let u = $('#covUrl').value.trim();
+  if (u && !/^https?:\/\//i.test(u)) u = 'https://' + u;
+  socket.emit('cov.nav', { url: u });
+};
+$('#covUrl').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#covGo').click(); });
+$('#covBack').onclick = () => socket.emit('cov.ctl', { act: 'back' });
+$('#covFwd').onclick = () => socket.emit('cov.ctl', { act: 'fwd' });
+$('#covReload').onclick = () => socket.emit('cov.ctl', { act: 'reload' });
+$('#covZoom').addEventListener('change', () => socket.emit('cov.ctl', { act: 'zoom', z: $('#covZoom').value / 100 }));
+
+/* ═══ بازی ═══ */
+const ttB = $('#ttBoard');
+for (let i = 0; i < 9; i++) { const b = document.createElement('button'); b.dataset.i = i; ttB.appendChild(b); }
+ttB.onclick = (e) => { const b = e.target.closest('button'); if (b) socket.emit('tt.move', { i: +b.dataset.i }); };
+socket.on('tt', (p) => { S.tt = { ...S.tt, ...p }; renderTt(); });
+function renderTt() {
+  const t = S.tt;
+  ttB.querySelectorAll('button').forEach((b, i) => {
+    b.textContent = t.cells[i] === 'x' ? '✕' : t.cells[i] === 'o' ? '⭕' : '';
+    b.className = t.cells[i] || '';
+    if (t.line?.includes(i)) b.classList.add('win');
+    b.disabled = !!t.winner || !!t.cells[i] || S.you?.side !== t.turn || !['x', 'o'].includes(S.you?.side);
+  });
+  $('#ttScores').textContent = `✕ ${t.scores.x} — ${t.scores.o} ⭕`;
+  $('#ttStatus').textContent = t.winner === 'draw' ? T('draw') : t.winner === 'x' ? T('winX') : t.winner === 'o' ? T('winO') : t.turn === 'x' ? T('turnX') : T('turnO');
+}
+$('#ttReset').onclick = () => socket.emit('tt.reset', {});
+
+/* ═══ بوت ═══ */
+applyI18n();
+
+</script>
+</body>
+</html>
