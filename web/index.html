@@ -579,7 +579,7 @@ const mvCmd = (act, extra = {}) => {
   socket.emit('mv.state', { act, pos, rate });
 };
 
-/* آپلود: توکن → chunkهای ۸ مگابایتی به‌ترتیب → سرور با آخرین chunk broadcast می‌کند */
+/* آپلود: توکن → chunkهای ۸ مگابایتی به‌ترتیب → بعد از پایان، mv.set پخش را برای همه فعال می‌کند */
 $('#mvPick').onclick = () => { if (!mvUploading) $('#mvFileIn').click(); };
 $('#mvFileIn').addEventListener('change', async (e) => {
   const f = e.target.files[0]; e.target.value = '';
@@ -589,6 +589,19 @@ $('#mvFileIn').addEventListener('change', async (e) => {
   const phSpan = $('#mvPh').querySelector('span');
   $('#mvPh').classList.remove('hide');
   phSpan.textContent = `${T('mvUploading')} 0%`;
+  // مدت‌زمان را از متادیتای فایل محلی می‌خوانیم — برای اسلایدر و سینک قبل از لود سرور
+  let dur = 0;
+  try {
+    const probe = document.createElement('video'); probe.preload = 'metadata';
+    const purl = URL.createObjectURL(f);
+    probe.src = purl;
+    await Promise.race([
+      new Promise((res) => { probe.onloadedmetadata = res; probe.onerror = res; }),
+      new Promise((res) => setTimeout(res, 3000)),
+    ]);
+    dur = isFinite(probe.duration) ? probe.duration : 0;
+    URL.revokeObjectURL(purl);
+  } catch {}
   try {
     const tok = await fetch(`/api/mv/token?room=${encodeURIComponent(S.code)}`).then((r) => r.json());
     if (!tok?.token) throw new Error('notoken');
@@ -600,6 +613,7 @@ $('#mvFileIn').addEventListener('change', async (e) => {
       if (!r.ok) throw new Error('upload ' + r.status);
       phSpan.textContent = `${T('mvUploading')} ${Math.round(((i + 1) / n) * 100)}%`;
     }
+    socket.emit('mv.set', { file: f.name.slice(0, 100), size: f.size, dur });
     socket.emit('mv.state', { act: 'play', pos: 0, rate: 1 });
   } catch (err) {
     console.warn('mv upload', err);
