@@ -8,7 +8,7 @@
   "portsAttributes": {
     "3000": { "label": "together app", "visibility": "public" }
   },
-  "postCreateCommand": "npm install --omit=dev && bash deploy/codespace-up.sh",
+  "postCreateCommand": "npm install --omit=dev && (bash deploy/codespace-up.sh || (PORT=3000 NODE_ENV=production nohup node server/index.js > app.log 2>&1 &))",
   "customizations": {
     "codespaces": {
       "openFiles": ["GITHUB-DEPLOY.md"]
