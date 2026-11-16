@@ -553,6 +553,7 @@ $('#ytSeek').addEventListener('change', () => { ytDrag = false; const d = ytPlay
 const mvVideo = $('#mvVideo');
 let mvStream = null, mvObjUrl = null, mvDrag = false;
 const mediaPeers = new Map();   // uid -> RTCPeerConnection
+const mvRetries = new Map();    // uid -> تلاش‌های اتصال مجدد
 const isMvHost = () => S.mv.active && S.mv.hostUid === S.you?.uid;
 const canMvCtl = () => !S.mv.lock || isMvHost() || (S.you && (S.you.uid === S.controller || S.you.uid === S.hostUid));
 $('#mvPick').onclick = () => $('#mvFileIn').click();
@@ -565,7 +566,7 @@ $('#mvFileIn').addEventListener('change', (e) => {
   mvVideo.srcObject = null; mvVideo.src = mvObjUrl;
   mvVideo.onloadedmetadata = () => {
     S.mv = { ...S.mv, active: true, hostUid: S.you.uid, name: f.name.slice(0, 80), size: f.size, dur: mvVideo.duration || 0 };
-    try { mvStream = cap.call(mvVideo); } catch { return toast(T('mvNotSup'), 'bad'); }
+    try { mvStream = cap.call(mvVideo, 30); } catch { mvStream = null; try { mvStream = cap.call(mvVideo); } catch { return toast(T('mvNotSup'), 'bad'); } }
     mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
     mvVideo.play().catch(() => {});
     socket.emit('mv.open', { name: S.mv.name, size: S.mv.size, dur: S.mv.dur });
@@ -585,7 +586,17 @@ function placeMovieCall(toUid) {
   mediaPeers.set(toUid, pc);
   for (const track of mvStream.getTracks()) pc.addTrack(track, mvStream);
   pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: toUid, data: { t: 'ice', c: e.candidate.toJSON() } }); };
-  pc.onconnectionstatechange = () => { if (['failed', 'closed'].includes(pc.connectionState)) mediaPeers.delete(toUid); };
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'connected') mvRetries.delete(toUid);
+    if (['failed', 'closed'].includes(pc.connectionState)) {
+      mediaPeers.delete(toUid);
+      const n = (mvRetries.get(toUid) || 0) + 1;
+      if (n <= 4 && mvStream && S.mv.active && S.roster.some((r) => r.uid === toUid)) {
+        mvRetries.set(toUid, n);
+        setTimeout(() => { if (mvStream && S.mv.active && !mediaPeers.has(toUid)) placeMovieCall(toUid); }, 2500);
+      }
+    }
+  };
   pc.createOffer().then((o) => pc.setLocalDescription(o)).then(() => socket.emit('rt.sig', { to: toUid, data: { t: 'offer', sdp: pc.localDescription.toJSON() } })).catch(() => {});
 }
 function pcFor(uid, from) {
@@ -595,6 +606,7 @@ function pcFor(uid, from) {
   mediaPeers.set(uid, pc);
   pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: from, data: { t: 'ice', c: e.candidate.toJSON() } }); };
   pc.ontrack = (e) => attachMovieStream(e.streams[0]);
+  pc.onconnectionstatechange = () => { if (['failed', 'closed'].includes(pc.connectionState)) mediaPeers.delete(uid); };
   return pc;
 }
 socket.on('rt.sig', async (p) => {
@@ -627,10 +639,15 @@ socket.on('mv.open', (p) => {
 });
 socket.on('mv.state', (p) => {
   if (isMvHost()) return;
-  S.mv.pos = p.pos || 0; S.mv.playing = p.act !== 'pause'; S.mv.rate = p.rate || 1;
+  S.mv.pos = p.pos || 0;
+  if (p.act === 'play' || p.act === 'sync') S.mv.playing = true;
+  else if (p.act === 'pause') S.mv.playing = false; // seek وضعیت play/pause را عوض نمی‌کند
+  S.mv.rate = p.rate || 1;
   if (!mvDrag) { const d = S.mv.dur || 1; $('#mvSeek').value = Math.min(100, Math.max(0, Math.round((S.mv.pos / d) * 100))); }
   $('#mvCur').textContent = fmtT(S.mv.pos);
   $('#mvRate').value = String(S.mv.rate);
+  // عنصر گیرنده باید همیشه جریان زنده را دنبال کند؛ اگر مرورگر pause‌اش کرده دوباره پخش کن
+  if (mvVideo.srcObject && mvVideo.paused) mvVideo.play().catch(() => {});
 });
 socket.on('mv.cmd', (p) => {
   // فرمان پخش/توقف/سیک مهمان‌ها از سرور می‌رسد — فرستندهٔ فیلم روی ویدیوی خودش اعمال می‌کند
@@ -641,6 +658,7 @@ socket.on('mv.close', () => { endMovie(false); });
 function endMovie(local) {
   for (const [, pc] of mediaPeers) { try { pc.close(); } catch {} }
   mediaPeers.clear();
+  mvRetries.clear();
   if (mvObjUrl) { URL.revokeObjectURL(mvObjUrl); mvObjUrl = null; }
   mvStream = null;
   try { mvVideo.pause(); mvVideo.removeAttribute('src'); mvVideo.srcObject = null; mvVideo.load(); } catch {}
