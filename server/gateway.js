@@ -17,7 +17,7 @@ function newRoom(id, code, passHash) {
     cov: { stack: [], idx: -1, zoom: 1 },
     yt: { v: null, hostUid: null, act: 'pause', pos: 0, rate: 1 },
     tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 }, sides: { x: null, o: null } },
-    mv: { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 },
+    mv: { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 },
     emptySince: null,
   };
 }
@@ -26,13 +26,19 @@ function roster(room) {
   return [...room.members.values()].map((m) => ({ uid: m.uid, name: m.name, role: m.role, side: m.side }));
 }
 
+// موقعیت مرجع فیلم با پیش‌روی زمانی — کسی که وسط فیلم می‌پیوندد عقب نمی‌ماند
+function mvPos(mv) {
+  if (mv.act !== 'play' || !mv.posAt) return mv.pos;
+  return Math.min(mv.pos + ((Date.now() - mv.posAt) / 1000) * mv.rate, mv.dur || 1e9);
+}
+
 function stateSnapshot(room) {
   return {
     chat: room.chat.slice(-100), strokes: room.strokes.slice(-400),
     cov: room.cov, yt: { v: room.yt.v, act: room.yt.act, pos: room.yt.pos, rate: room.yt.rate },
     tt: { cells: room.tt.cells, turn: room.tt.turn, winner: room.tt.winner, line: room.tt.line, scores: room.tt.scores },
     mv: room.mv.active
-      ? { active: true, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: room.mv.pos, act: room.mv.act, rate: room.mv.rate, url: `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` }
+      ? { active: true, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: mvPos(room.mv), act: room.mv.act, rate: room.mv.rate, url: `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` }
       : { active: false, hostUid: null },
     controller: room.controller, hostUid: room.hostUid,
   };
@@ -273,20 +279,28 @@ function install(io, store) {
       if (!room || !m) return;
       const name = safeStr(p?.file, 100);
       if (!mvf.safeName(name)) return socket.emit('err', { code: 'badurl' });
-      room.mv = { active: true, hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, act: 'pause', rate: 1 };
+      room.mv = { active: true, hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
       mvf.cleanupOthers(room.code, name);
       io.to(room.code).emit('mv.file', { url: `/mvfiles/${room.code}/${encodeURIComponent(name)}`, name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name });
       persistState(room.code);
     });
 
     socket.on('mv.state', (p) => {
-      // کنترل پخش برای همه باز است (مثل یوتیوب) — سرور وضعیت مرجع را نگه می‌دارد و broadcast می‌کند
+      // کنترل پخش برای همه باز است و ضربان همگام‌سازی از همه می‌آید — بدون اولویت ادمین
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m || !room.mv.active) return;
-      if (!limits.check(`mvstate:${socket.id}`, 30, 6000)) return socket.emit('err', { code: 'rate' });
+      if (!limits.check(`mvstate:${socket.id}`, 40, 6000)) return socket.emit('err', { code: 'rate' });
       const act = safeStr(p?.act, 8);
-      if (act === 'play' || act === 'pause') room.mv.act = act;
-      if (act === 'seek' || act === 'sync') room.mv.pos = clamp(p?.pos, 0, 24 * 3600);
+      if (act === 'play') { room.mv.act = 'play'; room.mv.pos = clamp(p?.pos, 0, 24 * 3600); room.mv.posAt = Date.now(); }
+      if (act === 'pause') { room.mv.act = 'pause'; room.mv.pos = clamp(p?.pos, 0, 24 * 3600); room.mv.posAt = 0; }
+      if (act === 'seek') { room.mv.lastSeekBy = m.uid; room.mv.lastSeekAt = Date.now(); }
+      if (act === 'seek' || act === 'sync') {
+        // تا ۳ ثانیه بعد از سیک، گزارش ضربانِ نفرِ دیگر کهنه است — موقعیت مرجع را عقب نکش
+        if (act === 'sync' && room.mv.lastSeekBy && room.mv.lastSeekBy !== m.uid && Date.now() - room.mv.lastSeekAt < 3000) return;
+        room.mv.pos = clamp(p?.pos, 0, 24 * 3600);
+        room.mv.posAt = Date.now();
+        room.mv.rate = clamp(p?.rate, 0.25, 2);
+      }
       if (act === 'rate') room.mv.rate = clamp(p?.rate, 0.25, 2);
       io.to(room.code).emit('mv.state', { act, pos: clamp(p?.pos, 0, 24 * 3600), rate: room.mv.rate, by: m.uid });
     });
@@ -295,7 +309,7 @@ function install(io, store) {
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m) return;
       if (room.hostUid !== m.uid && room.mv.hostUid !== m.uid) return socket.emit('err', { code: 'forbidden' });
-      room.mv = { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 };
+      room.mv = { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
       mvf.cleanupRoom(room.code);
       io.to(room.code).emit('mv.close');
       persistState(room.code);
