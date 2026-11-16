@@ -7,6 +7,8 @@ const { Server } = require('socket.io');
 const makeStore = require('./store');
 const { install } = require('./gateway');
 const buildRouter = require('./rooms');
+const { Limits } = require('./limits');
+const mvf = require('./mvfiles');
 
 const PORT = Number(process.env.PORT || 3121);
 const app = express();
@@ -19,6 +21,38 @@ app.use((_req, res, next) => { res.setHeader('X-Content-Type-Options', 'nosniff'
 const store = makeStore();
 const stateHolder = { rooms: new Map() };
 app.use('/api', buildRouter(store, stateHolder));
+
+/* ═══ فیلم مشترک — توکن، آپلود chunked و سرو فایل با Range ═══ */
+const mvLimits = new Limits();
+app.get('/api/mv/token', async (req, res) => {
+  const code = String(req.query.room || '').toUpperCase();
+  if (!/^[A-Z0-9]{4,10}$/.test(code)) return res.status(400).json({ ok: false, err: 'badroom' });
+  if (!mvLimits.check(`mvtok:${req.ip}`, 10, 60000)) return res.status(429).json({ ok: false, err: 'rate' });
+  try { if (!(await store.getRoom(code))) return res.status(404).json({ ok: false, err: 'noroom' }); }
+  catch { return res.status(500).json({ ok: false, err: 'server' }); }
+  res.json({ ok: true, token: mvf.issueToken(code) });
+});
+app.post('/api/mv/upload', express.raw({ limit: mvf.CHUNK + 64 * 1024, type: '*/*' }), (req, res) => {
+  const code = String(req.query.room || '').toUpperCase();
+  const name = mvf.safeName(String(req.query.name || ''));
+  const v = mvf.checkToken(req.query.token, code);
+  if (!v || !name) return res.status(403).json({ ok: false, err: 'badtoken' });
+  const idx = Number(req.query.i);
+  const buf = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+  if (!buf.length) return res.status(400).json({ ok: false, err: 'empty' });
+  if (!mvf.appendChunk(req.query.token, name, idx, buf, req.query.last === '1')) return res.status(409).json({ ok: false, err: 'badchunk' });
+  res.json({ ok: true, idx });
+});
+// پخش فیلم: sendFile روی کتابخانهٔ send سوار است و Range/206 را کامل پشتیبانی می‌کند (سیک آنی برای همه)
+app.get('/mvfiles/:room/:file', (req, res) => {
+  const room = String(req.params.room).replace(/[^A-Z0-9]/gi, '');
+  const file = mvf.safeName(String(req.params.file));
+  if (!file) return res.status(400).end();
+  res.sendFile(path.join(mvf.ROOT, room, file), { acceptRanges: true, dotfiles: 'deny' }, (err) => {
+    if (err && !res.headersSent) res.status(404).end();
+  });
+});
+
 // HTML بدون کش (استقرارهای جدید فوری می‌رسند)؛ etag برای اعتبارسنجی
 app.use(express.static(path.join(__dirname, '..', 'web'), {
   index: 'index.html', maxAge: 0, etag: true, lastModified: true,

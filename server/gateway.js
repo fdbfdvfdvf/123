@@ -4,6 +4,7 @@
 const crypto = require('crypto');
 const { Limits } = require('./limits');
 const { isValidUrl, sha256, safeStr, randCode, clamp } = require('./guard');
+const mvf = require('./mvfiles');
 
 const rid = () => crypto.randomBytes(8).toString('hex');
 
@@ -16,7 +17,7 @@ function newRoom(id, code, passHash) {
     cov: { stack: [], idx: -1, zoom: 1 },
     yt: { v: null, hostUid: null, act: 'pause', pos: 0, rate: 1 },
     tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 }, sides: { x: null, o: null } },
-    mv: { active: false, hostUid: null, name: '', size: 0, dur: 0, lock: false },
+    mv: { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 },
     emptySince: null,
   };
 }
@@ -30,7 +31,9 @@ function stateSnapshot(room) {
     chat: room.chat.slice(-100), strokes: room.strokes.slice(-400),
     cov: room.cov, yt: { v: room.yt.v, act: room.yt.act, pos: room.yt.pos, rate: room.yt.rate },
     tt: { cells: room.tt.cells, turn: room.tt.turn, winner: room.tt.winner, line: room.tt.line, scores: room.tt.scores },
-    mv: { active: room.mv.active, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, lock: room.mv.lock },
+    mv: room.mv.active
+      ? { active: true, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: room.mv.pos, act: room.mv.act, rate: room.mv.rate, url: `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` }
+      : { active: false, hostUid: null },
     controller: room.controller, hostUid: room.hostUid,
   };
 }
@@ -264,41 +267,36 @@ function install(io, store) {
       io.to(room.code).emit('yt.state', { act, pos: clamp(p?.pos, 0, 24 * 3600), rate: room.yt.rate, by: m.uid });
     });
 
-    socket.on('mv.open', (p) => {
+    socket.on('mv.set', (p) => {
+      // بعد از پایان آپلود صدا زده می‌شود — فایل روی دیسک آماده است
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m) return;
-      room.mv = { active: true, hostUid: m.uid, name: safeStr(p?.name, 80), size: clamp(p?.size, 0, 1e12), dur: clamp(p?.dur, 0, 24 * 3600), lock: room.mv.lock };
-      io.to(room.code).emit('mv.open', { name: room.mv.name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name });
+      const name = safeStr(p?.file, 100);
+      if (!mvf.safeName(name)) return socket.emit('err', { code: 'badurl' });
+      room.mv = { active: true, hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, act: 'pause', rate: 1 };
+      mvf.cleanupOthers(room.code, name);
+      io.to(room.code).emit('mv.file', { url: `/mvfiles/${room.code}/${encodeURIComponent(name)}`, name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name });
       persistState(room.code);
     });
 
     socket.on('mv.state', (p) => {
-      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
-      if (!room || !m || room.mv.hostUid !== m.uid) return;
-      io.to(room.code).emit('mv.state', { act: safeStr(p?.act, 8), pos: clamp(p?.pos, 0, 24 * 3600), rate: clamp(p?.rate, 0.25, 2), by: m.uid });
-    });
-
-    socket.on('mv.cmd', (p) => {
+      // کنترل پخش برای همه باز است (مثل یوتیوب) — سرور وضعیت مرجع را نگه می‌دارد و broadcast می‌کند
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m || !room.mv.active) return;
-      if (room.mv.lock && room.mv.hostUid !== m.uid && room.controller !== m.uid && room.hostUid !== m.uid) return socket.emit('err', { code: 'locked' });
-      const host = [...room.members.entries()].find(([, mm]) => mm.uid === room.mv.hostUid);
-      if (host) io.to(host[0]).emit('mv.cmd', { act: safeStr(p?.act, 8), pos: clamp(p?.pos, 0, 24 * 3600), rate: clamp(p?.rate, 0.25, 2) });
-    });
-
-    socket.on('mv.lock', (p) => {
-      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
-      if (!room || !m) return;
-      if (room.hostUid !== m.uid && room.mv.hostUid !== m.uid) return socket.emit('err', { code: 'forbidden' });
-      room.mv.lock = !!p?.on;
-      io.to(room.code).emit('mv.lock', { on: room.mv.lock });
+      if (!limits.check(`mvstate:${socket.id}`, 30, 6000)) return socket.emit('err', { code: 'rate' });
+      const act = safeStr(p?.act, 8);
+      if (act === 'play' || act === 'pause') room.mv.act = act;
+      if (act === 'seek' || act === 'sync') room.mv.pos = clamp(p?.pos, 0, 24 * 3600);
+      if (act === 'rate') room.mv.rate = clamp(p?.rate, 0.25, 2);
+      io.to(room.code).emit('mv.state', { act, pos: clamp(p?.pos, 0, 24 * 3600), rate: room.mv.rate, by: m.uid });
     });
 
     socket.on('mv.close', () => {
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m) return;
       if (room.hostUid !== m.uid && room.mv.hostUid !== m.uid) return socket.emit('err', { code: 'forbidden' });
-      room.mv = { active: false, hostUid: null, name: '', size: 0, dur: 0, lock: false };
+      room.mv = { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 };
+      mvf.cleanupRoom(room.code);
       io.to(room.code).emit('mv.close');
       persistState(room.code);
     });

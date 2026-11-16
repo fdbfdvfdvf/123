@@ -231,11 +231,9 @@ header .logo{font-size:20px}
             <button class="btn primary sm" id="mvPick">📁 <span data-i18n="mvPick">انتخاب فیلم</span></button>
             <button class="btn sm danger hide" id="mvEject">⏏ <span data-i18n="mvEject">پایان پخش</span></button>
             <span class="chip hide" id="mvInfo"></span>
-            <div class="tspacer"></div>
-            <button class="btn sm hide" id="mvLockToggle">🔓 <span data-i18n="ctrlAll">کنترل: همه</span></button>
           </div>
           <div id="mvWrap">
-            <div id="mvPh"><div><div class="big">🎬</div><span data-i18n="mvEmpty">هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.</span></div></div>
+            <div id="mvPh"><div><div class="big">🎬</div><span data-i18n="mvEmpty">هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو روی سرور آپلود می‌شود و همه از سرور می‌بینند.</span></div></div>
             <video id="mvVideo" playsinline></video>
           </div>
           <div class="toolbar">
@@ -250,7 +248,7 @@ header .logo{font-size:20px}
             <button class="btn icon sm" id="mvMute" title="صدا (محلی)">🔊</button>
             <button class="btn icon sm" id="mvFull" title="تمام‌صفحه">⛶</button>
           </div>
-          <div class="stageNote" data-i18n="mvNote">استریم مستقیم دستگاه‌به‌دستگاه (WebRTC) با سیگنالینگ سرور؛ پایداری به اینترنت فرستنده بستگی دارد. در Safari/iOS captureStream نیست و پیام صادقانه می‌گیرید.</div>
+          <div class="stageNote" data-i18n="mvNote">فیلم یک‌بار روی سرور آپلود می‌شود و همه مستقیم از سرور پخش می‌کنند؛ پخش/توقف/سیک برای همه، بدون وابستگی به اینترنت فرستنده. حداکثر ۲ گیگابایت.</div>
         </div>
         <!-- تخته -->
         <div class="tabPane" id="pane-board">
@@ -323,8 +321,8 @@ header .logo{font-size:20px}
 <script>
 /* ═══ i18n ═══ */
 const I18N = {
-  fa: { lsub:'اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.', mkRoom:'ساخت اتاق', joinRoom:'ورود با کد', mkGo:'ساخت و ورود', joinGo:'ورود', yourName:'اسم شما', roomName:'اسم اتاق (اختیاری)', optPass:'رمز اتاق (اختیاری)', roomCode:'کد اتاق، مثلاً 7XK2M', roomPass:'رمز (اگر دارد)', f1t:'اتاق دائمی', f1p:'وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.', f2t:'چت زنده', f2p:'تاریخچهٔ ماندگار و اعلان ورود و خروج.', f3t:'یوتیوب همگام', f3p:'پخش/توقف/سیک برای همه؛ هر کسی می‌تواند ویدیو بگذارد و همه کنترل دارند.', f4t:'فیلم مشترک', f4p:'ویدیو از دستگاه شما برای همه استریم می‌شود؛ هر دو کنترل دارید.', f5t:'تخته و هم‌مرورگری', f5p:'نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.', f6t:'بازی و مرجع حق سرور', f6p:'تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.', invite:'دعوت', leave:'خروج', online:'آنلاین در اتاق', ctlTitle:'کنترل', tabYt:'یوتیوب', tabMovie:'فیلم مشترک', tabBoard:'تخته', tabCoview:'هم‌مرورگری', tabGame:'بازی', setVideo:'تنظیم ویدیو', ytUrlPh:'لینک یا آیدی ویدیوی یوتیوب', ytEmpty:'با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.', play:'پخش', pause:'توقف', ytNote:'هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).', mvPick:'انتخاب فیلم', mvEject:'پایان پخش', ctrlAll:'کنترل: همه', ctrlHost:'کنترل: میزبان', mvEmpty:'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو از دستگاه شما مستقیم برای همه استریم می‌شود.', mvReceiving:'در حال دریافت استریم فیلم…', mvFrom:'از', mvReady:'فیلم مشترک وصل شد 🎬', mvClosed:'پخش فیلم پایان یافت', mvNotSup:'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream نیست) — از Chrome/Firefox دسکتاپ استفاده کنید.', mvUnmuteHint:'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید', mvNote:'استریم مستقیم دستگاه‌به‌دستگاه (WebRTC) با سیگنالینگ سرور؛ پایداری به اینترنت فرستنده بستگی دارد. در Safari/iOS captureStream نیست و پیام صادقانه می‌گیرید.', eraser:'پاک‌کن', undo:'برگشت', clear:'پاک‌کردن همه', boardNote:'هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.', urlPh:'آدرس سایت — مثلاً https://example.com', go:'برو', covEmpty:'سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.', covNote:'برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.', reset:'شروع مجدد', ttNote:'دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.', chat:'چت', msgPh:'پیام…', copied:'کپی شد ✓', invTitle:'لینک دعوت کپی شد', joined:'وارد اتاق شدی ✓', locked:'کنترل در اختیار نفر دیگری است', rate:'خیلی سریع! کمی آهسته‌تر', kicked:'میزبان شما را از اتاق حذف کرد', rejoin:'اتصال قطع شد؛ در حال اتصال مجدد…', badUrl:'آدرس معتبر نیست', host:'میزبان', you:'شما', winX:'✕ برد! 🎉', winO:'⭕ برد! 🎉', draw:'مساوی!', turnX:'نوبت ✕', turnO:'نوبت ⭕', spec:'تماشاچی', linkCopied:'لینک دعوت کپی شد — بفرستش برای طرف مقابل', badmove:'حرکت غیرقانونی — منتظر نوبت خودتان بمانید', forbidden:'دسترسی ندارید' },
-  en: { lsub:'A persistent online room with chat, whiteboard, YouTube, shared movies and games — no sign-up.', mkRoom:'Create a room', joinRoom:'Join by code', mkGo:'Create & join', joinGo:'Join', yourName:'Your name', roomName:'Room name (optional)', optPass:'Room password (optional)', roomCode:'Room code, e.g. 7XK2M', roomPass:'Password (if any)', f1t:'Persistent rooms', f1p:'State lives on the server — reconnect and everything is still there.', f2t:'Live chat', f2p:'Durable history with join/leave notices.', f3t:'Synced YouTube', f3p:'Play/pause/seek — everyone controls; anyone can set the video.', f4t:'Movie night', f4p:'Stream a local video to everyone; both sides control it.', f5t:'Board & co-view', f5p:'Shared drawing and synced site navigation.', f6t:'Server-authoritative games', f6p:'Tic-tac-toe turns validated on the server — no cheating.', invite:'Invite', leave:'Leave', online:'Online in room', ctlTitle:'Control', tabYt:'YouTube', tabMovie:'Movie night', tabBoard:'Board', tabCoview:'Co-view', tabGame:'Game', setVideo:'Set video', ytUrlPh:'YouTube URL or video ID', ytEmpty:'Use “Set video” to play a YouTube for everyone; playback stays in sync.', play:'Play', pause:'Pause', ytNote:'Each device renders its own player; commands sync via the server (periodic sync every 8s).', mvPick:'Pick a video', mvEject:'Stop sharing', ctrlAll:'Control: everyone', ctrlHost:'Control: host', mvEmpty:'No movie playing yet — “Pick a video” streams a file from your device to everyone.', mvReceiving:'Receiving the movie stream…', mvFrom:'from', mvReady:'Movie stream connected 🎬', mvClosed:'Movie sharing ended', mvNotSup:'Local-video sharing is not supported here (no captureStream) — use desktop Chrome/Firefox.', mvUnmuteHint:'Tap the speaker button to enable sound', mvNote:'Direct device-to-device stream (WebRTC) with server signaling; stability depends on the sender’s internet. Safari/iOS lacks captureStream and gets an honest message.', eraser:'Eraser', undo:'Undo', clear:'Clear all', boardNote:'Drawings appear live for everyone and persist on the server; you can see the other side’s cursor too.', urlPh:'Site URL — e.g. https://example.com', go:'Go', covEmpty:'Open a site so we both see it together; navigation is shared.', covNote:'Some sites (like Google) refuse to be embedded and show a fallback message. Click/typing inside external sites is not possible in this edition; full control needs the server-browser edition on the roadmap.', reset:'Reset', ttNote:'First two members of the room become ✕ and ⭕; turns are validated on the server.', chat:'Chat', msgPh:'Message…', copied:'Copied ✓', invTitle:'Invite link copied', joined:'You joined the room ✓', locked:'Control is held by someone else', rate:'Too fast! Slow down a bit', kicked:'The host removed you from the room', rejoin:'Connection lost; reconnecting…', badUrl:'Invalid URL', host:'host', you:'you', winX:'✕ wins! 🎉', winO:'⭕ wins! 🎉', draw:'Draw!', turnX:'✕ to move', turnO:'⭕ to move', spec:'spectator', linkCopied:'Invite link copied — send it to your friend', badmove:'Illegal move — wait for your turn', forbidden:'Not allowed' },
+  fa: { lsub:'اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.', mkRoom:'ساخت اتاق', joinRoom:'ورود با کد', mkGo:'ساخت و ورود', joinGo:'ورود', yourName:'اسم شما', roomName:'اسم اتاق (اختیاری)', optPass:'رمز اتاق (اختیاری)', roomCode:'کد اتاق، مثلاً 7XK2M', roomPass:'رمز (اگر دارد)', f1t:'اتاق دائمی', f1p:'وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.', f2t:'چت زنده', f2p:'تاریخچهٔ ماندگار و اعلان ورود و خروج.', f3t:'یوتیوب همگام', f3p:'پخش/توقف/سیک برای همه؛ هر کسی می‌تواند ویدیو بگذارد و همه کنترل دارند.', f4t:'فیلم مشترک', f4p:'فیلم روی سرور آپلود می‌شود و همه هم‌زمان از سرور می‌بینند؛ پخش، توقف و سیک برای همه.', f5t:'تخته و هم‌مرورگری', f5p:'نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.', f6t:'بازی و مرجع حق سرور', f6p:'تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.', invite:'دعوت', leave:'خروج', online:'آنلاین در اتاق', ctlTitle:'کنترل', tabYt:'یوتیوب', tabMovie:'فیلم مشترک', tabBoard:'تخته', tabCoview:'هم‌مرورگری', tabGame:'بازی', setVideo:'تنظیم ویدیو', ytUrlPh:'لینک یا آیدی ویدیوی یوتیوب', ytEmpty:'با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.', play:'پخش', pause:'توقف', ytNote:'هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).', mvPick:'انتخاب فیلم', mvEject:'پایان پخش', ctrlAll:'کنترل: همه', ctrlHost:'کنترل: میزبان', mvEmpty:'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو روی سرور آپلود می‌شود و همه از سرور می‌بینند.', mvReceiving:'در حال آپلود', mvFrom:'از', mvReady:'فیلم روی سرور آماده شد 🎬', mvClosed:'پخش فیلم پایان یافت', mvNotSup:'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream نیست) — از Chrome/Firefox دسکتاپ استفاده کنید.', mvUnmuteHint:'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید', mvNote:'فیلم یک‌بار روی سرور آپلود می‌شود و همه مستقیم از سرور پخش می‌کنند؛ پخش/توقف/سیک برای همه، بدون وابستگی به اینترنت فرستنده. حداکثر ۲ گیگابایت.', mvUploading:'در حال آپلود', mvTooBig:'حجم فیلم بیش از ۲ گیگابایت است', eraser:'پاک‌کن', undo:'برگشت', clear:'پاک‌کردن همه', boardNote:'هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.', urlPh:'آدرس سایت — مثلاً https://example.com', go:'برو', covEmpty:'سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.', covNote:'برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.', reset:'شروع مجدد', ttNote:'دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.', chat:'چت', msgPh:'پیام…', copied:'کپی شد ✓', invTitle:'لینک دعوت کپی شد', joined:'وارد اتاق شدی ✓', locked:'کنترل در اختیار نفر دیگری است', rate:'خیلی سریع! کمی آهسته‌تر', kicked:'میزبان شما را از اتاق حذف کرد', rejoin:'اتصال قطع شد؛ در حال اتصال مجدد…', badUrl:'آدرس معتبر نیست', host:'میزبان', you:'شما', winX:'✕ برد! 🎉', winO:'⭕ برد! 🎉', draw:'مساوی!', turnX:'نوبت ✕', turnO:'نوبت ⭕', spec:'تماشاچی', linkCopied:'لینک دعوت کپی شد — بفرستش برای طرف مقابل', badmove:'حرکت غیرقانونی — منتظر نوبت خودتان بمانید', forbidden:'دسترسی ندارید' },
+  en: { lsub:'A persistent online room with chat, whiteboard, YouTube, shared movies and games — no sign-up.', mkRoom:'Create a room', joinRoom:'Join by code', mkGo:'Create & join', joinGo:'Join', yourName:'Your name', roomName:'Room name (optional)', optPass:'Room password (optional)', roomCode:'Room code, e.g. 7XK2M', roomPass:'Password (if any)', f1t:'Persistent rooms', f1p:'State lives on the server — reconnect and everything is still there.', f2t:'Live chat', f2p:'Durable history with join/leave notices.', f3t:'Synced YouTube', f3p:'Play/pause/seek — everyone controls; anyone can set the video.', f4t:'Movie night', f4p:'The movie is uploaded to the server; everyone watches from it in sync — play and seek for all.', f5t:'Board & co-view', f5p:'Shared drawing and synced site navigation.', f6t:'Server-authoritative games', f6p:'Tic-tac-toe turns validated on the server — no cheating.', invite:'Invite', leave:'Leave', online:'Online in room', ctlTitle:'Control', tabYt:'YouTube', tabMovie:'Movie night', tabBoard:'Board', tabCoview:'Co-view', tabGame:'Game', setVideo:'Set video', ytUrlPh:'YouTube URL or video ID', ytEmpty:'Use “Set video” to play a YouTube for everyone; playback stays in sync.', play:'Play', pause:'Pause', ytNote:'Each device renders its own player; commands sync via the server (periodic sync every 8s).', mvPick:'Pick a video', mvEject:'Stop sharing', ctrlAll:'Control: everyone', ctrlHost:'Control: host', mvEmpty:'No movie playing yet — “Pick a video” uploads it to the server and everyone streams from there.', mvReceiving:'Uploading', mvFrom:'from', mvReady:'Movie is on the server 🎬', mvClosed:'Movie sharing ended', mvNotSup:'Local-video sharing is not supported here (no captureStream) — use desktop Chrome/Firefox.', mvUnmuteHint:'Tap the speaker button to enable sound', mvNote:'The movie is uploaded to the server once; everyone streams it directly — play/pause/seek for everyone, no dependence on the uploader’s internet. Max 2 GB.', mvUploading:'Uploading', mvTooBig:'Movie is larger than 2 GB', eraser:'Eraser', undo:'Undo', clear:'Clear all', boardNote:'Drawings appear live for everyone and persist on the server; you can see the other side’s cursor too.', urlPh:'Site URL — e.g. https://example.com', go:'Go', covEmpty:'Open a site so we both see it together; navigation is shared.', covNote:'Some sites (like Google) refuse to be embedded and show a fallback message. Click/typing inside external sites is not possible in this edition; full control needs the server-browser edition on the roadmap.', reset:'Reset', ttNote:'First two members of the room become ✕ and ⭕; turns are validated on the server.', chat:'Chat', msgPh:'Message…', copied:'Copied ✓', invTitle:'Invite link copied', joined:'You joined the room ✓', locked:'Control is held by someone else', rate:'Too fast! Slow down a bit', kicked:'The host removed you from the room', rejoin:'Connection lost; reconnecting…', badUrl:'Invalid URL', host:'host', you:'you', winX:'✕ wins! 🎉', winO:'⭕ wins! 🎉', draw:'Draw!', turnX:'✕ to move', turnO:'⭕ to move', spec:'spectator', linkCopied:'Invite link copied — send it to your friend', badmove:'Illegal move — wait for your turn', forbidden:'Not allowed' },
 };
 let LANG = localStorage.getItem('tg_lang') || (navigator.language?.startsWith('fa') ? 'fa' : 'fa');
 const T = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.fa[k] || k;
@@ -392,11 +390,11 @@ socket.on('welcome', (p) => {
   renderChatHistory(p.state.chat || []);
   S.strokes = (p.state.strokes || []).map((s) => { try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
   resizeBoard(); redrawAll();
-  applyCov(); applyYtSet(); renderTt(); updateMvUI(); renderPeople();
+  applyCov(); applyYtSet(); renderTt(); applyMvState(); renderPeople();
   toast(T('joined'), 'ok');
   if (!S.ytApiLoaded && S.yt.v) loadYtApi();
 });
-socket.on('roster', (p) => { S.roster = p.list; S.hostUid = p.hostUid; S.controller = p.controller; renderPeople(); movieOnRosterChange(); });
+socket.on('roster', (p) => { S.roster = p.list; S.hostUid = p.hostUid; S.controller = p.controller; renderPeople(); });
 socket.on('sys', (p) => addChat({ sys: true, body: p.msg, ts: p.ts }));
 socket.on('err', (p) => toast(p.code === 'rate' ? T('rate') : p.code === 'locked' ? T('locked') : T(p.code === 'badurl' ? 'badUrl' : p.code) || p.code, 'bad'));
 socket.on('kicked', () => { toast(T('kicked'), 'bad'); setTimeout(() => location.reload(), 1500); });
@@ -549,164 +547,129 @@ $('#ytRate').onchange = () => ytCtl('rate', { rate: Number($('#ytRate').value) }
 $('#ytSeek').addEventListener('input', () => { ytDrag = true; });
 $('#ytSeek').addEventListener('change', () => { ytDrag = false; const d = ytPlayer?.getDuration?.() || 0; if (d) ytCtl('seek', { pos: ($('#ytSeek').value / 100) * d }); });
 
-/* ═══ فیلم مشترک ═══ */
+/* ═══ فیلم مشترک — فایل روی سرور، پخش محلی همه، سینک مثل یوتیوب ═══ */
 const mvVideo = $('#mvVideo');
-let mvStream = null, mvObjUrl = null, mvDrag = false;
-const mediaPeers = new Map();   // uid -> RTCPeerConnection
-const mvRetries = new Map();    // uid -> تلاش‌های اتصال مجدد
+let mvDrag = false, mvUploading = false;
 const isMvHost = () => S.mv.active && S.mv.hostUid === S.you?.uid;
-const canMvCtl = () => !S.mv.lock || isMvHost() || (S.you && (S.you.uid === S.controller || S.you.uid === S.hostUid));
-$('#mvPick').onclick = () => $('#mvFileIn').click();
-$('#mvFileIn').addEventListener('change', (e) => {
-  const f = e.target.files[0]; e.target.value = '';
-  if (!f) return;
-  const cap = HTMLVideoElement.prototype.captureStream || HTMLVideoElement.prototype.mozCaptureStream;
-  if (!cap) return toast(T('mvNotSup'), 'bad');
-  mvObjUrl = URL.createObjectURL(f);
-  mvVideo.srcObject = null; mvVideo.src = mvObjUrl;
-  mvVideo.onloadedmetadata = () => {
-    S.mv = { ...S.mv, active: true, hostUid: S.you.uid, name: f.name.slice(0, 80), size: f.size, dur: mvVideo.duration || 0 };
-    try { mvStream = cap.call(mvVideo, 30); } catch { mvStream = null; try { mvStream = cap.call(mvVideo); } catch { return toast(T('mvNotSup'), 'bad'); } }
-    mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
-    mvVideo.play().catch(() => {});
-    socket.emit('mv.open', { name: S.mv.name, size: S.mv.size, dur: S.mv.dur });
-    startMovieCalls();
-    updateMvUI();
-  };
-});
-function startMovieCalls() {
-  if (!mvStream) return;
-  for (const r of S.roster) if (r.uid !== S.you.uid && !mediaPeers.has(r.uid)) placeMovieCall(r.uid);
-}
-function movieOnRosterChange() {
-  if (isMvHost() && mvStream) for (const r of S.roster) if (r.uid !== S.you.uid && !mediaPeers.has(r.uid)) placeMovieCall(r.uid);
-}
-function placeMovieCall(toUid) {
-  const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-  mediaPeers.set(toUid, pc);
-  for (const track of mvStream.getTracks()) pc.addTrack(track, mvStream);
-  pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: toUid, data: { t: 'ice', c: e.candidate.toJSON() } }); };
-  pc.onconnectionstatechange = () => {
-    if (pc.connectionState === 'connected') mvRetries.delete(toUid);
-    if (['failed', 'closed'].includes(pc.connectionState)) {
-      mediaPeers.delete(toUid);
-      const n = (mvRetries.get(toUid) || 0) + 1;
-      if (n <= 4 && mvStream && S.mv.active && S.roster.some((r) => r.uid === toUid)) {
-        mvRetries.set(toUid, n);
-        setTimeout(() => { if (mvStream && S.mv.active && !mediaPeers.has(toUid)) placeMovieCall(toUid); }, 2500);
-      }
-    }
-  };
-  pc.createOffer().then((o) => pc.setLocalDescription(o)).then(() => socket.emit('rt.sig', { to: toUid, data: { t: 'offer', sdp: pc.localDescription.toJSON() } })).catch(() => {});
-}
-function pcFor(uid, from) {
-  let pc = mediaPeers.get(uid);
-  if (pc) return pc;
-  pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-  mediaPeers.set(uid, pc);
-  pc.onicecandidate = (e) => { if (e.candidate) socket.emit('rt.sig', { to: from, data: { t: 'ice', c: e.candidate.toJSON() } }); };
-  pc.ontrack = (e) => attachMovieStream(e.streams[0]);
-  pc.onconnectionstatechange = () => { if (['failed', 'closed'].includes(pc.connectionState)) mediaPeers.delete(uid); };
-  return pc;
-}
-socket.on('rt.sig', async (p) => {
-  const d = p.data || {};
-  try {
-    if (d.t === 'offer') {
-      const pc = pcFor(p.from, p.from);
-      await pc.setRemoteDescription(d.sdp);
-      const a = await pc.createAnswer(); await pc.setLocalDescription(a);
-      socket.emit('rt.sig', { to: p.from, data: { t: 'answer', sdp: pc.localDescription.toJSON() } });
-    } else if (d.t === 'answer') {
-      const pc = mediaPeers.get(p.from);
-      if (pc && pc.signalingState === 'have-local-offer') await pc.setRemoteDescription(d.sdp);
-    } else if (d.t === 'ice') {
-      const pc = mediaPeers.get(p.from);
-      if (pc) await pc.addIceCandidate(d.c).catch(() => {});
-    }
-  } catch (e) { console.warn('sig', e.message); }
-});
-function attachMovieStream(rs) {
-  mvVideo.srcObject = rs;
-  mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
+mvVideo.onloadedmetadata = () => { S.mv.dur = mvVideo.duration || S.mv.dur; $('#mvDur').textContent = fmtT(S.mv.dur || 0); };
+
+function mvPlaySafe() {
   mvVideo.play().catch(() => { mvVideo.muted = true; $('#mvMute').textContent = '🔇'; mvVideo.play().catch(() => {}); toast(T('mvUnmuteHint')); });
-  toast(T('mvReady'), 'ok');
 }
-socket.on('mv.open', (p) => {
-  S.mv = { ...S.mv, active: true, hostUid: p.hostUid, name: p.name, size: p.size, dur: p.dur, pos: 0, playing: false };
-  if (!isMvHost()) $('#mvPh').querySelector('span').textContent = T('mvReceiving');
+function mvLoad(url, start) {
+  try { mvVideo.pause(); } catch {}
+  mvVideo.srcObject = null;
+  mvVideo.src = url;
+  mvVideo.classList.add('on'); $('#mvPh').classList.add('hide');
+  if (start) mvPlaySafe();
+}
+function applyMvLocal(p) {
+  if (p.act === 'play') mvPlaySafe();
+  if (p.act === 'pause') mvVideo.pause();
+  if (p.act === 'seek') { try { mvVideo.currentTime = +p.pos || 0; } catch {} }
+  if (p.act === 'rate') { try { mvVideo.playbackRate = +p.rate || 1; } catch {} }
+  if (p.act === 'sync' && Math.abs((mvVideo.currentTime || 0) - (+p.pos || 0)) > 2) { try { mvVideo.currentTime = +p.pos || 0; } catch {} }
+}
+// هر فرمان اول روی دستگاه خودمان اعمال می‌شود، بعد به سرور می‌رود تا برای بقیه هم broadcast شود
+const mvCmd = (act, extra = {}) => {
+  if (!S.mv.active) return;
+  const pos = extra.pos ?? (mvVideo.currentTime || 0);
+  const rate = extra.rate ?? (mvVideo.playbackRate || 1);
+  applyMvLocal({ act, pos, rate });
+  socket.emit('mv.state', { act, pos, rate });
+};
+
+/* آپلود: توکن → chunkهای ۸ مگابایتی به‌ترتیب → سرور با آخرین chunk broadcast می‌کند */
+$('#mvPick').onclick = () => { if (!mvUploading) $('#mvFileIn').click(); };
+$('#mvFileIn').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f || mvUploading) return;
+  if (f.size > 2 * 1024 * 1024 * 1024) return toast(T('mvTooBig'), 'bad');
+  mvUploading = true;
+  const phSpan = $('#mvPh').querySelector('span');
+  $('#mvPh').classList.remove('hide');
+  phSpan.textContent = `${T('mvUploading')} 0%`;
+  try {
+    const tok = await fetch(`/api/mv/token?room=${encodeURIComponent(S.code)}`).then((r) => r.json());
+    if (!tok?.token) throw new Error('notoken');
+    const CH = 8 * 1024 * 1024, n = Math.ceil(f.size / CH);
+    for (let i = 0; i < n; i++) {
+      const blob = f.slice(i * CH, Math.min(f.size, (i + 1) * CH));
+      const q = `room=${encodeURIComponent(S.code)}&token=${tok.token}&name=${encodeURIComponent(f.name.slice(0, 100))}&i=${i}&last=${i === n - 1 ? 1 : 0}`;
+      const r = await fetch('/api/mv/upload?' + q, { method: 'POST', body: blob });
+      if (!r.ok) throw new Error('upload ' + r.status);
+      phSpan.textContent = `${T('mvUploading')} ${Math.round(((i + 1) / n) * 100)}%`;
+    }
+    socket.emit('mv.state', { act: 'play', pos: 0, rate: 1 });
+  } catch (err) {
+    console.warn('mv upload', err);
+    phSpan.textContent = T('mvEmpty');
+    toast(T('forbidden'), 'bad');
+  } finally { mvUploading = false; }
+});
+
+socket.on('mv.file', (p) => {
+  S.mv = { active: true, hostUid: p.hostUid, name: p.name, size: p.size, dur: p.dur, pos: 0, act: 'pause', rate: 1 };
+  mvLoad(p.url, false);
   updateMvUI();
+  toast(T('mvReady'), 'ok');
 });
 socket.on('mv.state', (p) => {
-  if (isMvHost()) return;
-  S.mv.pos = p.pos || 0;
+  if (!S.mv.active) return;
   if (p.act === 'play' || p.act === 'sync') S.mv.playing = true;
   else if (p.act === 'pause') S.mv.playing = false; // seek وضعیت play/pause را عوض نمی‌کند
   S.mv.rate = p.rate || 1;
-  if (!mvDrag) { const d = S.mv.dur || 1; $('#mvSeek').value = Math.min(100, Math.max(0, Math.round((S.mv.pos / d) * 100))); }
-  $('#mvCur').textContent = fmtT(S.mv.pos);
+  if (p.act === 'seek' || p.act === 'sync') {
+    S.mv.pos = p.pos || 0;
+    const d = mvVideo.duration || S.mv.dur || 1;
+    if (!mvDrag) $('#mvSeek').value = Math.min(100, Math.max(0, Math.round(((p.pos || 0) / d) * 100)));
+    $('#mvCur').textContent = fmtT(p.pos || 0);
+  }
   $('#mvRate').value = String(S.mv.rate);
-  // عنصر گیرنده باید همیشه جریان زنده را دنبال کند؛ اگر مرورگر pause‌اش کرده دوباره پخش کن
-  if (mvVideo.srcObject && mvVideo.paused) mvVideo.play().catch(() => {});
+  applyMvLocal(p);
 });
-socket.on('mv.cmd', (p) => {
-  // فرمان پخش/توقف/سیک مهمان‌ها از سرور می‌رسد — فرستندهٔ فیلم روی ویدیوی خودش اعمال می‌کند
-  if (isMvHost() && S.mv.active && p?.act) hostApplyMv({ act: p.act, pos: p.pos || 0, rate: p.rate || 1 });
-});
-socket.on('mv.lock', (p) => { S.mv.lock = !!p.on; updateMvUI(); });
-socket.on('mv.close', () => { endMovie(false); });
-function endMovie(local) {
-  for (const [, pc] of mediaPeers) { try { pc.close(); } catch {} }
-  mediaPeers.clear();
-  mvRetries.clear();
-  if (mvObjUrl) { URL.revokeObjectURL(mvObjUrl); mvObjUrl = null; }
-  mvStream = null;
+socket.on('mv.close', () => endMovie());
+function endMovie() {
   try { mvVideo.pause(); mvVideo.removeAttribute('src'); mvVideo.srcObject = null; mvVideo.load(); } catch {}
   mvVideo.classList.remove('on');
-  S.mv = { active: false, hostUid: null, name: '', size: 0, dur: 0, lock: false, pos: 0, playing: false };
+  S.mv = { active: false, hostUid: null, name: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 };
   $('#mvPh').classList.remove('hide'); $('#mvPh').querySelector('span').textContent = T('mvEmpty');
   updateMvUI();
-  if (local) { socket.emit('mv.close'); toast(T('mvClosed')); }
 }
-$('#mvEject').onclick = () => endMovie(true);
-$('#mvLockToggle').onclick = () => socket.emit('mv.lock', { on: !S.mv.lock });
-const mvCmd = (act, extra = {}) => {
-  if (!S.mv.active || !canMvCtl()) return toast(T('locked'));
-  if (isMvHost()) hostApplyMv({ act, ...extra });
-  else socket.emit('mv.cmd', { act, ...extra });
-};
-function hostApplyMv(m) {
-  if (m.act === 'play') mvVideo.play().catch(() => {});
-  if (m.act === 'pause') mvVideo.pause();
-  if (m.act === 'seek') { try { mvVideo.currentTime = +m.pos || 0; } catch {} }
-  if (m.act === 'rate') { try { mvVideo.playbackRate = +m.rate || 1; } catch {} }
-  socket.emit('mv.state', { act: m.act, pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
-}
+$('#mvEject').onclick = () => socket.emit('mv.close');
+
 $('#mvPlay').onclick = () => mvCmd('play');
 $('#mvPause').onclick = () => mvCmd('pause');
-$('#mvBack10').onclick = () => mvCmd('seek', { pos: Math.max(0, (isMvHost() ? mvVideo.currentTime : S.mv.pos) - 10) });
-$('#mvFwd10').onclick = () => mvCmd('seek', { pos: (isMvHost() ? mvVideo.currentTime : S.mv.pos) + 10 });
+$('#mvBack10').onclick = () => mvCmd('seek', { pos: Math.max(0, (mvVideo.currentTime || 0) - 10) });
+$('#mvFwd10').onclick = () => mvCmd('seek', { pos: (mvVideo.currentTime || 0) + 10 });
 $('#mvRate').onchange = () => mvCmd('rate', { rate: Number($('#mvRate').value) });
 $('#mvSeek').addEventListener('input', () => { mvDrag = true; });
-$('#mvSeek').addEventListener('change', () => { mvDrag = false; const d = S.mv.dur || 0; if (d) mvCmd('seek', { pos: ($('#mvSeek').value / 100) * d }); });
+$('#mvSeek').addEventListener('change', () => { mvDrag = false; const d = mvVideo.duration || S.mv.dur || 0; if (d) mvCmd('seek', { pos: ($('#mvSeek').value / 100) * d }); });
 $('#mvMute').onclick = () => { mvVideo.muted = !mvVideo.muted; $('#mvMute').textContent = mvVideo.muted ? '🔇' : '🔊'; };
 $('#mvFull').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else mvVideo.requestFullscreen?.(); };
-mvVideo.addEventListener('click', () => { if (S.mv.active && canMvCtl()) mvCmd(isMvHost() ? (mvVideo.paused ? 'play' : 'pause') : (S.mv.playing ? 'pause' : 'play')); });
+mvVideo.addEventListener('click', () => { if (S.mv.active) mvCmd(S.mv.playing ? 'pause' : 'play'); });
+
+// هر نفر نوار و ثانیه‌شمار را از پخشِ محلی خودش می‌گیرد؛ فقط آپلودکننده هر ۵ ثانیه sync می‌فرستد
 setInterval(() => {
   if (!S.mv.active) return;
-  if (isMvHost()) {
-    const d = mvVideo.duration || S.mv.dur || 1;
-    if (!mvDrag) $('#mvSeek').value = Math.min(100, Math.max(0, Math.round(((mvVideo.currentTime || 0) / d) * 100)));
-    $('#mvCur').textContent = fmtT(mvVideo.currentTime || 0);
-    if (!mvVideo.paused && Math.floor(mvVideo.currentTime || 0) % 5 === 0) socket.emit('mv.state', { act: 'sync', pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
-  }
+  const d = mvVideo.duration || S.mv.dur || 0;
+  if (!mvDrag && d) $('#mvSeek').value = Math.min(100, Math.max(0, Math.round(((mvVideo.currentTime || 0) / d) * 100)));
+  $('#mvCur').textContent = fmtT(mvVideo.currentTime || 0);
+  if (isMvHost() && !mvVideo.paused && Math.floor(mvVideo.currentTime || 0) % 5 === 0) socket.emit('mv.state', { act: 'sync', pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
 }, 1000);
+function applyMvState() {
+  S.mv.playing = S.mv.act === 'play';
+  if (!S.mv.active || !S.mv.url) return updateMvUI();
+  mvLoad(S.mv.url, false);
+  applyMvLocal({ act: 'seek', pos: S.mv.pos || 0 });
+  applyMvLocal({ act: 'rate', rate: S.mv.rate || 1 });
+  if (S.mv.act === 'play') mvPlaySafe();
+  updateMvUI();
+}
 function updateMvUI() {
   const on = S.mv.active;
   $('#mvEject').classList.toggle('hide', !(on && (isMvHost() || S.you?.uid === S.hostUid)));
-  $('#mvLockToggle').classList.toggle('hide', !(on && (isMvHost() || S.you?.uid === S.hostUid)));
   $('#mvInfo').classList.toggle('hide', !on);
-  $('#mvLockToggle').innerHTML = (S.mv.lock ? '🔒 ' : '🔓 ') + (S.mv.lock ? T('ctrlHost') : T('ctrlAll'));
   if (on) $('#mvInfo').innerHTML = `🎬 <b dir="ltr">${esc(S.mv.name)}</b> · ${((S.mv.size || 0) / 1048576).toFixed(1)}MB · ${T('mvFrom')} ${esc(S.roster.find((r) => r.uid === S.mv.hostUid)?.name || '?')}`;
 }
 
