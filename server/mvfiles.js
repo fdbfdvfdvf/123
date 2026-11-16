@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ROOT = path.join(process.env.DATA_DIR || '.', 'mv');
+const ROOT = path.resolve(process.env.DATA_DIR || '.', 'mv');   // مطلق — sendFile مسیر نسبی نمی‌پذیرد
 const MAX_FILE = 2 * 1024 * 1024 * 1024;   // سقف ۲ گیگابایت
 const CHUNK = 8 * 1024 * 1024;             // هر chunk ۸ مگابایت
 
