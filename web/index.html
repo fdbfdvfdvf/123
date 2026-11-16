@@ -632,6 +632,10 @@ socket.on('mv.state', (p) => {
   $('#mvCur').textContent = fmtT(S.mv.pos);
   $('#mvRate').value = String(S.mv.rate);
 });
+socket.on('mv.cmd', (p) => {
+  // فرمان پخش/توقف/سیک مهمان‌ها از سرور می‌رسد — فرستندهٔ فیلم روی ویدیوی خودش اعمال می‌کند
+  if (isMvHost() && S.mv.active && p?.act) hostApplyMv({ act: p.act, pos: p.pos || 0, rate: p.rate || 1 });
+});
 socket.on('mv.lock', (p) => { S.mv.lock = !!p.on; updateMvUI(); });
 socket.on('mv.close', () => { endMovie(false); });
 function endMovie(local) {
