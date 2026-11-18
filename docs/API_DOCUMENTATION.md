@@ -19,16 +19,6 @@ Base: same origin as the app. All bodies JSON unless noted. Errors: `{ ok:false,
 | `POST /api/mv/upload?room&token&name&i&last` | token valid for that room | Body: raw bytes (`type:()=>true` accepts any Content-Type — browser Blobs included). Chunk ≤8 MB (+64 KB headroom), `i` must equal expected sequence → else 409. `last=1` finalizes. **Filename is sanitized, not rejected** — brackets, apostrophes, commas etc. are normalized (`sanitizeName`); the response returns the final `{ ok, idx, name }` and the client uses that name in `mv.set`. |
 | `GET /mvfiles/:room/:file` | public | Range-capable (206) streaming; 404 after eject/cleanup; filename re-sanitized on serve (`sanitizeName`, video extensions only). |
 
-## Local movie mode (no upload)
-| Event | Auth | Notes |
-|---|---|---|
-| `mv.local.set` (socket) | member, 4/10 s | Host declares a device-local file: room.mv gets `mode:'local'`, server stores **no bytes**; broadcasts `mv.local.file {name, size, dur, hostUid, hostName, hostSid}`. Any prior server-mode movie file is cleaned up. |
-| `mvp.want` (socket) | member | Viewer asks for the local stream; server routes to the host socket → host gets `mvp.need {to: viewerSid, uid}`. |
-| `mvp.sig` (socket) | member, 150/10 s | SDP offer/answer + ICE relay between host and viewers, targeted by socketId, stringified-capped 16 KB. One dedicated WebRTC peer connection per viewer (`captureStream` of the host's `<video>`); STUN-only. |
-| sync | — | Host keeps emitting `mv.state` heartbeats; viewers render positions from them and never emit (a live stream can't seek) — play/pause/seek/rate commands run on the host's device and flow to everyone through the stream. |
-
-When the host leaves/disconnects, the room's local movie is auto-closed (`mv.close` broadcast + persisted reset) — the file lives only on their device.
-
 ## Administration
 Planned (M11): `GET /api/admin/stats` behind `ADMIN_TOKEN` — returns rooms, members, calls, storage usage. Not implemented yet (no fake endpoints shipped).
 

@@ -17,7 +17,6 @@ Principles: server-authoritative state, validate every event, sanitize every str
 - Co-browse URLs: must parse as absolute `http:`/`https:` (`isValidUrl`) — no `javascript:`/`data:` injection into the shared iframe.
 - Numbers pass `clamp()` bounds (positions 0–24 h, rate 0.25–2, strokes ≤2400 points, coordinates bounded).
 - JSON body ≤64 KB; WS message ≤1 MB; signaling relay payload stringified-capped 16 KB; upload chunk ≤8 MB.
-- Local movie mode: the file never leaves the host's device — media flows peer-to-peer over WebRTC (STUN only, no media through the server); `mvp.sig` relay carries only SDP/ICE (16 KB cap, 150/10 s per socket, targeted strictly at room members); host disconnect auto-closes the movie and resets persisted state; filenames pass the same `sanitizeName` as uploads.
 
 ## XSS
 The client renders **all** user-derived strings through `esc()` (HTML entity escaping) — chat bodies, names, room names, file names, lobby cards. React-like frameworks are absent, so escaping is manual and consistently applied. No `innerHTML` receives unsanitized data.
