@@ -27,7 +27,7 @@ Base: same origin as the app. All bodies JSON unless noted. Errors: `{ ok:false,
 | `mvp.sig` (socket) | member, 150/10 s | SDP offer/answer + ICE relay between host and viewers, targeted by socketId, stringified-capped 16 KB. One dedicated WebRTC peer connection per viewer (`captureStream` of the host's `<video>`); STUN-only. |
 | sync | — | Host keeps emitting `mv.state` heartbeats; viewers render positions from them and never emit (a live stream can't seek) — play/pause/seek/rate commands run on the host's device and flow to everyone through the stream. |
 
-When the host leaves/disconnects, the room's local movie is auto-closed (`mv.close` broadcast + persisted reset) — the file lives only on their device.
+When the host leaves/disconnects, the room's local movie is auto-closed (`mv.close` broadcast + persisted reset) — the file lives only on their device. A viewer-side watchdog restarts ICE and shows a visible retry toast instead of a silent black screen; ICE uses Google STUN with a community TURN fallback (openrelay.metered.ca) for hard-NAT peers.
 
 ## Administration
 Planned (M11): `GET /api/admin/stats` behind `ADMIN_TOKEN` — returns rooms, members, calls, storage usage. Not implemented yet (no fake endpoints shipped).
