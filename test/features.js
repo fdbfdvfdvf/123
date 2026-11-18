@@ -79,9 +79,14 @@ const once = (s, ev) => new Promise((res) => s.once(ev, res));
   A.emit('rtc.join', { mic: true, cam: false });
   const rr = await Promise.race([rosterP, sleep(2000).then(() => null)]);
   check('rtc.roster شامل A', rr && rr.list.length === 1 && rr.list[0].name === 'میزبان');
-  const rosterP2 = new Promise((res) => A.once('rtc.roster', res));
+  const rosterP2 = new Promise((res) => {
+    const t = setTimeout(() => res(null), 3000);
+    A.on('rtc.roster', (p) => {   // نسخهٔ معوقِ join خودِ A را رد کن — فقط لیست دونفره معتبر است
+      if (p.list.length === 2) { clearTimeout(t); A.off('rtc.roster'); res(p); }
+    });
+  });
   B.emit('rtc.join', { mic: true, cam: true });
-  const rr2 = await Promise.race([rosterP2, sleep(2000).then(() => null)]);
+  const rr2 = await rosterP2;
   check('دو نفر در تماس', rr2 && rr2.list.length === 2);
   const rr3 = await new Promise((res) => {
     const t = setTimeout(() => res(null), 3000);
