@@ -8,22 +8,42 @@ const mvf = require('./mvfiles');
 
 const rid = () => crypto.randomBytes(8).toString('hex');
 
-function newRoom(id, code, passHash) {
+function newRoom(id, code, passHash, name) {
   return {
-    id, code, passHash: passHash || null,
-    members: new Map(),           // sid -> {uid, name, role, side, joinedAt}
+    id, code, passHash: passHash || null, name: (name || '').trim().slice(0, 60) || code,
+    members: new Map(),           // sid -> {uid, name, role, side, joinedAt, inCall, mic, cam, screen}
     hostUid: null, controller: null,
     chat: [], strokes: [],
     cov: { stack: [], idx: -1, zoom: 1 },
     yt: { v: null, hostUid: null, act: 'pause', pos: 0, rate: 1 },
     tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 }, sides: { x: null, o: null } },
     mv: { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 },
+    theme: 'default',
+    rps: { seats: { p1: null, p2: null }, picks: { p1: null, p2: null }, wins: { p1: 0, p2: 0 }, phase: 'pick', last: null },
     emptySince: null,
   };
 }
 
 function roster(room) {
-  return [...room.members.values()].map((m) => ({ uid: m.uid, name: m.name, role: m.role, side: m.side }));
+  return [...room.members.values()].map((m) => ({ uid: m.uid, name: m.name, role: m.role, side: m.side, inCall: !!m.inCall, mic: !!m.mic, cam: !!m.cam, screen: !!m.screen }));
+}
+
+const THEMES = ['default', 'cafe', 'pub', 'drivein', 'arcade'];
+
+// اعضای در حال تماس — مبنای mesh WebRTC
+function callList(room) {
+  return [...room.members.values()].filter((m) => m.inCall).map((m) => ({ uid: m.uid, name: m.name }));
+}
+
+// نمای عمومی RPS — انتخاب‌ها فقط در فاز reveal فاش می‌شوند
+function rpsView(room) {
+  const r = room.rps;
+  const seat = (s) => {
+    const uid = r.seats[s];
+    const m = uid && [...room.members.values()].find((x) => x.uid === uid);
+    return { uid, name: m ? m.name : null, picked: !!r.picks[s] };
+  };
+  return { seats: { p1: seat('p1'), p2: seat('p2') }, wins: r.wins, phase: r.phase, picks: r.phase === 'reveal' ? r.picks : null, last: r.last };
 }
 
 // موقعیت مرجع فیلم با پیش‌روی زمانی — کسی که وسط فیلم می‌پیوندد عقب نمی‌ماند
@@ -41,6 +61,7 @@ function stateSnapshot(room) {
       ? { active: true, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: mvPos(room.mv), act: room.mv.act, rate: room.mv.rate, url: `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` }
       : { active: false, hostUid: null },
     controller: room.controller, hostUid: room.hostUid,
+    theme: room.theme, rps: rpsView(room), rtc: callList(room),
   };
 }
 
@@ -64,7 +85,7 @@ function install(io, store) {
     if (room) return room;
     const row = await store.getRoom(code);
     if (!row) return null;
-    room = newRoom(row.id, row.code, row.pass_hash);
+    room = newRoom(row.id, row.code, row.pass_hash, row.name);
     const [msgs, strks, st] = await Promise.all([store.getMessages(row.id), store.getStrokes(row.id), store.getState(row.id)]);
     room.chat = msgs.map((m) => ({ name: m.name, body: m.body, ts: Number(m.ts) }));
     room.strokes = strks;
@@ -72,6 +93,8 @@ function install(io, store) {
     try { if (st.yt) room.yt = { ...room.yt, ...JSON.parse(st.yt) }; } catch {}
     try { if (st.tt) room.tt = { ...room.tt, ...JSON.parse(st.tt) }; } catch {}
     try { if (st.mv) room.mv = { ...room.mv, ...JSON.parse(st.mv) }; } catch {}
+    try { if (st.rps) room.rps = { ...room.rps, ...JSON.parse(st.rps) }; } catch {}
+    try { if (st.theme && THEMES.includes(st.theme)) room.theme = st.theme; } catch {}
     rooms.set(code, room);
     return room;
   }
@@ -87,6 +110,8 @@ function install(io, store) {
         await store.setState(room.id, 'yt', JSON.stringify({ v: room.yt.v, act: 'pause', pos: 0, rate: 1 }));
         await store.setState(room.id, 'tt', JSON.stringify({ cells: room.tt.cells, turn: room.tt.turn, winner: room.tt.winner, line: room.tt.line, scores: room.tt.scores }));
         await store.setState(room.id, 'mv', JSON.stringify(room.mv));
+        await store.setState(room.id, 'theme', room.theme);
+        await store.setState(room.id, 'rps', JSON.stringify({ seats: room.rps.seats, wins: room.rps.wins, phase: room.rps.phase, last: room.rps.last }));
       } catch (e) { console.warn('persist state', e.message); }
     }
     dirty.clear();
@@ -114,7 +139,13 @@ function install(io, store) {
       room.hostUid = rest.length ? rest[0].uid : null;
       if (rest.length) rest[0].role = 'host';
     }
+    // صندلی RPS و حضور تماس عضوِ خارج‌شده پاک می‌شود
+    let rpsChanged = false;
+    for (const s of ['p1', 'p2']) if (room.rps.seats[s] === m.uid) { room.rps.seats[s] = null; room.rps.picks[s] = null; room.rps.phase = 'pick'; rpsChanged = true; }
+    if (room.rps.phase === 'reveal' && rpsChanged) room.rps.phase = 'pick';
     io.to(room.code).emit('roster', { list: roster(room), hostUid: room.hostUid, controller: room.controller });
+    if (rpsChanged) io.to(room.code).emit('rps', rpsView(room));
+    if (m.inCall) io.to(room.code).emit('rtc.roster', { list: callList(room) });
     io.to(room.code).emit('sys', { msg: `${m.name}${reason || ' خارج شد'}`, ts: Date.now() });
     if (room.members.size === 0) room.emptySince = Date.now();
   }
@@ -145,7 +176,7 @@ function install(io, store) {
 
         const uid = rid();
         const isFirst = room.members.size === 0;
-        const member = { uid, name, role: isFirst || !room.hostUid ? 'host' : 'guest', joinedAt: Date.now() };
+        const member = { uid, name, role: isFirst || !room.hostUid ? 'host' : 'guest', joinedAt: Date.now(), inCall: false, mic: false, cam: false, screen: false };
         if (member.role === 'host') room.hostUid = uid;
         // سمت‌های تیک‌تاک‌تو: دو نفر اول
         if (!room.tt.sides.x || ![...room.members.values()].some((x) => x.uid === room.tt.sides.x)) room.tt.sides.x = uid;
@@ -364,7 +395,10 @@ function install(io, store) {
       io.to(entry[0]).emit('kicked');
       entry[0].disconnect(true);
       room.members.delete(entry[0]);
+      for (const s of ['p1', 'p2']) if (room.rps.seats[s] === entry[1].uid) { room.rps.seats[s] = null; room.rps.picks[s] = null; room.rps.phase = 'pick'; }
       io.to(room.code).emit('roster', { list: roster(room), hostUid: room.hostUid, controller: room.controller });
+      if (entry[1].inCall) io.to(room.code).emit('rtc.roster', { list: callList(room) });
+      io.to(room.code).emit('rps', rpsView(room));
     });
 
     socket.on('rt.sig', (p) => {
@@ -375,6 +409,99 @@ function install(io, store) {
       if (!target) return;
       const payload = JSON.stringify(p?.data || {}).slice(0, 16384);
       io.to(target[0]).emit('rt.sig', { from: m.uid, data: JSON.parse(payload) });
+    });
+
+    /* ═══ تم اتاق (سفارشی‌سازی به سبک Kosmi) — فقط میزبان ═══ */
+    socket.on('room.theme', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (room.hostUid !== m.uid) return socket.emit('err', { code: 'forbidden' });
+      const t = safeStr(p?.theme, 20);
+      if (!THEMES.includes(t)) return socket.emit('err', { code: 'badtheme' });
+      room.theme = t;
+      io.to(room.code).emit('room.theme', { theme: t });
+      persistState(room.code);
+    });
+
+    /* ═══ صدا و تصویر — حضور در تماس؛ سیگنالینگ از rt.sig رله می‌شود ═══ */
+    socket.on('rtc.join', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (!limits.check(`rtcjoin:${socket.id}`, 8, 60000)) return socket.emit('err', { code: 'rate' });
+      if (!m.inCall && callList(room).length >= 10) return socket.emit('err', { code: 'callfull' });
+      m.inCall = true;
+      m.mic = p?.mic !== false; m.cam = !!p?.cam; m.screen = false;
+      io.to(room.code).emit('rtc.roster', { list: callList(room) });
+      io.to(room.code).emit('roster', { list: roster(room), hostUid: room.hostUid, controller: room.controller });
+    });
+
+    socket.on('rtc.leave', () => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m || !m.inCall) return;
+      m.inCall = false; m.mic = false; m.cam = false; m.screen = false;
+      io.to(room.code).emit('rtc.roster', { list: callList(room) });
+      io.to(room.code).emit('roster', { list: roster(room), hostUid: room.hostUid, controller: room.controller });
+    });
+
+    socket.on('rtc.state', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m || !m.inCall) return;
+      if (!limits.check(`rtcstate:${socket.id}`, 30, 10000)) return;
+      if ('mic' in (p || {})) m.mic = !!p.mic;
+      if ('cam' in (p || {})) m.cam = !!p.cam;
+      if ('screen' in (p || {})) m.screen = !!p.screen;
+      io.to(room.code).emit('rtc.state', { uid: m.uid, mic: m.mic, cam: m.cam, screen: m.screen });
+    });
+
+    /* ═══ سنگ‌کاغذقیچی — دومین بازی ماژولار؛ انتخاب‌ها مخفی تا هر دو بزنند ═══ */
+    socket.on('rps.seat', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (!limits.check(`rps:${socket.id}`, 20, 10000)) return;
+      const seat = p?.seat === null || p?.seat === undefined ? null : safeStr(p.seat, 3);
+      if (seat !== null && !['p1', 'p2'].includes(seat)) return socket.emit('err', { code: 'badmove' });
+      if (seat === null) {
+        for (const s of ['p1', 'p2']) if (room.rps.seats[s] === m.uid) { room.rps.seats[s] = null; room.rps.picks[s] = null; }
+      } else {
+        for (const s of ['p1', 'p2']) if (room.rps.seats[s] === m.uid) { room.rps.seats[s] = null; room.rps.picks[s] = null; }
+        if (room.rps.seats[seat] && room.rps.seats[seat] !== m.uid) return socket.emit('err', { code: 'seatbusy' });
+        room.rps.seats[seat] = m.uid;
+      }
+      room.rps.phase = 'pick';
+      io.to(room.code).emit('rps', rpsView(room));
+      persistState(room.code);
+    });
+
+    socket.on('rps.pick', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (!limits.check(`rps:${socket.id}`, 20, 10000)) return;
+      const seat = room.rps.seats.p1 === m.uid ? 'p1' : room.rps.seats.p2 === m.uid ? 'p2' : null;
+      if (!seat) return socket.emit('err', { code: 'noseat' });
+      if (room.rps.phase !== 'pick') return socket.emit('err', { code: 'badmove' });
+      const pick = safeStr(p?.pick, 2);
+      if (!['r', 'p', 's'].includes(pick)) return socket.emit('err', { code: 'badmove' });
+      room.rps.picks[seat] = pick;
+      if (room.rps.picks.p1 && room.rps.picks.p2) {
+        const a = room.rps.picks.p1, b = room.rps.picks.p2;
+        const beats = { r: 's', p: 'r', s: 'p' };
+        room.rps.phase = 'reveal';
+        if (a === b) room.rps.last = { a, b, result: 'draw' };
+        else if (beats[a] === b) { room.rps.wins.p1++; room.rps.last = { a, b, result: 'p1' }; }
+        else { room.rps.wins.p2++; room.rps.last = { a, b, result: 'p2' }; }
+      }
+      io.to(room.code).emit('rps', rpsView(room));
+      persistState(room.code);
+    });
+
+    socket.on('rps.reset', (p) => {
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (p?.newmatch) { room.rps.wins = { p1: 0, p2: 0 }; room.rps.last = null; }
+      room.rps.picks = { p1: null, p2: null };
+      room.rps.phase = 'pick';
+      io.to(room.code).emit('rps', rpsView(room));
+      persistState(room.code);
     });
 
     socket.on('sync', (_p, ack) => {

@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   id TEXT PRIMARY KEY,
   code TEXT UNIQUE NOT NULL,
   pass_hash TEXT,
+  name TEXT,
   created_at BIGINT NOT NULL,
   closed_at BIGINT
 );
@@ -49,10 +50,10 @@ class FileStore {
     setInterval(() => this._flush(), 2000).unref?.();
   }
   _flush() { try { fs.writeFileSync(this.file, JSON.stringify(this.d)); } catch (e) { console.warn('store flush', e.message); } }
-  async createRoom({ id, code, passHash }) { this.d.rooms[id] = { id, code, passHash: passHash || null, created_at: Date.now(), closed_at: null }; this._flush(); }
+  async createRoom({ id, code, passHash, name }) { this.d.rooms[id] = { id, code, passHash: passHash || null, name: name || code, created_at: Date.now(), closed_at: null }; this._flush(); }
   async getRoom(code) {
     const r = Object.values(this.d.rooms).find((x) => x.code === code && !x.closed_at) || null;
-    return r ? { id: r.id, code: r.code, pass_hash: r.passHash, created_at: r.created_at, closed_at: r.closed_at } : null;
+    return r ? { id: r.id, code: r.code, pass_hash: r.passHash, name: r.name || r.code, created_at: r.created_at, closed_at: r.closed_at } : null;
   }
   async closeRoom(id) { if (this.d.rooms[id]) { this.d.rooms[id].closed_at = Date.now(); this._flush(); } }
   async addMessage(roomId, m) { (this.d.messages[roomId] ||= []).push(m); if (this.d.messages[roomId].length > 2000) this.d.messages[roomId] = this.d.messages[roomId].slice(-1000); }
@@ -68,12 +69,16 @@ class FileStore {
 
 class PgStore {
   constructor(url) { this.pool = new Pool({ connectionString: url, max: 5 }); }
-  async init() { await this.pool.query(DDL); }
-  async createRoom({ id, code, passHash }) {
-    await this.pool.query('INSERT INTO rooms (id, code, pass_hash, created_at) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING', [id, code, passHash || null, Date.now()]);
+  async init() {
+    await this.pool.query(DDL);
+    // مهاجرت سبک برای استقرارهای قدیمی: ستون name اتاق
+    await this.pool.query('ALTER TABLE rooms ADD COLUMN IF NOT EXISTS name TEXT').catch(() => {});
+  }
+  async createRoom({ id, code, passHash, name }) {
+    await this.pool.query('INSERT INTO rooms (id, code, pass_hash, name, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING', [id, code, passHash || null, name || code, Date.now()]);
   }
   async getRoom(code) {
-    const r = await this.pool.query('SELECT id, code, pass_hash FROM rooms WHERE code=$1 AND closed_at IS NULL ORDER BY created_at DESC LIMIT 1', [code]);
+    const r = await this.pool.query('SELECT id, code, pass_hash, name FROM rooms WHERE code=$1 AND closed_at IS NULL ORDER BY created_at DESC LIMIT 1', [code]);
     return r.rows[0] || null;
   }
   async closeRoom(id) { await this.pool.query('UPDATE rooms SET closed_at=$2 WHERE id=$1', [id, Date.now()]); }

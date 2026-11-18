@@ -143,6 +143,51 @@ header .logo{font-size:20px}
 .msub{color:var(--txt3);font-size:12px}
 .swatch{width:26px;height:26px;border-radius:8px;border:2px solid var(--line2);padding:0}
 .swatch.on{border-color:#fff}
+
+/* ═══ لابی اتاق‌های عمومی ═══ */
+#lobbySec{margin-top:26px}
+#lobbySec h2{font-size:17px;margin-bottom:10px}
+#lobbyGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.lobbyCard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:12px;text-align:right;display:flex;flex-direction:column;gap:8px}
+.lobbyCard b{font-size:14px}
+.lobbyCard .cnt{font-size:12px;color:var(--txt2)}
+.lobbyEmpty{color:var(--txt3);font-size:13px;padding:6px 2px}
+
+/* ═══ تم‌های اتاق — متغیرهای رنگ کل اپ ═══ */
+body[data-theme="cafe"]{--grad:linear-gradient(135deg,#d97706,#b45309 55%,#92400e);--bg:#140d08;--bg2:#1d120a}
+body[data-theme="pub"]{--grad:linear-gradient(135deg,#22c55e,#15803d 55%,#166534);--bg:#071009;--bg2:#0b1a0f}
+body[data-theme="drivein"]{--grad:linear-gradient(135deg,#fb7185,#e11d48 55%,#9f1239);--bg:#120610;--bg2:#1c0a18}
+body[data-theme="arcade"]{--grad:linear-gradient(135deg,#38bdf8,#0ea5e9 55%,#2563eb);--bg:#050a14;--bg2:#0a1224}
+
+/* ═══ تماس صوتی/تصویری ═══ */
+#callDock{display:flex;gap:6px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:rgba(13,8,26,.8);flex-wrap:wrap}
+#callDock.live .callCtl{display:inline-flex}
+#callTray{display:none;gap:10px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line);background:rgba(13,8,26,.35)}
+#callTray.on{display:flex}
+.tile{position:relative;flex:0 0 auto;width:168px;height:96px;border-radius:12px;overflow:hidden;background:#171126;border:2px solid transparent}
+.tile.wide{width:300px}
+.tile video{width:100%;height:100%;object-fit:cover;background:#000;display:block}
+.tile .tav{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-weight:800;background:var(--panel2)}
+.tile .tn{position:absolute;bottom:4px;inset-inline-start:6px;font-size:11px;font-weight:700;background:rgba(0,0,0,.55);padding:1px 7px;border-radius:8px;max-width:88%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .tbadge{position:absolute;top:4px;inset-inline-end:6px;font-size:11px;background:rgba(0,0,0,.55);padding:1px 6px;border-radius:8px;display:flex;gap:3px}
+.tile.speaking{border-color:var(--ok);box-shadow:0 0 0 2px rgba(52,211,153,.4)}
+
+/* ═══ سنگ‌کاغذقیچی ═══ */
+#rpsWrap{flex:1;display:none;place-items:center}
+#rpsWrap.on{display:grid}
+.rpsBox{text-align:center;width:min(100%,420px)}
+.rpsSeats{display:flex;gap:10px;justify-content:center}
+.rpsSeats button{flex:1;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:13px;min-height:52px}
+.rpsSeats button.mine{border-color:var(--vio2);background:rgba(124,58,237,.18)}
+.rpsPicks{display:flex;gap:24px;justify-content:center;align-items:center;margin:16px 0;font-size:44px;min-height:64px}
+.rpsPicks .vs{font-size:15px;color:var(--txt3)}
+.rpsBtns{display:flex;gap:10px;justify-content:center}
+.rpsBtns button{font-size:26px;padding:10px 16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line2)}
+.rpsBtns button:hover{border-color:var(--vio2)}
+.gameTabs{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
+.gameTabs button{padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--txt2)}
+.gameTabs button.on{background:var(--grad);color:#fff;border-color:transparent}
+
 </style>
 </head>
 <body>
@@ -169,6 +214,10 @@ header .logo{font-size:20px}
         <button class="btn primary" id="btnJoin" style="width:100%" data-i18n="joinGo">ورود</button>
       </div>
     </div>
+    <div id="lobbySec" class="hide">
+      <h2 data-i18n="lobbyT">اتاق‌های عمومی فعال</h2>
+      <div id="lobbyGrid"></div>
+    </div>
     <div class="feats">
       <div class="feat"><b data-i18n="f1t">اتاق دائمی</b><span data-i18n="f1p">وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.</span></div>
       <div class="feat"><b data-i18n="f2t">چت زنده</b><span data-i18n="f2p">تاریخچهٔ ماندگار و اعلان ورود و خروج.</span></div>
@@ -190,6 +239,7 @@ header .logo{font-size:20px}
     <div class="logo">Together</div>
     <span class="chip" id="codeChip" title="کد اتاق">-----</span>
     <button class="btn sm" id="btnInvite">🔗 <span data-i18n="invite">دعوت</span></button>
+    <button class="btn sm hide" id="themeBtn">🎨 <span id="themeLbl"></span></button>
     <span class="chip hide" id="netChip">…</span>
     <div class="hspacer"></div>
     <button class="btn icon sm" id="chatToggle">💬</button>
@@ -211,6 +261,7 @@ header .logo{font-size:20px}
         <button data-tab="coview">🌐 <span data-i18n="tabCoview">هم‌مرورگری</span></button>
         <button data-tab="game">🎮 <span data-i18n="tabGame">بازی</span></button>
       </div>
+      <div id="callTray"></div>
       <div class="stage">
         <!-- یوتیوب -->
         <div class="tabPane on" id="pane-yt">
@@ -296,6 +347,10 @@ header .logo{font-size:20px}
         </div>
         <!-- بازی -->
         <div class="tabPane" id="pane-game">
+          <div class="gameTabs">
+            <button id="gTT" class="on" data-g="tt"></button>
+            <button id="gRPS" data-g="rps"></button>
+          </div>
           <div id="ttWrap">
             <div>
               <div id="ttBoard"></div>
@@ -304,7 +359,40 @@ header .logo{font-size:20px}
               <p class="msub" style="text-align:center;margin-top:10px" data-i18n="ttNote">دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.</p>
             </div>
           </div>
+          <div id="rpsWrap">
+            <div class="rpsBox">
+              <div class="rpsSeats">
+                <button id="rpsSeat1" data-i18n="takeSeat">صندلی ۱ — نشستن</button>
+                <button id="rpsSeat2" data-i18n="takeSeat">صندلی ۲ — نشستن</button>
+              </div>
+              <div class="rpsPicks"><span id="rpsPick1">—</span><span class="vs">VS</span><span id="rpsPick2">—</span></div>
+              <div id="rpsStatus" class="msub" style="margin-bottom:12px">—</div>
+              <div class="rpsBtns">
+                <button class="rpsP" data-p="r" title="سنگ">✊</button>
+                <button class="rpsP" data-p="p" title="کاغذ">✋</button>
+                <button class="rpsP" data-p="s" title="قیچی">✌️</button>
+              </div>
+              <div style="margin-top:14px">
+                <span class="chip" id="rpsScores">۰ — ۰</span>
+                <button class="btn sm" id="rpsNext" data-i18n="rpsNext">دست بعدی</button>
+                <button class="btn sm" id="rpsNew" data-i18n="rpsNew">مسابقهٔ جدید</button>
+              </div>
+              <p class="msub" style="margin-top:10px" data-i18n="rpsNote">دو نفر روی صندلی می‌نشینند؛ انتخاب‌ها مخفی می‌ماند تا هر دو بزنند — اعتبارسنجی روی سرور.</p>
+            </div>
+          </div>
         </div>
+      </div>
+      <div id="callDock">
+        <button class="btn primary sm" id="callJoinBtn">🎙 <span data-i18n="voiceJoin">وصل صدا</span></button>
+        <div class="callCtl">
+          <button class="btn icon sm" id="callMicBtn" title="میکروفن">🎙</button>
+          <button class="btn icon sm" id="callCamBtn" title="دوربین">📷</button>
+          <button class="btn icon sm" id="callScreenBtn" title="اشتراک صفحه">🖥</button>
+          <button class="btn icon sm" id="callSoundBtn" title="صدای همه">🔊</button>
+          <button class="btn sm danger" id="callLeaveBtn" data-i18n="voiceLeave">قطع صدا</button>
+          <span class="chip" id="callCnt">0</span>
+        </div>
+        <span class="msub" id="callHint"></span>
       </div>
     </div>
     <aside id="chatPane">
@@ -331,8 +419,8 @@ header .logo{font-size:20px}
 <script>
 /* ═══ i18n ═══ */
 const I18N = {
-  fa: { lsub:'اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.', mkRoom:'ساخت اتاق', joinRoom:'ورود با کد', mkGo:'ساخت و ورود', joinGo:'ورود', yourName:'اسم شما', roomName:'اسم اتاق (اختیاری)', optPass:'رمز اتاق (اختیاری)', roomCode:'کد اتاق، مثلاً 7XK2M', roomPass:'رمز (اگر دارد)', f1t:'اتاق دائمی', f1p:'وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.', f2t:'چت زنده', f2p:'تاریخچهٔ ماندگار و اعلان ورود و خروج.', f3t:'یوتیوب همگام', f3p:'پخش/توقف/سیک برای همه؛ هر کسی می‌تواند ویدیو بگذارد و همه کنترل دارند.', f4t:'فیلم مشترک', f4p:'فیلم روی سرور آپلود می‌شود و همه هم‌زمان از سرور می‌بینند؛ پخش، توقف و سیک برای همه.', f5t:'تخته و هم‌مرورگری', f5p:'نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.', f6t:'بازی و مرجع حق سرور', f6p:'تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.', invite:'دعوت', leave:'خروج', online:'آنلاین در اتاق', ctlTitle:'کنترل', tabYt:'یوتیوب', tabMovie:'فیلم مشترک', tabBoard:'تخته', tabCoview:'هم‌مرورگری', tabGame:'بازی', setVideo:'تنظیم ویدیو', ytUrlPh:'لینک یا آیدی ویدیوی یوتیوب', ytEmpty:'با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.', play:'پخش', pause:'توقف', ytNote:'هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).', mvPick:'انتخاب فیلم', mvEject:'پایان پخش', ctrlAll:'کنترل: همه', ctrlHost:'کنترل: میزبان', mvEmpty:'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو روی سرور آپلود می‌شود و همه از سرور می‌بینند.', mvReceiving:'در حال آپلود', mvFrom:'از', mvReady:'فیلم روی سرور آماده شد 🎬', mvClosed:'پخش فیلم پایان یافت', mvNotSup:'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream نیست) — از Chrome/Firefox دسکتاپ استفاده کنید.', mvUnmuteHint:'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید', mvNote:'فیلم یک‌بار روی سرور آپلود می‌شود و همه مستقیم از سرور پخش می‌کنند؛ پخش/توقف/سیک برای همه با اولویت برابر — ضربان هر ۲.۵ ثانیه و اصلاح خودکار انحراف. حداکثر ۲ گیگابایت.', mvUploading:'در حال آپلود', mvTooBig:'حجم فیلم بیش از ۲ گیگابایت است', eraser:'پاک‌کن', undo:'برگشت', clear:'پاک‌کردن همه', boardNote:'هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.', urlPh:'آدرس سایت — مثلاً https://example.com', go:'برو', covEmpty:'سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.', covNote:'برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.', reset:'شروع مجدد', ttNote:'دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.', chat:'چت', msgPh:'پیام…', copied:'کپی شد ✓', invTitle:'لینک دعوت کپی شد', joined:'وارد اتاق شدی ✓', locked:'کنترل در اختیار نفر دیگری است', rate:'خیلی سریع! کمی آهسته‌تر', kicked:'میزبان شما را از اتاق حذف کرد', rejoin:'اتصال قطع شد؛ در حال اتصال مجدد…', badUrl:'آدرس معتبر نیست', host:'میزبان', you:'شما', winX:'✕ برد! 🎉', winO:'⭕ برد! 🎉', draw:'مساوی!', turnX:'نوبت ✕', turnO:'نوبت ⭕', spec:'تماشاچی', linkCopied:'لینک دعوت کپی شد — بفرستش برای طرف مقابل', badmove:'حرکت غیرقانونی — منتظر نوبت خودتان بمانید', forbidden:'دسترسی ندارید' },
-  en: { lsub:'A persistent online room with chat, whiteboard, YouTube, shared movies and games — no sign-up.', mkRoom:'Create a room', joinRoom:'Join by code', mkGo:'Create & join', joinGo:'Join', yourName:'Your name', roomName:'Room name (optional)', optPass:'Room password (optional)', roomCode:'Room code, e.g. 7XK2M', roomPass:'Password (if any)', f1t:'Persistent rooms', f1p:'State lives on the server — reconnect and everything is still there.', f2t:'Live chat', f2p:'Durable history with join/leave notices.', f3t:'Synced YouTube', f3p:'Play/pause/seek — everyone controls; anyone can set the video.', f4t:'Movie night', f4p:'The movie is uploaded to the server; everyone watches from it in sync — play and seek for all.', f5t:'Board & co-view', f5p:'Shared drawing and synced site navigation.', f6t:'Server-authoritative games', f6p:'Tic-tac-toe turns validated on the server — no cheating.', invite:'Invite', leave:'Leave', online:'Online in room', ctlTitle:'Control', tabYt:'YouTube', tabMovie:'Movie night', tabBoard:'Board', tabCoview:'Co-view', tabGame:'Game', setVideo:'Set video', ytUrlPh:'YouTube URL or video ID', ytEmpty:'Use “Set video” to play a YouTube for everyone; playback stays in sync.', play:'Play', pause:'Pause', ytNote:'Each device renders its own player; commands sync via the server (periodic sync every 8s).', mvPick:'Pick a video', mvEject:'Stop sharing', ctrlAll:'Control: everyone', ctrlHost:'Control: host', mvEmpty:'No movie playing yet — “Pick a video” uploads it to the server and everyone streams from there.', mvReceiving:'Uploading', mvFrom:'from', mvReady:'Movie is on the server 🎬', mvClosed:'Movie sharing ended', mvNotSup:'Local-video sharing is not supported here (no captureStream) — use desktop Chrome/Firefox.', mvUnmuteHint:'Tap the speaker button to enable sound', mvNote:'The movie is uploaded to the server once; everyone streams it directly — play/pause/seek for all with equal priority; 2.5s heartbeats auto-correct any drift. Max 2 GB.', mvUploading:'Uploading', mvTooBig:'Movie is larger than 2 GB', eraser:'Eraser', undo:'Undo', clear:'Clear all', boardNote:'Drawings appear live for everyone and persist on the server; you can see the other side’s cursor too.', urlPh:'Site URL — e.g. https://example.com', go:'Go', covEmpty:'Open a site so we both see it together; navigation is shared.', covNote:'Some sites (like Google) refuse to be embedded and show a fallback message. Click/typing inside external sites is not possible in this edition; full control needs the server-browser edition on the roadmap.', reset:'Reset', ttNote:'First two members of the room become ✕ and ⭕; turns are validated on the server.', chat:'Chat', msgPh:'Message…', copied:'Copied ✓', invTitle:'Invite link copied', joined:'You joined the room ✓', locked:'Control is held by someone else', rate:'Too fast! Slow down a bit', kicked:'The host removed you from the room', rejoin:'Connection lost; reconnecting…', badUrl:'Invalid URL', host:'host', you:'you', winX:'✕ wins! 🎉', winO:'⭕ wins! 🎉', draw:'Draw!', turnX:'✕ to move', turnO:'⭕ to move', spec:'spectator', linkCopied:'Invite link copied — send it to your friend', badmove:'Illegal move — wait for your turn', forbidden:'Not allowed' },
+  fa: { lsub:'اتاق آنلاین مشترک با اتاق دائمی، چت، تخته، یوتیوب، فیلم مشترک و بازی — بدون ثبت‌نام.', mkRoom:'ساخت اتاق', joinRoom:'ورود با کد', mkGo:'ساخت و ورود', joinGo:'ورود', yourName:'اسم شما', roomName:'اسم اتاق (اختیاری)', optPass:'رمز اتاق (اختیاری)', roomCode:'کد اتاق، مثلاً 7XK2M', roomPass:'رمز (اگر دارد)', f1t:'اتاق دائمی', f1p:'وضعیت روی سرور می‌ماند؛ بعد از قطعی هم همه‌چیز سر جایش است.', f2t:'چت زنده', f2p:'تاریخچهٔ ماندگار و اعلان ورود و خروج.', f3t:'یوتیوب همگام', f3p:'پخش/توقف/سیک برای همه؛ هر کسی می‌تواند ویدیو بگذارد و همه کنترل دارند.', f4t:'فیلم مشترک', f4p:'فیلم روی سرور آپلود می‌شود و همه هم‌زمان از سرور می‌بینند؛ پخش، توقف و سیک برای همه.', f5t:'تخته و هم‌مرورگری', f5p:'نقاشی مشترک و ناوبری هماهنگ در سایت‌ها.', f6t:'بازی و مرجع حق سرور', f6p:'تیک‌تاک‌تو با اعتبارسنجی نوبت روی سرور — تقلب ممکن نیست.', invite:'دعوت', leave:'خروج', online:'آنلاین در اتاق', ctlTitle:'کنترل', tabYt:'یوتیوب', tabMovie:'فیلم مشترک', tabBoard:'تخته', tabCoview:'هم‌مرورگری', tabGame:'بازی', setVideo:'تنظیم ویدیو', ytUrlPh:'لینک یا آیدی ویدیوی یوتیوب', ytEmpty:'با «تنظیم ویدیو» یک یوتیوب برای همه بگذارید؛ پخش/توقف/سیک همه‌با هم همگام است.', play:'پخش', pause:'توقف', ytNote:'هر ویدیو روی دستگاه هر نفر جدا رندر می‌شود؛ فرمان‌ها از سرور همگام می‌شوند (سینک دوره‌ای هر ۸ ثانیه).', mvPick:'انتخاب فیلم', mvEject:'پایان پخش', ctrlAll:'کنترل: همه', ctrlHost:'کنترل: میزبان', mvEmpty:'هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو روی سرور آپلود می‌شود و همه از سرور می‌بینند.', mvReceiving:'در حال آپلود', mvFrom:'از', mvReady:'فیلم روی سرور آماده شد 🎬', mvClosed:'پخش فیلم پایان یافت', mvNotSup:'پخش اشتراکی فایل در این مرورگر پشتیبانی نمی‌شود (captureStream نیست) — از Chrome/Firefox دسکتاپ استفاده کنید.', mvUnmuteHint:'برای فعال‌شدن صدا، دکمهٔ بلندگو را بزنید', mvNote:'فیلم یک‌بار روی سرور آپلود می‌شود و همه مستقیم از سرور پخش می‌کنند؛ پخش/توقف/سیک برای همه با اولویت برابر — ضربان هر ۲.۵ ثانیه و اصلاح خودکار انحراف. حداکثر ۲ گیگابایت.', mvUploading:'در حال آپلود', mvTooBig:'حجم فیلم بیش از ۲ گیگابایت است', eraser:'پاک‌کن', undo:'برگشت', clear:'پاک‌کردن همه', boardNote:'هر چیزی بکشید برای همه زنده می‌آید و روی سرور می‌ماند؛ نشانگرِ طرف مقابل را هم می‌بینید.', urlPh:'آدرس سایت — مثلاً https://example.com', go:'برو', covEmpty:'سایتی را باز کنید تا هر دو نفر هم‌زمان آن را ببینیم؛ ناوبری مشترک است.', covNote:'برخی سایت‌ها اجازهٔ نمایش داخل سایت دیگر نمی‌دهند (مثل گوگل) — آن‌وقت پیام جایگزین می‌بینید. کلیک/تایپ داخل سایت‌های خارجی در این نسخه ممکن نیست؛ برای کنترل کامل، نسخهٔ مرورگر سرور در نقشهٔ راه است.', reset:'شروع مجدد', ttNote:'دو نفر اولِ اتاق ✕ و ⭕ می‌شوند؛ اعتبارسنجی نوبت روی سرور است.', chat:'چت', msgPh:'پیام…', copied:'کپی شد ✓', invTitle:'لینک دعوت کپی شد', joined:'وارد اتاق شدی ✓', locked:'کنترل در اختیار نفر دیگری است', rate:'خیلی سریع! کمی آهسته‌تر', kicked:'میزبان شما را از اتاق حذف کرد', rejoin:'اتصال قطع شد؛ در حال اتصال مجدد…', badUrl:'آدرس معتبر نیست', host:'میزبان', you:'شما', winX:'✕ برد! 🎉', winO:'⭕ برد! 🎉', draw:'مساوی!', turnX:'نوبت ✕', turnO:'نوبت ⭕', spec:'تماشاچی', linkCopied:'لینک دعوت کپی شد — بفرستش برای طرف مقابل', badmove:'حرکت غیرقانونی — منتظر نوبت خودتان بمانید', forbidden:'دسترسی ندارید', lobbyT:'اتاق‌های عمومی فعال', lobbyEmpty:'فعلاً اتاق عمومی فعالی نیست — اولین نفر باش!', lobbyJoin:'ورود', voiceJoin:'وصل صدا', voiceLeave:'قطع صدا', callFull:'ظرفیت تماس پر است (۱۰ نفر)', rtcHint:'برای شنیدن دیگران دکمهٔ 🔊 را بزنید', soundAll:'صدای همه فعال شد', seatBusy:'این صندلی اشغال است', noSeat:'اول روی یک صندلی بنشین', takeSeat:'صندلی خالی — نشستن', leaveSeat:'بلند شدن', rpsNext:'دست بعدی', rpsNew:'مسابقهٔ جدید', rpsNote:'دو نفر روی صندلی می‌نشینند؛ انتخاب‌ها مخفی می‌ماند تا هر دو بزنند — اعتبارسنجی روی سرور.', rpsYourTurn:'انتخابت را بزن!', rpsWaiting:'منتظر بازیکن‌ها…', rpsDraw:'مساوی!', rpsYouWin:'بردی! 🎉', rpsYouLose:'باختی!', rpsYou:'تو', thDefault:'کلاسیک', thCafe:'کافی‌شاپ', thPub:'پاب', thDrivein:'دریواین', thArcade:'آرکید', gTT:'⭕ تیک‌تاک‌تو', gRPS:'✊ سنگ‌کاغذقیچی' },
+  en: { lsub:'A persistent online room with chat, whiteboard, YouTube, shared movies and games — no sign-up.', mkRoom:'Create a room', joinRoom:'Join by code', mkGo:'Create & join', joinGo:'Join', yourName:'Your name', roomName:'Room name (optional)', optPass:'Room password (optional)', roomCode:'Room code, e.g. 7XK2M', roomPass:'Password (if any)', f1t:'Persistent rooms', f1p:'State lives on the server — reconnect and everything is still there.', f2t:'Live chat', f2p:'Durable history with join/leave notices.', f3t:'Synced YouTube', f3p:'Play/pause/seek — everyone controls; anyone can set the video.', f4t:'Movie night', f4p:'The movie is uploaded to the server; everyone watches from it in sync — play and seek for all.', f5t:'Board & co-view', f5p:'Shared drawing and synced site navigation.', f6t:'Server-authoritative games', f6p:'Tic-tac-toe turns validated on the server — no cheating.', invite:'Invite', leave:'Leave', online:'Online in room', ctlTitle:'Control', tabYt:'YouTube', tabMovie:'Movie night', tabBoard:'Board', tabCoview:'Co-view', tabGame:'Game', setVideo:'Set video', ytUrlPh:'YouTube URL or video ID', ytEmpty:'Use “Set video” to play a YouTube for everyone; playback stays in sync.', play:'Play', pause:'Pause', ytNote:'Each device renders its own player; commands sync via the server (periodic sync every 8s).', mvPick:'Pick a video', mvEject:'Stop sharing', ctrlAll:'Control: everyone', ctrlHost:'Control: host', mvEmpty:'No movie playing yet — “Pick a video” uploads it to the server and everyone streams from there.', mvReceiving:'Uploading', mvFrom:'from', mvReady:'Movie is on the server 🎬', mvClosed:'Movie sharing ended', mvNotSup:'Local-video sharing is not supported here (no captureStream) — use desktop Chrome/Firefox.', mvUnmuteHint:'Tap the speaker button to enable sound', mvNote:'The movie is uploaded to the server once; everyone streams it directly — play/pause/seek for all with equal priority; 2.5s heartbeats auto-correct any drift. Max 2 GB.', mvUploading:'Uploading', mvTooBig:'Movie is larger than 2 GB', eraser:'Eraser', undo:'Undo', clear:'Clear all', boardNote:'Drawings appear live for everyone and persist on the server; you can see the other side’s cursor too.', urlPh:'Site URL — e.g. https://example.com', go:'Go', covEmpty:'Open a site so we both see it together; navigation is shared.', covNote:'Some sites (like Google) refuse to be embedded and show a fallback message. Click/typing inside external sites is not possible in this edition; full control needs the server-browser edition on the roadmap.', reset:'Reset', ttNote:'First two members of the room become ✕ and ⭕; turns are validated on the server.', chat:'Chat', msgPh:'Message…', copied:'Copied ✓', invTitle:'Invite link copied', joined:'You joined the room ✓', locked:'Control is held by someone else', rate:'Too fast! Slow down a bit', kicked:'The host removed you from the room', rejoin:'Connection lost; reconnecting…', badUrl:'Invalid URL', host:'host', you:'you', winX:'✕ wins! 🎉', winO:'⭕ wins! 🎉', draw:'Draw!', turnX:'✕ to move', turnO:'⭕ to move', spec:'spectator', linkCopied:'Invite link copied — send it to your friend', badmove:'Illegal move — wait for your turn', forbidden:'Not allowed', lobbyT:'Active public rooms', lobbyEmpty:'No active public rooms right now — be the first!', lobbyJoin:'Join', voiceJoin:'Join call', voiceLeave:'Leave call', callFull:'Call is full (10 people)', rtcHint:'Tap 🔊 to hear the others', soundAll:'Everyone unmuted', seatBusy:'That seat is taken', noSeat:'Take a seat first', takeSeat:'Empty seat — sit', leaveSeat:'Stand up', rpsNext:'Next round', rpsNew:'New match', rpsNote:'Two players take the seats; picks stay hidden until both have chosen — validated on the server.', rpsYourTurn:'Make your pick!', rpsWaiting:'Waiting for players…', rpsDraw:'Draw!', rpsYouWin:'You win! 🎉', rpsYouLose:'You lose!', rpsYou:'you', thDefault:'Classic', thCafe:'Coffee shop', thPub:'Pub', thDrivein:'Drive-in', thArcade:'Arcade', gTT:'⭕ Tic-tac-toe', gRPS:'✊ Rock-paper-scissors' },
 };
 let LANG = localStorage.getItem('tg_lang') || (navigator.language?.startsWith('fa') ? 'fa' : 'fa');
 const T = (k) => (I18N[LANG] && I18N[LANG][k]) || I18N.fa[k] || k;
@@ -341,6 +429,8 @@ function applyI18n() {
   document.documentElement.dir = LANG === 'fa' ? 'rtl' : 'ltr';
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = T(el.dataset.i18n);
   for (const el of document.querySelectorAll('[data-i18n-ph]')) el.placeholder = T(el.dataset.i18nPh);
+  $('#gTT').textContent = T('gTT'); $('#gRPS').textContent = T('gRPS');
+  if (S.theme) $('#themeLbl').textContent = T('th' + S.theme[0].toUpperCase() + S.theme.slice(1));
   $('#langBtn').textContent = LANG === 'fa' ? 'EN' : 'فا';
 }
 const $ = (s) => document.querySelector(s);
@@ -387,8 +477,29 @@ $('#btnJoin').onclick = () => {
 };
 const hash = location.hash.match(/r=([A-Z0-9]{4,8})/i);
 if (hash) { $('#jnCode').value = hash[1].toUpperCase(); }
-function startJoin(code, pass) { S.code = code; S.pass = pass || ''; doJoin(); }
+function startJoin(code, pass) { S.code = code; S.pass = pass || ''; localStorage.setItem('tg_name', S.name || ''); stopLobby(); doJoin(); }
 function doJoin() { socket.emit('join', { code: S.code, name: S.name, pass: S.pass }, (res) => { if (!res?.ok) { toast(res?.err || 'خطا', 'bad'); S.code = null; } }); }
+
+/* ═══ لابی اتاق‌های عمومی ═══ */
+let lobbyTimer = null;
+async function refreshLobby() {
+  if (S.code) return stopLobby();
+  try {
+    const r = await fetch('/api/rooms'); const j = await r.json();
+    $('#lobbySec').classList.remove('hide');
+    const g = $('#lobbyGrid'); g.innerHTML = '';
+    if (!j.rooms?.length) { g.innerHTML = `<div class="lobbyEmpty">${T('lobbyEmpty')}</div>`; return; }
+    for (const it of j.rooms) {
+      const d = document.createElement('div'); d.className = 'lobbyCard';
+      d.innerHTML = `<b>${esc(it.name)}</b><span class="cnt">👥 ${it.online}${it.inCall ? ' · 🎙 ' + it.inCall : ''}</span>`;
+      const b = document.createElement('button'); b.className = 'btn sm primary'; b.textContent = T('lobbyJoin');
+      b.onclick = () => { S.name = $('#crName').value.trim() || localStorage.getItem('tg_name') || 'مهمان'; startJoin(it.code, ''); };
+      d.appendChild(b); g.appendChild(d);
+    }
+  } catch {}
+}
+function stopLobby() { if (lobbyTimer) { clearInterval(lobbyTimer); lobbyTimer = null; } }
+refreshLobby(); lobbyTimer = setInterval(refreshLobby, 12000);
 
 /* ═══ welcome / roster ═══ */
 socket.on('welcome', (p) => {
@@ -401,12 +512,15 @@ socket.on('welcome', (p) => {
   S.strokes = (p.state.strokes || []).map((s) => { try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
   resizeBoard(); redrawAll();
   applyCov(); applyYtSet(); renderTt(); applyMvState(); renderPeople();
+  applyTheme(p.state.theme); renderRps(p.state.rps);
+  $('#themeBtn').classList.toggle('hide', !S.isHost());
+  if (RTC.active) socket.emit('rtc.join', { mic: RTC.micOn, cam: RTC.camOn });   // بعد از ری‌کانکت دوباره وارد تماس شو
   toast(T('joined'), 'ok');
   if (!S.ytApiLoaded && S.yt.v) loadYtApi();
 });
 socket.on('roster', (p) => { S.roster = p.list; S.hostUid = p.hostUid; S.controller = p.controller; renderPeople(); });
 socket.on('sys', (p) => addChat({ sys: true, body: p.msg, ts: p.ts }));
-socket.on('err', (p) => toast(p.code === 'rate' ? T('rate') : p.code === 'locked' ? T('locked') : T(p.code === 'badurl' ? 'badUrl' : p.code) || p.code, 'bad'));
+socket.on('err', (p) => toast(p.code === 'rate' ? T('rate') : p.code === 'locked' ? T('locked') : p.code === 'seatbusy' ? T('seatBusy') : p.code === 'callfull' ? T('callFull') : p.code === 'noseat' ? T('noSeat') : T(p.code === 'badurl' ? 'badUrl' : p.code) || p.code, 'bad'));
 socket.on('kicked', () => { toast(T('kicked'), 'bad'); setTimeout(() => location.reload(), 1500); });
 socket.on('disconnect', () => { if (S.code) toast(T('rejoin'), 'bad'); });
 socket.on('connect', () => { if (S.code && S.name) doJoin(); });
@@ -417,10 +531,11 @@ function renderPeople() {
   for (const r of S.roster) {
     const me = S.you && r.uid === S.you.uid;
     const d = document.createElement('div'); d.className = 'person';
-    d.innerHTML = `<div class="av">${esc((r.name || '?')[0])}</div><div class="nm">${esc(r.name)}${me ? ` <span class="role">(${T('you')})</span>` : ''}<div class="role">${r.role === 'host' ? '👑 ' + T('host') : r.side === 'spec' ? T('spec') : ''}</div></div>${S.isHost() && !me ? `<button class="kick" data-uid="${r.uid}">✕</button>` : ''}`;
+    d.innerHTML = `<div class="av">${esc((r.name || '?')[0])}</div><div class="nm">${esc(r.name)}${me ? ` <span class="role">(${T('you')})</span>` : ''}<div class="role">${r.role === 'host' ? '👑 ' + T('host') : r.side === 'spec' ? T('spec') : ''}${r.inCall ? ' · 🎙' : ''}${r.screen ? ' 🖥' : ''}</div></div>${S.isHost() && !me ? `<button class="kick" data-uid="${r.uid}">✕</button>` : ''}`;
     box.appendChild(d);
   }
   box.querySelectorAll('.kick').forEach((b) => b.onclick = () => socket.emit('kick', { uid: b.dataset.uid }));
+  $('#themeBtn').classList.toggle('hide', !S.isHost());
   const cb = $('#ctlBox'); cb.innerHTML = '';
   const sel = document.createElement('select'); sel.className = 'inp'; sel.style.minHeight = '34px';
   const opts = [[null, T('ctrlAll')], [S.hostUid, '👑 ' + T('host')], ...S.roster.filter((r) => r.uid !== S.hostUid).map((r) => [r.uid, r.name])];
@@ -816,6 +931,319 @@ function renderTt() {
   $('#ttStatus').textContent = t.winner === 'draw' ? T('draw') : t.winner === 'x' ? T('winX') : t.winner === 'o' ? T('winO') : t.turn === 'x' ? T('turnX') : T('turnO');
 }
 $('#ttReset').onclick = () => socket.emit('tt.reset', {});
+
+/* ═══ تب‌های داخل بخش بازی ═══ */
+function setGameMode(g) {
+  $('#gTT').classList.toggle('on', g === 'tt');
+  $('#gRPS').classList.toggle('on', g === 'rps');
+  $('#ttWrap').style.display = g === 'tt' ? '' : 'none';
+  $('#rpsWrap').classList.toggle('on', g === 'rps');
+}
+$('#gTT').textContent = T('gTT'); $('#gRPS').textContent = T('gRPS');
+$('#gTT').onclick = () => setGameMode('tt');
+$('#gRPS').onclick = () => setGameMode('rps');
+
+/* ═══ تم اتاق — فقط میزبان؛ برای همه اعمال و روی سرور می‌ماند ═══ */
+const THEME_ORDER = ['default', 'cafe', 'pub', 'drivein', 'arcade'];
+function applyTheme(t) {
+  S.theme = THEME_ORDER.includes(t) ? t : 'default';
+  if (S.theme === 'default') document.body.removeAttribute('data-theme');
+  else document.body.dataset.theme = S.theme;
+  $('#themeLbl').textContent = T('th' + S.theme[0].toUpperCase() + S.theme.slice(1));
+}
+$('#themeBtn').onclick = () => {
+  if (!S.isHost()) return toast(T('forbidden'), 'bad');
+  const next = THEME_ORDER[(THEME_ORDER.indexOf(S.theme || 'default') + 1) % THEME_ORDER.length];
+  socket.emit('room.theme', { theme: next });
+};
+socket.on('room.theme', (p) => applyTheme(p.theme));
+
+/* ═══ سنگ‌کاغذقیچی ═══ */
+const RPS_GLYPH = { r: '✊', p: '✋', s: '✌️' };
+function renderRps(v) {
+  if (!v || !S.you) { if (v) S.rps = v; return; }
+  S.rps = v;
+  const mySeat = v.seats.p1.uid === S.you.uid ? 'p1' : v.seats.p2.uid === S.you.uid ? 'p2' : null;
+  const seatBtn = (s, el) => {
+    const st = v.seats[s];
+    el.textContent = st.uid
+      ? (st.uid === S.you.uid ? `${T('rpsYou')} · ${T('leaveSeat')}` : esc(st.name) + (st.picked ? ' ✔' : ' …'))
+      : `${s === 'p1' ? '۱' : '۲'} — ${T('takeSeat')}`;
+    el.classList.toggle('mine', mySeat === s);
+  };
+  seatBtn('p1', $('#rpsSeat1')); seatBtn('p2', $('#rpsSeat2'));
+  const pickShown = (s) => (v.picks ? RPS_GLYPH[v.picks[s]] || '—' : v.seats[s].picked ? '❔' : '—');
+  $('#rpsPick1').textContent = pickShown('p1');
+  $('#rpsPick2').textContent = pickShown('p2');
+  $('#rpsScores').textContent = `${v.wins.p1} — ${v.wins.p2}`;
+  let status;
+  if (v.phase === 'reveal' && v.last) {
+    const iWon = (v.last.result === 'p1' && v.seats.p1.uid === S.you.uid) || (v.last.result === 'p2' && v.seats.p2.uid === S.you.uid);
+    status = v.last.result === 'draw' ? T('rpsDraw') : iWon ? T('rpsYouWin') : T('rpsYouLose');
+  } else if (mySeat) status = T('rpsYourTurn');
+  else status = T('rpsWaiting');
+  $('#rpsStatus').textContent = status;
+  $$('.rpsP').forEach((b) => { b.disabled = !mySeat || v.phase !== 'pick'; b.classList.toggle('on', !!mySeat && v.phase === 'pick' && S.rpsLastPick === b.dataset.p && !v.seats[mySeat].picked); });
+}
+$('#rpsSeat1').onclick = () => socket.emit('rps.seat', { seat: S.rps?.seats.p1.uid === S.you?.uid ? null : 'p1' });
+$('#rpsSeat2').onclick = () => socket.emit('rps.seat', { seat: S.rps?.seats.p2.uid === S.you?.uid ? null : 'p2' });
+$$('.rpsP').forEach((b) => b.onclick = () => { S.rpsLastPick = b.dataset.p; socket.emit('rps.pick', { pick: b.dataset.p }); });
+$('#rpsNext').onclick = () => socket.emit('rps.reset', {});
+$('#rpsNew').onclick = () => socket.emit('rps.reset', { newmatch: true });
+socket.on('rps', renderRps);
+
+/* ═══ صدا و تصویر و اشتراک صفحه — WebRTC mesh روی رلهٔ rt.sig ═══ */
+const RTC = {
+  active: false, micOn: true, camOn: false, soundAll: false,
+  local: null, micTrack: null, camTrack: null, screen: null, screenAudio: null,
+  peers: new Map(), tiles: new Map(), audioCtx: null, analysers: new Map(),
+};
+const PC_CONFIG = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
+window.__rtcState = () => ({
+  active: RTC.active,
+  peers: [...RTC.peers.entries()].map(([k, v]) => ({ uid: k.slice(0, 4), ice: v.pc.connectionState, recv: v.pc.getReceivers().filter((r) => r.track).map((r) => r.track.kind) })),
+  tiles: RTC.tiles.size,
+  local: RTC.local ? RTC.local.getTracks().map((t) => t.kind + (t.enabled ? '' : ':off')) : [],
+  cam: !!RTC.camTrack, screen: !!RTC.screen,
+});
+
+function tileFor(uid, name, self) {
+  let t = RTC.tiles.get(uid);
+  if (t) return t;
+  const d = document.createElement('div'); d.className = 'tile' + (self ? ' self' : '');
+  const v = document.createElement('video'); v.autoplay = true; v.playsInline = true; if (self) v.muted = true; else v.muted = !RTC.soundAll;
+  const av = document.createElement('div'); av.className = 'tav'; av.textContent = esc((name || '?')[0]);
+  const tn = document.createElement('div'); tn.className = 'tn'; tn.textContent = (self ? '⭐ ' : '') + (name || '');
+  const bd = document.createElement('div'); bd.className = 'tbadge';
+  d.append(av, v, tn, bd);
+  d.title = self ? '' : T('soundAll');
+  if (!self) d.onclick = () => { v.muted = !v.muted; if (!v.muted) RTC.soundAll = true; };
+  $('#callTray').appendChild(d);
+  t = { el: d, video: v, av, badge: bd, name, analyser: null };
+  RTC.tiles.set(uid, t);
+  return t;
+}
+function tileBadges(uid, mic, cam, screen) {
+  const t = RTC.tiles.get(uid); if (!t) return;
+  t.badge.textContent = (!mic ? '🔇' : '') + (screen ? '🖥' : '') + (cam && !screen ? '📷' : '');
+  t.el.classList.toggle('wide', !!screen);
+}
+function attachAnalyser(t, self) {
+  try {
+    RTC.audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (RTC.audioCtx.state === 'suspended') RTC.audioCtx.resume();
+    if (self && RTC.local) {
+      const src = RTC.audioCtx.createMediaStreamSource(RTC.local);
+      const an = RTC.audioCtx.createAnalyser(); an.fftSize = 512;
+      src.connect(an); t.analyser = an; return;
+    }
+    if (!t.analyser && !t.video.srcNode) {
+      const src = RTC.audioCtx.createMediaElementSource(t.video);
+      const an = RTC.audioCtx.createAnalyser(); an.fftSize = 512;
+      src.connect(an); an.connect(RTC.audioCtx.destination);
+      t.video.srcNode = true; t.analyser = an;
+    }
+  } catch {}
+}
+setInterval(() => {   // نشانگر گفتگو — کاملاً محلی، بدون ترافیک شبکه
+  for (const [uid, t] of RTC.tiles) {
+    if (!t.analyser) continue;
+    const buf = new Uint8Array(t.analyser.fftSize);
+    t.analyser.getByteTimeDomainData(buf);
+    let sum = 0; for (let i = 0; i < buf.length; i++) { const x = (buf[i] - 128) / 128; sum += x * x; }
+    t.el.classList.toggle('speaking', Math.sqrt(sum / buf.length) > 0.11);
+  }
+}, 180);
+
+function peerInit(uid, initiator) {
+  if (RTC.peers.has(uid)) return RTC.peers.get(uid);
+  const name = S.roster.find((r) => r.uid === uid)?.name || '?';
+  const pc = new RTCPeerConnection(PC_CONFIG);
+  const e = { pc, initiator, pending: [], remoteSet: false };
+  RTC.peers.set(uid, e);
+  const at = pc.addTransceiver(RTC.micTrack || 'audio', { direction: 'sendrecv' });
+  const vt = pc.addTransceiver(RTC.camTrack || 'video', { direction: 'sendrecv' });
+  e.aSender = at.sender; e.vSender = vt.sender;
+  if (RTC.screen) { try { vt.sender.replaceTrack(RTC.screen.getVideoTracks()[0]); } catch {} }
+  pc.onicecandidate = (ev) => { if (ev.candidate) socket.emit('rt.sig', { to: uid, data: { t: 'ice', c: ev.candidate } }); };
+  pc.ontrack = (ev) => {
+    const stream = ev.streams[0] || new MediaStream([ev.receiver.track]);
+    const t = tileFor(uid, name, false);
+    if (ev.track.kind === 'video') { t.video.srcObject = stream; t.av.style.display = 'none'; }
+    t.video.srcObject ||= stream;
+    t.video.play?.().catch(() => {});
+    attachAnalyser(t, false);
+    if (!RTC.soundAll) $('#callHint').textContent = T('rtcHint');
+  };
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'failed' && e.initiator) { peerClose(uid); if (callActive(uid)) peerInit(uid, true); }
+  };
+  if (initiator) {
+    pc.createOffer().then(async (o) => { await pc.setLocalDescription(o); socket.emit('rt.sig', { to: uid, data: { t: 'offer', s: pc.localDescription } }); }).catch(() => {});
+  }
+  return e;
+}
+function callActive(uid) { return [...S.roster || []].some((r) => r.uid === uid && r.inCall); }
+function peerClose(uid) {
+  const e = RTC.peers.get(uid);
+  if (e) { try { e.pc.close(); } catch {} }
+  RTC.peers.delete(uid);
+  const t = RTC.tiles.get(uid);
+  if (t) { t.el.remove(); RTC.tiles.delete(uid); }
+}
+socket.on('rt.sig', async ({ from, data }) => {
+  if (!RTC.active) return;
+  const d = data || {};
+  try {
+    if (d.t === 'offer') {
+      const e = peerInit(from, false);
+      await e.pc.setRemoteDescription(d.s); e.remoteSet = true;
+      const ans = await e.pc.createAnswer();
+      await e.pc.setLocalDescription(ans);
+      socket.emit('rt.sig', { to: from, data: { t: 'answer', s: e.pc.localDescription } });
+      for (const c of e.pending) e.pc.addIceCandidate(c).catch(() => {});
+      e.pending = [];
+    } else if (d.t === 'answer') {
+      const e = RTC.peers.get(from);
+      if (e && !e.remoteSet) { await e.pc.setRemoteDescription(d.s); e.remoteSet = true; for (const c of e.pending) e.pc.addIceCandidate(c).catch(() => {}); e.pending = []; }
+    } else if (d.t === 'ice') {
+      const e = RTC.peers.get(from);
+      if (!e) return;
+      if (e.remoteSet) e.pc.addIceCandidate(d.c).catch(() => {});
+      else e.pending.push(d.c);
+    }
+  } catch (err) { console.warn('rtc sig', err); }
+});
+socket.on('rtc.roster', (p) => {
+  const list = p.list || [];
+  $('#callCnt').textContent = list.length;
+  if (!RTC.active) return;
+  for (const it of list) {
+    if (it.uid === S.you?.uid) continue;
+    if (!RTC.peers.has(it.uid) && S.you.uid < it.uid) peerInit(it.uid, true);   // آغازگر قطعی — بدون glare
+  }
+  for (const uid of [...RTC.peers.keys()]) if (!list.some((x) => x.uid === uid)) peerClose(uid);
+  $('#callTray').classList.toggle('on', RTC.tiles.size > 0);
+});
+socket.on('rtc.state', (p) => tileBadges(p.uid, p.mic, p.cam, p.screen));
+
+async function callJoin() {
+  if (RTC.active) return;
+  if (!navigator.mediaDevices?.getUserMedia) return toast(T('rtcHint'), 'bad');
+  try {
+    RTC.local = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+    RTC.micTrack = RTC.local.getAudioTracks()[0] || null;
+    RTC.micOn = !!(RTC.micTrack && RTC.micTrack.enabled);
+    RTC.active = true;
+    socket.emit('rtc.join', { mic: RTC.micOn, cam: RTC.camOn });
+    const me = tileFor(S.you.uid, S.you.name, true);
+    me.video.srcObject = RTC.local; me.av.style.display = 'none';
+    attachAnalyser(me, true);
+    $('#callDock').classList.add('live');
+    $('#callMicBtn').classList.toggle('on', RTC.micOn);
+    $('#callJoinBtn').classList.add('hide');
+    $('#callTray').classList.add('on');
+    $('#callHint').textContent = T('rtcHint');
+  } catch (e) { toast(T('rtcHint'), 'bad'); }
+}
+function callLeave() {
+  socket.emit('rtc.leave');
+  for (const uid of [...RTC.peers.keys()]) peerClose(uid);
+  try { RTC.local?.getTracks().forEach((t) => t.stop()); } catch {}
+  try { RTC.camTrack?.stop(); } catch {}
+  try { RTC.screen?.getTracks().forEach((t) => t.stop()); } catch {}
+  const me = S.you && RTC.tiles.get(S.you.uid);
+  if (me) { me.el.remove(); RTC.tiles.delete(S.you.uid); }
+  RTC.local = null; RTC.micTrack = null; RTC.camTrack = null; RTC.screen = null; RTC.active = false; RTC.camOn = false; RTC.soundAll = false;
+  $('#callDock').classList.remove('live');
+  $('#callJoinBtn').classList.remove('hide');
+  $('#callTray').classList.remove('on');
+  $('#callCnt').textContent = '0';
+  $('#callHint').textContent = '';
+}
+$('#callJoinBtn').onclick = callJoin;
+$('#callLeaveBtn').onclick = callLeave;
+$('#callMicBtn').onclick = () => {
+  if (!RTC.micTrack) return;
+  RTC.micOn = !RTC.micOn;
+  RTC.micTrack.enabled = RTC.micOn;
+  $('#callMicBtn').classList.toggle('on', RTC.micOn);
+  socket.emit('rtc.state', { mic: RTC.micOn });
+  const me = S.you && RTC.tiles.get(S.you.uid);
+  if (me) tileBadges(S.you.uid, RTC.micOn, RTC.camOn, !!RTC.screen);
+};
+$('#callCamBtn').onclick = async () => {
+  if (RTC.camTrack && RTC.camTrack.readyState === 'live') {
+    RTC.camOn = !RTC.camOn;
+    RTC.camTrack.enabled = RTC.camOn;
+    $('#callCamBtn').classList.toggle('on', RTC.camOn);
+    socket.emit('rtc.state', { cam: RTC.camOn });
+    return;
+  }
+  try {
+    const vs = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 } }, audio: false });
+    RTC.camTrack = vs.getVideoTracks()[0];
+    RTC.camOn = true;
+    for (const [, e] of RTC.peers) { try { await e.vSender.replaceTrack(RTC.camTrack); } catch {} }
+    const me = S.you && tileFor(S.you.uid, S.you.name, true);
+    if (me) { me.video.srcObject = new MediaStream([RTC.camTrack]); me.av.style.display = 'none'; }
+    $('#callCamBtn').classList.add('on');
+    socket.emit('rtc.state', { cam: true });
+  } catch { toast(T('rtcHint'), 'bad'); }
+};
+$('#callSoundBtn').onclick = () => {
+  RTC.soundAll = !RTC.soundAll;
+  for (const [uid, t] of RTC.tiles) if (uid !== S.you?.uid) t.video.muted = !RTC.soundAll;
+  $('#callSoundBtn').classList.toggle('on', RTC.soundAll);
+  if (RTC.soundAll) { $('#callHint').textContent = T('soundAll'); setTimeout(() => { $('#callHint').textContent = ''; }, 2000); }
+};
+async function mixAudioWithScreen(sysTrack) {
+  // صدای سیستم + میکروفن در یک ترک — مثل ادغام صدای فیلم و تماس
+  try {
+    RTC.audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (RTC.audioCtx.state === 'suspended') await RTC.audioCtx.resume();
+    const dest = RTC.audioCtx.createMediaStreamDestination();
+    if (RTC.micTrack) RTC.audioCtx.createMediaStreamSource(new MediaStream([RTC.micTrack])).connect(dest);
+    if (sysTrack) RTC.audioCtx.createMediaStreamSource(new MediaStream([sysTrack])).connect(dest);
+    return dest.stream.getAudioTracks()[0] || null;
+  } catch { return RTC.micTrack; }
+}
+$('#callScreenBtn').onclick = async () => {
+  if (RTC.screen) return stopScreen();
+  if (!navigator.mediaDevices?.getDisplayMedia) return toast(T('rtcHint'), 'bad');
+  try {
+    const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 15 } }, audio: true });
+    RTC.screen = s;
+    const vt = s.getVideoTracks()[0];
+    vt.onended = stopScreen;
+    RTC.screenAudio = s.getAudioTracks()[0] || null;
+    const mixed = await mixAudioWithScreen(RTC.screenAudio);
+    for (const [, e] of RTC.peers) {
+      try { await e.vSender.replaceTrack(vt); } catch {}
+      try { if (mixed) await e.aSender.replaceTrack(mixed); } catch {}
+    }
+    const me = S.you && tileFor(S.you.uid, S.you.name, true);
+    if (me) { me.video.srcObject = new MediaStream([vt]); me.av.style.display = 'none'; me.el.classList.add('wide'); }
+    $('#callScreenBtn').classList.add('on');
+    socket.emit('rtc.state', { screen: true });
+  } catch {}
+};
+async function stopScreen() {
+  try { RTC.screen?.getTracks().forEach((t) => t.stop()); } catch {}
+  RTC.screen = null; RTC.screenAudio = null;
+  for (const [, e] of RTC.peers) {
+    try { await e.vSender.replaceTrack(RTC.camTrack); } catch {}
+    try { if (RTC.micTrack) await e.aSender.replaceTrack(RTC.micTrack); } catch {}
+  }
+  const me = S.you && RTC.tiles.get(S.you.uid);
+  if (me) {
+    me.el.classList.remove('wide');
+    me.video.srcObject = RTC.camTrack ? new MediaStream([RTC.camTrack]) : (RTC.local || null);
+    if (!RTC.camTrack && !RTC.local) { me.av.style.display = ''; }
+  }
+  $('#callScreenBtn').classList.remove('on');
+  socket.emit('rtc.state', { screen: false });
+}
 
 /* ═══ بوت ═══ */
 applyI18n();
