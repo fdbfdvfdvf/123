@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""پوستهٔ ssh برای gh codespace — gh یک تونل محلی به sshd کداسپیس می‌سازد (localhost:PORT)
+و این باینری باید با کلید داده‌شده مستقیم به همان پورت وصل شود."""
+import sys, os
+
+LOG = os.environ.get('SSH_WRAPPER_LOG', '/tmp/ssh_wrapper.log')
+def log(*a):
+    with open(LOG, 'a') as f: f.write(' '.join(str(x) for x in a) + '\n')
+
+argv = sys.argv[1:]
+log('ARGV:', argv)
+
+key_files, port, host, cmd_args = [], 22, 'localhost', []
+i = 0
+while i < len(argv):
+    a = argv[i]
+    if a == '-i': key_files.append(argv[i + 1]); i += 2; continue
+    if a == '-p': port = int(argv[i + 1]); i += 2; continue
+    if a == '-o': i += 2; continue
+    if a == '--': cmd_args = argv[i + 1:]; break
+    if a.startswith('-'): i += 1; continue          # بقیهٔ فلگ‌ها (-C، -t، …) بی‌اثر
+    if '@' in a:
+        host = a.split('@', 1)[1]; i += 1; continue
+    # اولین آرگومان بدون فلگ بعد از host = شروع دستور راه‌دور
+    cmd_args = argv[i:]
+    break
+log('key:', key_files, 'host:', host, 'port:', port, 'cmd:', cmd_args)
+
+def main():
+    import paramiko
+    cli = paramiko.SSHClient()
+    cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    cli.connect(host, port=port, username='vscode', key_filename=key_files or None,
+                look_for_keys=False, allow_agent=False, timeout=30, banner_timeout=30)
+    if cmd_args:
+        cmd = ' '.join(cmd_args)   # gh دستور را یک‌تکه می‌فرستد — بدون کوتیت اضافه
+        stdin, stdout, stderr = cli.exec_command(cmd, get_pty=False)
+        sys.stdout.write(stdout.read().decode('utf-8', 'replace'))
+        err = stderr.read().decode('utf-8', 'replace')
+        if err: sys.stderr.write(err)
+        code = stdout.channel.recv_exit_status()
+        log('exit', code)
+        sys.exit(code)
+    # شل تعاملی
+    chan = cli.invoke_shell()
+    import select, threading
+    stdin = sys.stdin.buffer
+    def pump_in():
+        try:
+            while True:
+                d = stdin.read1(65536)
+                if not d: break
+                chan.sendall(d)
+        except Exception: pass
+        finally:
+            try: chan.shutdown_write()
+            except Exception: pass
+    threading.Thread(target=pump_in, daemon=True).start()
+    while True:
+        if chan.recv_ready():
+            d = chan.recv(65536)
+            if not d: break
+            sys.stdout.buffer.write(d); sys.stdout.buffer.flush()
+        if chan.exit_status_ready() and not chan.recv_ready(): break
+        if chan.closed: break
+        select.select([sys.stdin], [], [], 0.05)
+    sys.exit(0)
+
+if __name__ == '__main__':
+    try:
+        main()
+    finally:
+        log('done')

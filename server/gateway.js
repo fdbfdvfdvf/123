@@ -17,7 +17,7 @@ function newRoom(id, code, passHash, name) {
     cov: { stack: [], idx: -1, zoom: 1 },
     yt: { v: null, hostUid: null, act: 'pause', pos: 0, rate: 1 },
     tt: { cells: Array(9).fill(''), turn: 'x', winner: null, line: null, scores: { x: 0, o: 0 }, sides: { x: null, o: null } },
-    mv: { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 },
+    mv: { active: false, mode: 'server', hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 },
     theme: 'default',
     rps: { seats: { p1: null, p2: null }, picks: { p1: null, p2: null }, wins: { p1: 0, p2: 0 }, phase: 'pick', last: null },
     emptySince: null,
@@ -58,7 +58,7 @@ function stateSnapshot(room) {
     cov: room.cov, yt: { v: room.yt.v, act: room.yt.act, pos: room.yt.pos, rate: room.yt.rate },
     tt: { cells: room.tt.cells, turn: room.tt.turn, winner: room.tt.winner, line: room.tt.line, scores: room.tt.scores },
     mv: room.mv.active
-      ? { active: true, hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: mvPos(room.mv), act: room.mv.act, rate: room.mv.rate, url: `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` }
+      ? { active: true, mode: room.mv.mode || 'server', hostUid: room.mv.hostUid, name: room.mv.name, size: room.mv.size, dur: room.mv.dur, pos: mvPos(room.mv), act: room.mv.act, rate: room.mv.rate, url: room.mv.file ? `/mvfiles/${room.code}/${encodeURIComponent(room.mv.file)}` : '' }
       : { active: false, hostUid: null },
     controller: room.controller, hostUid: room.hostUid,
     theme: room.theme, rps: rpsView(room), rtc: callList(room),
@@ -133,7 +133,14 @@ function install(io, store) {
     room.members.delete(socket.id);
     if (room.controller === m.uid) room.controller = null;
     if (room.yt.hostUid === m.uid) room.yt.hostUid = null;
-    if (room.mv.hostUid === m.uid) room.mv.active = false;
+    if (room.mv.hostUid === m.uid) {
+      if (room.mv.mode === 'local') {
+        // فیلم لوکال روی دستگاهِ میزبان است — خروج او یعنی پایان پخش برای همه
+        room.mv = { active: false, mode: 'server', hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
+        io.to(room.code).emit('mv.close');
+        persistState(room.code);
+      } else room.mv.active = false;
+    }
     if (room.hostUid === m.uid) {
       const rest = [...room.members.values()].sort((a, b) => a.joinedAt - b.joinedAt);
       room.hostUid = rest.length ? rest[0].uid : null;
@@ -310,10 +317,42 @@ function install(io, store) {
       if (!room || !m) return;
       const name = mvf.sanitizeName(safeStr(p?.file, 200));   // پاک‌سازی نام — کاربر هر نامی می‌فرستد، سرور نرمال می‌کند
       if (!name) return socket.emit('err', { code: 'badurl' });
-      room.mv = { active: true, hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
+      room.mv = { active: true, mode: 'server', hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
       mvf.cleanupOthers(room.code, name);
       io.to(room.code).emit('mv.file', { url: `/mvfiles/${room.code}/${encodeURIComponent(name)}`, name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name });
       persistState(room.code);
+    });
+
+    socket.on('mv.local.set', (p) => {
+      // فیلم لوکال — بدون آپلود: فایل روی دستگاهِ میزبان می‌ماند و بیننده‌ها با WebRTC مستقیم از او استریم می‌کنند
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m) return;
+      if (!limits.check(`mvlocal:${socket.id}`, 4, 10000)) return socket.emit('err', { code: 'rate' });
+      const name = mvf.sanitizeName(safeStr(p?.file, 200));
+      if (!name) return socket.emit('err', { code: 'badurl' });
+      room.mv = { active: true, mode: 'local', hostUid: m.uid, name, file: '', size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
+      mvf.cleanupRoom(room.code);   // اگر فیلم سروری قبلی بود، فایلش پاک شود
+      io.to(room.code).emit('mv.local.file', { name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name, hostSid: socket.id });
+      persistState(room.code);
+    });
+
+    socket.on('mvp.want', () => {
+      // بینندهٔ فیلم لوکال، میزبان را برای مذاکرهٔ WebRTC صدا می‌زند
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m || !room.mv.active || room.mv.mode !== 'local' || !room.mv.hostUid) return;
+      const host = [...room.members.entries()].find(([, mm]) => mm.uid === room.mv.hostUid);
+      if (host && host[0] !== socket.id) io.to(host[0]).emit('mvp.need', { to: socket.id, uid: m.uid, name: m.name });
+    });
+
+    socket.on('mvp.sig', (p) => {
+      // ریلهٔ سیگنالینگ فیلم لوکال — مثل rt.sig ولی هدف با socketId (میزبان/بیننده در لحظه)
+      const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
+      if (!room || !m || !room.mv.active || room.mv.mode !== 'local') return;
+      if (!limits.check(`mvpsig:${socket.id}`, 150, 10000)) return;
+      const to = safeStr(p?.to, 40);
+      if (!room.members.has(to)) return;
+      const payload = JSON.stringify(p?.data || {}).slice(0, 16384);
+      io.to(to).emit('mvp.sig', { from: m.uid, data: JSON.parse(payload) });
     });
 
     socket.on('mv.state', (p) => {
@@ -340,7 +379,7 @@ function install(io, store) {
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m) return;
       if (room.hostUid !== m.uid && room.mv.hostUid !== m.uid) return socket.emit('err', { code: 'forbidden' });
-      room.mv = { active: false, hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
+      room.mv = { active: false, mode: 'server', hostUid: null, name: '', file: '', size: 0, dur: 0, pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
       mvf.cleanupRoom(room.code);
       io.to(room.code).emit('mv.close');
       persistState(room.code);
