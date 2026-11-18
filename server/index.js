@@ -32,7 +32,7 @@ app.get('/api/mv/token', async (req, res) => {
   catch { return res.status(500).json({ ok: false, err: 'server' }); }
   res.json({ ok: true, token: mvf.issueToken(code) });
 });
-app.post('/api/mv/upload', express.raw({ limit: mvf.CHUNK + 64 * 1024, type: '*/*' }), (req, res) => {
+app.post('/api/mv/upload', express.raw({ limit: mvf.CHUNK + 64 * 1024, type: () => true }), (req, res) => {
   const code = String(req.query.room || '').toUpperCase();
   const name = mvf.safeName(String(req.query.name || ''));
   const v = mvf.checkToken(req.query.token, code);
