@@ -705,19 +705,21 @@ function applyMvLocal(p) {
   if (p.act === 'rate') { mvUserRate = +p.rate || 1; mvNudge = 1; try { mvVideo.playbackRate = mvUserRate; } catch {} }
   if (p.act === 'sync') mvCorrectDrift(p.pos);
 }
-// تصحیح نرم انحراف: تا ±۴.۵ ثانیه با نرخِ پخش (۰.۹× تا ۱.۱۵×) جا می‌افتیم — seek سخت بافر را می‌شکند و حلقهٔ مکث می‌سازد؛
-// فقط انحراف بزرگ seek می‌گیرد. حین بافر (readyState<2) هیچ تصحیحی انجام نمی‌شود تا طوفانِ seek پدید نیاید.
+// تصحیح نرم انحراف: تا ۶ ثانیه با نرخِ پخش (تا ۱.۳×) جا می‌افتیم — seek سخت بافر را می‌شکند و حلقهٔ مکث می‌سازد؛
+// بین seekهای تصحیحی ۱۰ ثانیه خنک‌کاری هست تا روی شبکهٔ کند طوفانِ seek پدید نیاید. حین بافر هیچ تصحیحی انجام نمی‌شود.
+let mvLastCorr = 0;
 function mvCorrectDrift(remotePos) {
   if (mvVideo.paused || mvVideo.readyState < 2 || mvDrag) return;
   const drift = (mvVideo.currentTime || 0) - (+remotePos || 0);   // مثبت = جلوتر از مرجع
-  if (Math.abs(drift) > 4.5) {
+  if (Math.abs(drift) > 6 && Date.now() - mvLastCorr > 10000) {
+    mvLastCorr = Date.now();
     mvNudge = 1;
     try { mvVideo.playbackRate = mvUserRate; mvVideo.currentTime = +remotePos || 0; } catch {}
     return;
   }
   const target = Math.abs(drift) < 0.35 ? 1
     : drift > 0 ? 1                                  // من جلوترم — کندِ مصنوعی نمی‌شوم؛ عقب‌ها با سرعتِ بیشتر می‌رسند
-    : Math.min(1.18, 1 - drift / 8);                 // من عقب‌ترم — نرم و بی‌مکث جا می‌افتم
+    : Math.min(1.3, 1 - drift / 8);                  // من عقب‌ترم — نرم و بی‌مکث جا می‌افتم
   if (target !== mvNudge) {
     mvNudge = target;
     try { mvVideo.playbackRate = mvUserRate * target; } catch {}
