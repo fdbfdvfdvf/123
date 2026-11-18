@@ -34,19 +34,19 @@ app.get('/api/mv/token', async (req, res) => {
 });
 app.post('/api/mv/upload', express.raw({ limit: mvf.CHUNK + 64 * 1024, type: () => true }), (req, res) => {
   const code = String(req.query.room || '').toUpperCase();
-  const name = mvf.safeName(String(req.query.name || ''));
+  const name = mvf.sanitizeName(String(req.query.name || ''));
   const v = mvf.checkToken(req.query.token, code);
-  if (!v || !name) return res.status(403).json({ ok: false, err: 'badtoken' });
+  if (!v || !name) return res.status(403).json({ ok: false, err: 'badname' });
   const idx = Number(req.query.i);
   const buf = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
   if (!buf.length) return res.status(400).json({ ok: false, err: 'empty' });
   if (!mvf.appendChunk(req.query.token, name, idx, buf, req.query.last === '1')) return res.status(409).json({ ok: false, err: 'badchunk' });
-  res.json({ ok: true, idx });
+  res.json({ ok: true, idx, name });   // نام نهایی پاک‌سازی‌شده — کلاینت برای mv.set از همین استفاده می‌کند
 });
 // پخش فیلم: sendFile روی کتابخانهٔ send سوار است و Range/206 را کامل پشتیبانی می‌کند (سیک آنی برای همه)
 app.get('/mvfiles/:room/:file', (req, res) => {
   const room = String(req.params.room).replace(/[^A-Z0-9]/gi, '');
-  const file = mvf.safeName(String(req.params.file));
+  const file = mvf.sanitizeName(String(req.params.file)) || mvf.safeName(String(req.params.file));
   if (!file) return res.status(400).end();
   res.sendFile(path.join(mvf.ROOT, room, file), { acceptRanges: true, dotfiles: 'deny' }, (err) => {
     if (err && !res.headersSent) res.status(404).end();

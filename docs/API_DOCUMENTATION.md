@@ -16,8 +16,8 @@ Base: same origin as the app. All bodies JSON unless noted. Errors: `{ ok:false,
 | Method & path | Auth | Notes |
 |---|---|---|
 | `GET /api/mv/token?room=CODE` | room must exist | 10 req/min/IP → 429. Returns `{ ok, token }` (32 hex, TTL 2 h). |
-| `POST /api/mv/upload?room&token&name&i&last` | token valid for that room | Body: raw bytes (`type:()=>true` accepts any Content-Type — browser Blobs included). Chunk ≤8 MB (+64 KB headroom), `i` must equal expected sequence → else 409. `last=1` finalizes. |
-| `GET /mvfiles/:room/:file` | public | Range-capable (206) streaming; 404 after eject/cleanup; filename sanitized `safeName` (video extensions only). |
+| `POST /api/mv/upload?room&token&name&i&last` | token valid for that room | Body: raw bytes (`type:()=>true` accepts any Content-Type — browser Blobs included). Chunk ≤8 MB (+64 KB headroom), `i` must equal expected sequence → else 409. `last=1` finalizes. **Filename is sanitized, not rejected** — brackets, apostrophes, commas etc. are normalized (`sanitizeName`); the response returns the final `{ ok, idx, name }` and the client uses that name in `mv.set`. |
+| `GET /mvfiles/:room/:file` | public | Range-capable (206) streaming; 404 after eject/cleanup; filename re-sanitized on serve (`sanitizeName`, video extensions only). |
 
 ## Administration
 Planned (M11): `GET /api/admin/stats` behind `ADMIN_TOKEN` — returns rooms, members, calls, storage usage. Not implemented yet (no fake endpoints shipped).

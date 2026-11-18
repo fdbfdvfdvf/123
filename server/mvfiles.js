@@ -30,6 +30,27 @@ const safeName = (n) => (typeof n === 'string' &&
   /^[\w.\-() \u0600-\u06FF]{1,100}$/.test(n) &&
   /\.(mp4|webm|mkv|mov|m4v|avi|ogv)$/i.test(n) ? n : null);
 
+const VIDEO_EXT_RE = /\.(mp4|webm|mkv|mov|m4v|avi|ogv)$/i;
+// پاک‌سازی نام فایل به‌جای رد کردن: کاراکترهای غیرمجازِ نام‌های واقعی (براکت، آپاستروف، کاما، #، +…) → فاصله.
+// خروجی deterministic است تا همهٔ chunkهای یک فایل به همان نام بنویسند؛ فشرده‌سازی نقطه‌های متوالی «..» را از بین می‌برد.
+function sanitizeName(n) {
+  const s = String(n || '');
+  const m = s.match(VIDEO_EXT_RE);
+  if (!m || s.length > 200) return null;   // فقط فایل‌های ویدیویی پذیرفته می‌شوند
+  const ext = m[1].toLowerCase();
+  let base = s.slice(0, s.length - m[0].length)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/[\\/:"*?<>|#%+!@$^&=;,'`]/g, ' ')
+    .replace(/[^\w.() \-\u0600-\u06FF]/g, ' ')
+    .replace(/[\s.]+/g, (c) => (c.includes('.') ? '.' : ' '))
+    .trim()
+    .replace(/^[.\s]+|[.\s]+$/g, '');
+  if (base.length > 80) base = base.slice(0, 80).replace(/[.\s]+$/g, '');
+  if (!base) base = 'movie';
+  const out = base + '.' + ext;
+  return out.length <= 100 ? out : null;
+}
+
 const roomDir = (code) => path.join(ROOT, String(code).replace(/[^A-Z0-9]/gi, ''));
 
 function issueToken(code) {
@@ -72,4 +93,4 @@ function cleanupOthers(code, keepName) {
   } catch {}
 }
 
-module.exports = { ROOT, issueToken, checkToken, appendChunk, cleanupRoom, cleanupOthers, safeName, MAX_FILE, CHUNK };
+module.exports = { ROOT, issueToken, checkToken, appendChunk, cleanupRoom, cleanupOthers, safeName, sanitizeName, MAX_FILE, CHUNK };

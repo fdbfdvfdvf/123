@@ -308,8 +308,8 @@ function install(io, store) {
       // بعد از پایان آپلود صدا زده می‌شود — فایل روی دیسک آماده است
       const room = rooms.get(socket.data.room); const m = room?.members.get(socket.id);
       if (!room || !m) return;
-      const name = safeStr(p?.file, 100);
-      if (!mvf.safeName(name)) return socket.emit('err', { code: 'badurl' });
+      const name = mvf.sanitizeName(safeStr(p?.file, 200));   // پاک‌سازی نام — کاربر هر نامی می‌فرستد، سرور نرمال می‌کند
+      if (!name) return socket.emit('err', { code: 'badurl' });
       room.mv = { active: true, hostUid: m.uid, name, file: name, size: clamp(p?.size, 0, 2.1e9), dur: clamp(p?.dur, 0, 24 * 3600), pos: 0, posAt: 0, act: 'pause', rate: 1, lastSeekBy: null, lastSeekAt: 0 };
       mvf.cleanupOthers(room.code, name);
       io.to(room.code).emit('mv.file', { url: `/mvfiles/${room.code}/${encodeURIComponent(name)}`, name, size: room.mv.size, dur: room.mv.dur, hostUid: m.uid, hostName: m.name });

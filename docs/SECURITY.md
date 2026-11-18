@@ -13,7 +13,7 @@ Principles: server-authoritative state, validate every event, sanitize every str
 
 ## Input validation (server-side, every event)
 - `safeStr()`: strips control chars, clamps length (names 24, chat 1000, URLs 200…).
-- Room codes: uppercase, `^[A-Z0-9]{4,10}$`; YouTube IDs `^[\w-]{6,64}$`; upload filenames: extension allow-list (`mp4|webm|mkv|mov|m4v|avi|ogv`), unicode-letter safe charset, ≤100 chars.
+- Room codes: uppercase, `^[A-Z0-9]{4,10}$`; YouTube IDs `^[\w-]{6,64}$`; upload filenames: **sanitized, not rejected** — extension must be a video type (`mp4|webm|mkv|mov|m4v|avi|ogv`), everything outside the safe charset (`\w.()-` + Persian range) becomes a space, consecutive dots collapse (no `../` traversal), slash/backslash removed, ≤100 chars; the sanitized name is returned to the client and reused for `mv.set` so disk and URL always match.
 - Co-browse URLs: must parse as absolute `http:`/`https:` (`isValidUrl`) — no `javascript:`/`data:` injection into the shared iframe.
 - Numbers pass `clamp()` bounds (positions 0–24 h, rate 0.25–2, strokes ≤2400 points, coordinates bounded).
 - JSON body ≤64 KB; WS message ≤1 MB; signaling relay payload stringified-capped 16 KB; upload chunk ≤8 MB.
