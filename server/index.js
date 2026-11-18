@@ -56,7 +56,7 @@ app.get('/mvfiles/:room/:file', (req, res) => {
 // HTML بدون کش (استقرارهای جدید فوری می‌رسند)؛ etag برای اعتبارسنجی
 app.use(express.static(path.join(__dirname, '..', 'web'), {
   index: 'index.html', maxAge: 0, etag: true, lastModified: true,
-  setHeaders: (res, filePath) => { if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache'); },
+  setHeaders: (res, filePath) => { if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-store'); },
 }));
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'web', 'index.html')));
 
