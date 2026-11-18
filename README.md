@@ -1,52 +1,51 @@
-# Together Platform — نسخهٔ سرور-محور
+# Together — Kosmi-inspired social hangout platform
 
-اتاق‌های آنلاین مشترک با **مرجع حق سرور** و **وضعیت ماندگار**: چت و تخته و بازی بعد از ریستارت سرور هم سرِ جایشان هستند، اتاق‌ها با کد/لینک دائمی‌اند و هویت‌ها بدون ثبت‌نام کار می‌کنند.
+A real-time, browser-only hangout platform in the spirit of [kosmi.io](https://kosmi.io): persistent rooms, synced watch parties, voice/video calls, screen sharing with system audio, shared whiteboard & co-browsing, multiplayer games, and a public lobby — **no sign-up required**.
 
-## معماری
+> This is an independent implementation. It does not use, copy, or claim knowledge of Kosmi's proprietary source code, private APIs, or internal infrastructure. Feature observations were made only from Kosmi's public website (see `docs/research/KOSMI_ANALYSIS.md`).
 
-- **سرور:** Node 22 + Express + Socket.IO — اتاق‌ها، حضور زنده، چت، تخته، هم‌مرورگری، یوتیوب، فیلم مشترک، تیک‌تاک‌تو (اعتبارسنجی نوبت روی سرور)، قفل کنترل، کیک، رمز اتاق (SHA-256).
-- **ذخیره‌سازی دو-پشتیبان:** اگر `DATABASE_URL` باشد → PostgreSQL (`pg`)، وگرنه فایل JSON برای محلی/تست. همین یک کد هر دو جا را می‌پوشاند.
-- **رسانه:** استریم فیلم مشترک دستگاه‌به‌دستگاه (WebRTC) با سیگنالینگ از طریق سرور (`rt.sig` رله).
-- **امنیت:** محدودیت نرخ per-socket روی همهٔ رویدادها، پاک‌سازی ورودی‌ها، گارد URL (فقط http/https)، سقف ۱۲ نفر در اتاق، پیام ≤۱۰۰۰ نویسه، سیگنالینگ ≤۱۶KB.
-- **UI:** تک‌فایل `web/index.html` — فارسی/انگلیسی، RTL، تم تاریک بنفش، همهٔ پنل‌ها.
+**Live instance:** the user's GitHub Codespace (`deploy/` scripts) — same code runs anywhere Node runs.
 
-## اجرای محلی
+## Feature matrix (implemented = real, tested code)
+
+| Area | Features |
+|---|---|
+| Rooms | Create (name + optional password), join by code / invite link `#r=CODE`, public lobby of live rooms, host role, controller lock, kick + temporary ban, 12-person cap, room themes (Classic/Coffee shop/Pub/Drive-in/Arcade), persistent room state |
+| People | Guest identity by nickname (no registration), roster with call badges, reconnection re-join |
+| Chat | Persisted history (≤2000), typing indicator, quick reactions, system messages |
+| Watch party | YouTube (URL/ID, play/pause/seek/rate, 8s heartbeat), shared movie upload (chunked ≤2 GB, Range streaming, symmetric 2.5s heartbeats with anti-rollback, host/uploader eject) |
+| Voice / video | WebRTC mesh calls (audio + optional camera), speaking indicator (local analysis), per-tile volume, unmute-all, device-driven tiles |
+| Screen share | `getDisplayMedia` with **mixed system+mic audio** (WebAudio), instant switch back to camera, badge + wide tile |
+| Games | Tic-tac-toe (server-validated turns, sides, scores) and Rock-Paper-Scissors (hidden picks until both choose, server-validated, persistent wins) |
+| Board & co-view | Shared whiteboard (pen/eraser/width/undo/clear/PNG export, persisted strokes, remote cursors), synced iframe co-browsing (URL stack, zoom, reload) |
+| i18n / UX | Full Persian + English, RTL/LTR, dark theme, responsive (mobile drawer chat, wrapped tabs), toasts, empty states |
+
+## Quick start
 
 ```bash
 npm install
-npm start          # http://localhost:3121
-npm run smoke      # ۲۸ سناریوی اسموک با دو کلاینت واقعی + تست ریستارت
+npm start            # http://localhost:3121
 ```
 
-## متغیرهای محیطی
+Environment variables: see `docs/INSTALLATION.md`. Tests: see `docs/DEVELOPMENT_ROADMAP.md` and `test/`.
 
-| متغیر | کار |
-|---|---|
-| `PORT` | پورت (پیش‌فرض 3121؛ روی Railway خودکار) |
-| `DATABASE_URL` | اگر باشد → PostgreSQL، وگرنه فایل |
-| `DATA_DIR` | مسیر فایل JSON در حالت فایل |
+## Layout
 
-## دیپلوی روی Railway (یک فرمان)
-
-```bash
-RAILWAY_API_TOKEN=xxxx bash /home/z/my-project/scripts/platform_deploy.sh
+```
+server/   index.js (HTTP+WS entry), gateway.js (socket events), rooms.js (REST),
+          store.js (File/PostgreSQL), mvfiles.js (chunked upload), guard.js, limits.js
+web/      index.html (single-file UI: CSS + JS, i18n, WebRTC client)
+test/     smoke.js, features.js (socket harness: lobby/theme/RPS/call presence)
+deploy/   restart.sh, codespace-up.sh, gh-codespace-deploy.sh, compose file
+docs/     research/ + architecture, database, API, WS events, WebRTC, security, deployment, roadmap
 ```
 
-اسکریپت: لینک پروژه → افزودن Postgres → `railway up` با Dockerfile موجود → دامنهٔ عمومی → health check روی `/api/health` → چاپ لینک نهایی. بعد از انتشار، دکمهٔ «دعوت» خودکار لینک `https://دامنه/#r=CODE` می‌سازد.
+## Documentation
 
-## تفاوت صادقانه با اپ P2P (`../together/index.html`)
+- `docs/research/KOSMI_ANALYSIS.md` — public-product analysis, verified vs. assumed
+- `docs/research/PRODUCT_SPEC.md` — product specification for this platform
+- `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/API_DOCUMENTATION.md`, `docs/WEBSOCKET_EVENTS.md`, `docs/WEBRTC_SETUP.md`, `docs/SECURITY.md`, `docs/DEPLOYMENT.md`, `docs/INSTALLATION.md`, `docs/DEVELOPMENT_ROADMAP.md`
 
-| | پلتفرم (این پوشه) | اپ P2P |
-|---|---|---|
-| اتاق دائمی و ماندگاری وضعیت | ✅ | ❌ (وابسته به میزبان) |
-| مرجع حق سرور (ضد تقلب در بازی) | ✅ | اعتبارسنجی روی میزبان |
-| تماس تصویری/صوتی و اشتراک صفحه | ❌ (نقشهٔ راه) | ✅ |
-| انتقال فایل P2P | ❌ | ✅ (تا ۵MB) |
-| حالت اتصال دستی (کپی/پیست SDP) | ❌ | ✅ |
-| پنل شبکه (پینگ/loss/بیت‌ریت تطبیقی) | ❌ | ✅ |
+## Status
 
-هر دو نسخه زنده‌اند و مکمل هم‌اند؛ نسخهٔ مرورگرِ سرور (کنترل کامل روی هر سایتی) طبق `../together/blueprint-fa.md` در نقشهٔ راه است.
-
-## تست
-
-`test/smoke.js` — ۲۸ سناریو: REST، ورود/رمز، چت دوطرفه، تخته (استروک/برگشت)، گارد URL مخرب، ناوبری مشترک، یوتیوب، فیلم مشترک (قفل/کنترل/پایان)، تیک‌تاک‌تو سرور-محور با ردِ حرکت غیرقانونی، محدودیت نرخ، قفل کنترل، و **ماندگاری کامل بعد از ریستارت سرور**.
+48 automated checks pass on the live deployment (12 WebRTC two-browser × 2 role orders, 20 movie sync, 16 feature harness). Known limits and the next milestones are in `docs/DEVELOPMENT_ROADMAP.md`.
