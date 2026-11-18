@@ -1059,12 +1059,15 @@ function peerInit(uid, initiator) {
   if (RTC.peers.has(uid)) return RTC.peers.get(uid);
   const name = S.roster.find((r) => r.uid === uid)?.name || '?';
   const pc = new RTCPeerConnection(PC_CONFIG);
-  const e = { pc, initiator, pending: [], remoteSet: false };
+  const e = { pc, initiator, pending: [], remoteSet: false, aSender: null, vSender: null };
   RTC.peers.set(uid, e);
-  const at = pc.addTransceiver(RTC.micTrack || 'audio', { direction: 'sendrecv' });
-  const vt = pc.addTransceiver(RTC.camTrack || 'video', { direction: 'sendrecv' });
-  e.aSender = at.sender; e.vSender = vt.sender;
-  if (RTC.screen) { try { vt.sender.replaceTrack(RTC.screen.getVideoTracks()[0]); } catch {} }
+  if (initiator) {
+    // آغازگر ترنسسیورها را می‌سازد — پاسخ‌دهنده از خود offer می‌گیرد (وگرنه association شکست می‌خورد)
+    const at = pc.addTransceiver(RTC.micTrack || 'audio', { direction: 'sendrecv' });
+    const vt = pc.addTransceiver(RTC.camTrack || 'video', { direction: 'sendrecv' });
+    e.aSender = at.sender; e.vSender = vt.sender;
+    if (RTC.screen) { try { vt.sender.replaceTrack(RTC.screen.getVideoTracks()[0]); } catch {} }
+  }
   pc.onicecandidate = (ev) => { if (ev.candidate) socket.emit('rt.sig', { to: uid, data: { t: 'ice', c: ev.candidate } }); };
   pc.ontrack = (ev) => {
     const stream = ev.streams[0] || new MediaStream([ev.receiver.track]);
@@ -1098,6 +1101,16 @@ socket.on('rt.sig', async ({ from, data }) => {
     if (d.t === 'offer') {
       const e = peerInit(from, false);
       await e.pc.setRemoteDescription(d.s); e.remoteSet = true;
+      // ترنسسیورهای ساخته‌شده از offer را به sendrecv ارتقا بده و ترک‌های محلی را بفرست
+      const tx = e.pc.getTransceivers();
+      const at = tx.find((t) => t.receiver.track?.kind === 'audio');
+      const vt = tx.find((t) => t.receiver.track?.kind === 'video');
+      if (at) { at.direction = 'sendrecv'; if (RTC.micTrack) { try { await at.sender.replaceTrack(RTC.micTrack); } catch {} } e.aSender = at.sender; }
+      if (vt) {
+        vt.direction = 'sendrecv';
+        try { if (RTC.screen) await vt.sender.replaceTrack(RTC.screen.getVideoTracks()[0]); else if (RTC.camTrack) await vt.sender.replaceTrack(RTC.camTrack); } catch {}
+        e.vSender = vt.sender;
+      }
       const ans = await e.pc.createAnswer();
       await e.pc.setLocalDescription(ans);
       socket.emit('rt.sig', { to: from, data: { t: 'answer', s: e.pc.localDescription } });

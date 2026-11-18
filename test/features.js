@@ -6,14 +6,14 @@ let pass = 0, fail = 0;
 const check = (n, c) => { c ? pass++ : fail++; console.log(`${c ? 'PASS' : 'FAIL'}  ${n}`); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const connect = () => new Promise((res, rej) => { const s = io(BASE, { transports: ['websocket'] }); s.on('connect', () => res(s)); s.on('connect_error', rej); });
-const join = (s, code, name) => new Promise((res, rej) => { s.emit('join', { code, name }, (r) => r?.ok ? res(r) : rej(new Error('join: ' + JSON.stringify(r)))); setTimeout(() => rej(new Error('join timeout')), 8000); });
+const join = (s, code, name, pass) => new Promise((res, rej) => { s.emit('join', { code, name, pass }, (r) => r?.ok ? res(r) : rej(new Error('join: ' + JSON.stringify(r)))); setTimeout(() => rej(new Error('join timeout')), 8000); });
 const once = (s, ev) => new Promise((res) => s.once(ev, res));
 
 (async () => {
   const name = 'feat-' + Math.random().toString(36).slice(2, 6);
 
   /* ─── لابی: اتاق عمومی با نام ─── */
-  const cr = await (await fetch(BASE + '/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ roomName: 'لابی تست', pass: '' }) })).json();
+  const cr = await (await fetch(BASE + '/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'tester', roomName: 'لابی تست', pass: '' }) })).json();
   check('ساخت اتاق با نام', cr.ok && cr.name === 'لابی تست');
   const info = await (await fetch(BASE + '/api/rooms/' + cr.code)).json();
   check('GET اتاق شامل name', info.ok && info.name === 'لابی تست' && info.hasPass === false);
@@ -24,12 +24,18 @@ const once = (s, ev) => new Promise((res) => s.once(ev, res));
   const mine = lobby1.rooms.find((x) => x.code === cr.code);
   check('لابی اتاق عمومی را نشان می‌دهد', !!mine && mine.online === 1 && mine.name === 'لابی تست');
 
-  /* ─── اتاق رمزدار نباید در لابی باشد ─── */
-  const cp = await (await fetch(BASE + '/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ roomName: 'سری', pass: 'x1234' }) })).json();
-  const B = await connect();
-  await join(B, cp.code, 'دومی');
+  /* ─── اتاق رمزدار نباید در لابی باشد (با سوکت موقت) ─── */
+  const cp = await (await fetch(BASE + '/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: 'tester', roomName: 'سری', pass: 'x1234' }) })).json();
+  const Ctmp = await connect();
+  await join(Ctmp, cp.code, 'دومی', 'x1234');
   const lobby2 = await (await fetch(BASE + '/api/rooms')).json();
   check('اتاق رمزدار از لابی پنهان است', !lobby2.rooms.some((x) => x.code === cp.code));
+  Ctmp.disconnect();
+
+  /* ─── B به اتاق A می‌آید — از این‌جا به بعد هم‌اتاق‌اند ─── */
+  const B = await connect();
+  const jB = await join(B, cr.code, 'دومی');
+  check('B مهمان است', jB.you.role === 'guest');
 
   /* ─── تم: میزبان عوض می‌کند، بقیه می‌گیرند؛ مهمان حق ندارد ─── */
   const themeP = once(A, 'room.theme');
@@ -77,9 +83,13 @@ const once = (s, ev) => new Promise((res) => s.once(ev, res));
   B.emit('rtc.join', { mic: true, cam: true });
   const rr2 = await Promise.race([rosterP2, sleep(2000).then(() => null)]);
   check('دو نفر در تماس', rr2 && rr2.list.length === 2);
-  const rosterP3 = new Promise((res) => B.once('rtc.roster', res));
-  B.emit('rtc.leave');
-  const rr3 = await Promise.race([rosterP3, sleep(2000).then(() => null)]);
+  const rr3 = await new Promise((res) => {
+    const t = setTimeout(() => res(null), 3000);
+    B.on('rtc.roster', (p) => {   // broadcastهای معوق (مثل نسخهٔ join خودش) را رد کن — فقط لیست بدون «دومی» معتبر است
+      if (!p.list.some((x) => x.name === 'دومی')) { clearTimeout(t); B.off('rtc.roster'); res(p); }
+    });
+    B.emit('rtc.leave');
+  });
   check('خروج از تماس → roster به‌روز', rr3 && rr3.list.length === 1);
 
   console.log(`\nنتیجه: ${pass} موفق، ${fail} ناموفق`);
