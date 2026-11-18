@@ -48,7 +48,11 @@ app.get('/mvfiles/:room/:file', (req, res) => {
   const room = String(req.params.room).replace(/[^A-Z0-9]/gi, '');
   const file = mvf.sanitizeName(String(req.params.file)) || mvf.safeName(String(req.params.file));
   if (!file) return res.status(400).end();
-  res.sendFile(path.join(mvf.ROOT, room, file), { acceptRanges: true, dotfiles: 'deny' }, (err) => {
+  res.sendFile(path.join(mvf.ROOT, room, file), {
+    acceptRanges: true, dotfiles: 'deny',
+    // فایل ویدیو حین نشست غیرقابل‌تغییر است — کشِ رنج‌ها ریکاوریِ بافر و سیک‌های مکرر را بدون دانلود مجدد می‌کند
+    setHeaders: (rc) => rc.setHeader('Cache-Control', 'private, max-age=3600'),
+  }, (err) => {
     if (err && !res.headersSent) res.status(404).end();
   });
 });

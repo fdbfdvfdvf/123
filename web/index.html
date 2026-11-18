@@ -295,7 +295,7 @@ body[data-theme="arcade"]{--grad:linear-gradient(135deg,#38bdf8,#0ea5e9 55%,#256
           </div>
           <div id="mvWrap">
             <div id="mvPh"><div><div class="big">🎬</div><span data-i18n="mvEmpty">هنوز فیلمی پخش نمی‌شود — با «انتخاب فیلم» یک ویدیو روی سرور آپلود می‌شود و همه از سرور می‌بینند.</span></div></div>
-            <video id="mvVideo" playsinline></video>
+            <video id="mvVideo" playsinline preload="auto"></video>
           </div>
           <div class="toolbar">
             <button class="btn sm" id="mvBack10">⏪ ۱۰ث</button>
@@ -675,11 +675,21 @@ $('#ytSeek').addEventListener('change', () => { ytDrag = false; const d = ytPlay
 /* ═══ فیلم مشترک — فایل روی سرور، پخش محلی همه، سینک مثل یوتیوب ═══ */
 const mvVideo = $('#mvVideo');
 let mvDrag = false, mvUploading = false;
+let mvNudge = 1, mvUserRate = 1;   // ضریبِ موقت تصحیح انحراف + نرخِ واقعیِ انتخابیِ کاربر
 const isMvHost = () => S.mv.active && S.mv.hostUid === S.you?.uid;
 mvVideo.onloadedmetadata = () => { S.mv.dur = mvVideo.duration || S.mv.dur; $('#mvDur').textContent = fmtT(S.mv.dur || 0); };
 
 function mvPlaySafe() {
-  mvVideo.play().catch(() => { mvVideo.muted = true; $('#mvMute').textContent = '🔇'; mvVideo.play().catch(() => {}); toast(T('mvUnmuteHint')); });
+  const go = () => mvVideo.play().catch(() => { mvVideo.muted = true; $('#mvMute').textContent = '🔇'; mvVideo.play().catch(() => {}); toast(T('mvUnmuteHint')); });
+  // شروع نرم: تا canplay (حداکثر ۶ ثانیه) صبر کن — پخش با بافر صفر روی شبکهٔ کند مکث‌مکث می‌شود
+  if (mvVideo.readyState < 3) {
+    let started = false;
+    const start = () => { if (!started) { started = true; go(); } };
+    mvVideo.addEventListener('canplay', start, { once: true });
+    setTimeout(start, 6000);
+    return;
+  }
+  go();
 }
 function mvLoad(url, start) {
   try { mvVideo.pause(); } catch {}
@@ -690,10 +700,28 @@ function mvLoad(url, start) {
 }
 function applyMvLocal(p) {
   if (p.act === 'play') mvPlaySafe();
-  if (p.act === 'pause') mvVideo.pause();
-  if (p.act === 'seek') { try { mvVideo.currentTime = +p.pos || 0; } catch {} }
-  if (p.act === 'rate') { try { mvVideo.playbackRate = +p.rate || 1; } catch {} }
-  if (p.act === 'sync' && !mvVideo.paused && Math.abs((mvVideo.currentTime || 0) - (+p.pos || 0)) > 2) { try { mvVideo.currentTime = +p.pos || 0; } catch {} }
+  if (p.act === 'pause') { mvNudge = 1; try { mvVideo.playbackRate = mvUserRate; } catch {} mvVideo.pause(); }
+  if (p.act === 'seek') { mvNudge = 1; try { mvVideo.playbackRate = mvUserRate; } catch {} try { mvVideo.currentTime = +p.pos || 0; } catch {} }
+  if (p.act === 'rate') { mvUserRate = +p.rate || 1; mvNudge = 1; try { mvVideo.playbackRate = mvUserRate; } catch {} }
+  if (p.act === 'sync') mvCorrectDrift(p.pos);
+}
+// تصحیح نرم انحراف: تا ±۴.۵ ثانیه با نرخِ پخش (۰.۹× تا ۱.۱۵×) جا می‌افتیم — seek سخت بافر را می‌شکند و حلقهٔ مکث می‌سازد؛
+// فقط انحراف بزرگ seek می‌گیرد. حین بافر (readyState<2) هیچ تصحیحی انجام نمی‌شود تا طوفانِ seek پدید نیاید.
+function mvCorrectDrift(remotePos) {
+  if (mvVideo.paused || mvVideo.readyState < 2 || mvDrag) return;
+  const drift = (mvVideo.currentTime || 0) - (+remotePos || 0);   // مثبت = جلوتر از مرجع
+  if (Math.abs(drift) > 4.5) {
+    mvNudge = 1;
+    try { mvVideo.playbackRate = mvUserRate; mvVideo.currentTime = +remotePos || 0; } catch {}
+    return;
+  }
+  const target = Math.abs(drift) < 0.35 ? 1
+    : drift > 0 ? 1                                  // من جلوترم — کندِ مصنوعی نمی‌شوم؛ عقب‌ها با سرعتِ بیشتر می‌رسند
+    : Math.min(1.18, 1 - drift / 8);                 // من عقب‌ترم — نرم و بی‌مکث جا می‌افتم
+  if (target !== mvNudge) {
+    mvNudge = target;
+    try { mvVideo.playbackRate = mvUserRate * target; } catch {}
+  }
 }
 // هر فرمان اول روی دستگاه خودمان اعمال می‌شود، بعد به سرور می‌رود تا برای بقیه هم broadcast شود
 const mvCmd = (act, extra = {}) => {
@@ -752,12 +780,14 @@ $('#mvFileIn').addEventListener('change', async (e) => {
 
 socket.on('mv.file', (p) => {
   S.mv = { active: true, hostUid: p.hostUid, name: p.name, size: p.size, dur: p.dur, pos: 0, act: 'pause', rate: 1 };
+  mvNudge = 1; mvUserRate = 1;
   mvLoad(p.url, false);
   updateMvUI();
   toast(T('mvReady'), 'ok');
 });
 socket.on('mv.state', (p) => {
   if (!S.mv.active) return;
+  if (p.by && S.you && p.by === S.you.uid) return;   // echo فرمان خودم — همین حالا سمت خودم اعمال شده؛ تصحیح فقط با گزارش دیگران
   if (p.act === 'play' || p.act === 'sync') S.mv.playing = true;
   else if (p.act === 'pause') S.mv.playing = false; // seek وضعیت play/pause را عوض نمی‌کند
   S.mv.rate = p.rate || 1;
@@ -775,6 +805,7 @@ function endMovie() {
   try { mvVideo.pause(); mvVideo.removeAttribute('src'); mvVideo.srcObject = null; mvVideo.load(); } catch {}
   mvVideo.classList.remove('on');
   S.mv = { active: false, hostUid: null, name: '', size: 0, dur: 0, pos: 0, act: 'pause', rate: 1 };
+  mvNudge = 1; mvUserRate = 1;
   $('#mvPh').classList.remove('hide'); $('#mvPh').querySelector('span').textContent = T('mvEmpty');
   updateMvUI();
 }
@@ -802,7 +833,7 @@ setInterval(() => {
 // هر کسی بیش از ۲ ثانیه از گزارش دیگران فاصله داشته باشد خودکار پرش می‌کند — بدون اولویت ادمین
 setInterval(() => {
   if (!S.mv.active || mvDrag || mvVideo.paused || mvVideo.readyState < 2) return;
-  socket.emit('mv.state', { act: 'sync', pos: mvVideo.currentTime || 0, rate: mvVideo.playbackRate || 1 });
+  socket.emit('mv.state', { act: 'sync', pos: mvVideo.currentTime || 0, rate: mvUserRate });
 }, 2500);
 function applyMvState() {
   S.mv.playing = S.mv.act === 'play';
